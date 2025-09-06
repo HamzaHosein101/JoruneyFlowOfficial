@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:strokeColor="#D6E4FF"
+    app:strokeWidth="1dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp">
+
+        <!-- Trip name -->
+        <TextView
+            android:id="@+id/txtTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#0D1B3E"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btnOverflow"
+            app:layout_constrainedWidth="true" />
+
+        <!-- 3-dot overflow button -->
+        <ImageButton
+            android:id="@+id/btnOverflow"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="More options"
+            android:src="@drawable/ic_more_vert_24"
+            app:tint="#2E5BFF"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Destination -->
+        <TextView
+            android:id="@+id/txtDestination"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textColor="#0D1B3E"
+            android:textSize="14sp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            app:layout_constraintTop_toBottomOf="@id/txtTitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Dates -->
+        <TextView
+            android:id="@+id/txtDates"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textColor="#2E5BFF"
+            android:textSize="13sp"
+            app:layout_constraintTop_toBottomOf="@id/txtDestination"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/txtBudgetPill"
+            app:layout_constrainedWidth="true" />
+
+        <!-- Budget pill -->
+        <TextView
+            android:id="@+id/txtBudgetPill"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            android:textSize="12sp"
+            android:background="@drawable/shape_budget_pill_blue"
+            app:layout_constraintTop_toBottomOf="@id/txtDestination"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Spacer bottom to give breathing room -->
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="8dp"
+            app:layout_constraintTop_toBottomOf="@id/txtDates"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>
