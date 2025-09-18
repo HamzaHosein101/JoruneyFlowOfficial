@@ -21,7 +21,6 @@ import java.util.*
 
 class TripDetailActivity : AppCompatActivity() {
 
-    // --- simple emoji map for Open-Meteo weather codes ---
     private fun weatherEmoji(code: Int?): String = when (code) {
         0 -> "☀️"
         1, 2, 3 -> "⛅"
@@ -107,7 +106,7 @@ class TripDetailActivity : AppCompatActivity() {
             }
         }
 
-        // Feature clicks
+
         findViewById<MaterialCardView>(R.id.cardChatbot).setOnClickListener { toast("AI Chatbot") }
         findViewById<MaterialCardView>(R.id.cardReviews).setOnClickListener { toast("Reviews") }
         findViewById<MaterialCardView>(R.id.cardChecklist).setOnClickListener {
@@ -153,17 +152,17 @@ class TripDetailActivity : AppCompatActivity() {
                     }
                 }
 
-                // 2) Weather call (current + daily)
+                // 2) Weather call
                 val wx = HttpClients.openMeteo.forecast(lat, lon, unit = "fahrenheit")
 
 
-// 3) Bind current
+                // Bind current
                 val t = wx.current?.temperature_2m
                 val c = wx.current?.weather_code
                 txtTemp.text = if (t != null) "${t.toInt()}°" else "--°"
                 txtEmoji.text = weatherEmoji(c)
 
-// Show "Updated <time>" respecting 12/24h settings
+                // Show updated time
                 val timeStr = android.text.format.DateFormat
                     .getTimeFormat(this@TripDetailActivity)
                     .format(java.util.Date())
@@ -172,7 +171,7 @@ class TripDetailActivity : AppCompatActivity() {
 
 
 
-                // 4) Bind 7-day strip
+                //Bind 7-day strip
                 stripDaily.removeAllViews()
                 val days  = wx.daily?.time.orEmpty()
                 val maxes = wx.daily?.temperature_2m_max.orEmpty()

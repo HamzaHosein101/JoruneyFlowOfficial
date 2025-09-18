@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TravelPractice"
         tools:targetApi="31">
-        
+
 
         <activity
             android:name=".ui.checklist.BagChecklistActivity"
@@ -25,10 +25,10 @@
         <!-- Home screen (trips) -->
         <activity
             android:name=".HomeActivity"
-            android:exported="false" /> <!-- Register -->
+            android:exported="false" />
         <activity
             android:name=".RegisterActivity"
-            android:exported="false" /> <!-- LOGIN is the launcher -->
+            android:exported="false" />
         <activity
             android:name=".LoginActivity"
             android:exported="true">
@@ -37,7 +37,7 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <!-- Keep MainActivity ONLY if you still need it; not a launcher anymore -->
+        </activity>
         <activity
             android:name=".MainActivity"
             android:exported="false" />
