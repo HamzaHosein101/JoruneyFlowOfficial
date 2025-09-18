@@ -284,6 +284,121 @@
                 </com.google.android.material.card.MaterialCardView>
 
             </androidx.gridlayout.widget.GridLayout>
+
+            <!-- Weather -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardWeather"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:strokeColor="#D6E4FF"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <!-- Header row -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:id="@+id/txtWeatherTitle"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Weather"
+                            android:textStyle="bold"
+                            android:textSize="18sp"
+                            android:textColor="#0D1B3E" />
+
+                        <TextView
+                            android:id="@+id/txtWeatherStatus"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Loading…"
+                            android:textSize="13sp"
+                            android:textColor="#2E5BFF"/>
+                    </LinearLayout>
+
+
+                    <!-- Current conditions -->
+                    <LinearLayout
+                        android:id="@+id/rowCurrent"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingTop="8dp">
+
+                        <TextView
+                            android:id="@+id/txtCurrentEmoji"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="⛅"
+                            android:textSize="28sp"
+                            android:paddingEnd="8dp"/>
+
+                        <TextView
+                            android:id="@+id/txtCurrentTemp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="--°"
+                            android:textStyle="bold"
+                            android:textSize="24sp" />
+
+                        <TextView
+                            android:id="@+id/txtCurrentLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="  Now"
+                            android:textSize="14sp"
+                            android:paddingStart="6dp"/>
+                    </LinearLayout>
+
+                    <!-- Daily forecast -->
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="8dp"
+                        android:overScrollMode="never"
+                        android:scrollbars="none">
+
+                        <LinearLayout
+                            android:id="@+id/stripDaily"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal" />
+                    </HorizontalScrollView>
+
+                    <!-- Hourly forecast (hidden until we have data) -->
+                    <HorizontalScrollView
+                        android:id="@+id/hourlyScroll"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="8dp"
+                        android:visibility="gone"
+                        android:overScrollMode="never"
+                        android:scrollbars="none">
+
+                        <LinearLayout
+                            android:id="@+id/stripHourly"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal" />
+                    </HorizontalScrollView>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+
         </LinearLayout>
     </ScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

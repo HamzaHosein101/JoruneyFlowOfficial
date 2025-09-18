@@ -47,7 +47,6 @@
             android:clipToPadding="false"
             android:paddingTop="8dp"
             android:paddingBottom="96dp"
-            app:spanCount="2"
             app:layout_constraintTop_toBottomOf="@id/labelTrips"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

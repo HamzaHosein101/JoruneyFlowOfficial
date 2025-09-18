@@ -9,7 +9,9 @@ data class Trip(
     var budget: Double = 0.0,
     var startDate: Long = 0L,
     var endDate: Long = 0L,
-    var createdAt: Long = System.currentTimeMillis()
+    var createdAt: Long = System.currentTimeMillis(),
+    var lat: Double? = null,
+    var lng: Double? = null
 ) : Serializable
 
 

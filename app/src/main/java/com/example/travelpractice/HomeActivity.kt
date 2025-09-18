@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.travelpractice.model.Trip
 import com.example.travelpractice.ui.home.AddTripBottomSheetDialogFragment
@@ -35,7 +36,7 @@ class HomeActivity : AppCompatActivity() {
         recycler = findViewById(R.id.recyclerTrips)
         empty    = findViewById(R.id.emptyState)
 
-        recycler.layoutManager = GridLayoutManager(this, 2)
+        recycler.layoutManager = LinearLayoutManager(this)
         adapter = TripAdapter(
             onDelete = { trip ->
                 db.collection("trips").document(trip.id).delete()
