@@ -6,11 +6,12 @@
     android:layout_margin="8dp"
     app:cardCornerRadius="16dp"
     app:cardElevation="2dp"
-    app:strokeColor="#D6E4FF"
+    app:strokeColor="#96BEFF"
     app:strokeWidth="1dp"
     android:clickable="true"
     android:focusable="true"
-    android:foreground="?attr/selectableItemBackground">
+    android:foreground="?attr/selectableItemBackground"
+    app:cardBackgroundColor="#FFFFFF">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -76,7 +77,7 @@
             android:paddingEnd="10dp"
             android:paddingTop="6dp"
             android:paddingBottom="6dp"
-            android:textColor="@android:color/white"
+            android:textColor="#000000"
             android:textStyle="bold"
             android:textSize="12sp"
             android:background="@drawable/shape_budget_pill_blue"

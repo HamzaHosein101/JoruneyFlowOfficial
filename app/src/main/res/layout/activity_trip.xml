@@ -6,7 +6,7 @@
     android:layout_margin="8dp"
     app:cardCornerRadius="16dp"
     app:cardElevation="2dp"
-    app:strokeColor="#D6E4FF"
+    app:strokeColor="#789DF4"
     app:strokeWidth="1dp">
 
 
@@ -35,7 +35,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="More options"
             android:src="@drawable/ic_more_vert_24"
-            app:tint="#2E5BFF"
+            app:tint="#183371"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
@@ -44,7 +44,7 @@
             android:id="@+id/txtDates"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textColor="#2E5BFF"
+            android:textColor="#183371"
             android:textSize="13sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
