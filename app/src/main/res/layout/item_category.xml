@@ -8,7 +8,8 @@
     android:layout_marginBottom="12dp"
     app:cardCornerRadius="16dp"
     app:cardElevation="2dp"
-    app:strokeWidth="0dp">
+    app:strokeWidth="0dp"
+    android:backgroundTint="#FFFFFF">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -23,6 +24,17 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal">
+
+
+            <TextView
+                android:id="@+id/tvCategoryProgress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0/0"
+                android:textColor="@color/primaryNavy"
+                android:textSize="14sp"
+                android:layout_marginEnd="8dp"/>
+
 
             <TextView
                 android:id="@+id/tvCategoryTitle"
@@ -43,8 +55,8 @@
                 android:paddingHorizontal="12dp"
                 android:text="+ Item"
                 android:textAllCaps="false"
-                android:textColor="@color/aqua"
-                app:strokeColor="@color/aqua"
+                android:textColor="#000000"
+                app:strokeColor="#368FD0"
                 app:cornerRadius="16dp"/>
 
             <ImageButton
@@ -63,7 +75,7 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="Delete category"
                 android:src="@drawable/ic_delete_24"
-                app:tint="@color/errorRed" />
+                app:tint="#F67C7C" />
         </LinearLayout>
 
         <!-- Divider -->
