@@ -45,24 +45,36 @@ class RegisterActivity : AppCompatActivity() {
             btnRegister.isEnabled = false
             auth.createUserWithEmailAndPassword(email, pass)
                 .addOnCompleteListener { task ->
+                    btnRegister.isEnabled = true
                     if (task.isSuccessful) {
-                        // Set displayName (username) on the Firebase user profile
                         val user = auth.currentUser
+
+                        // Set displayName (username) on the Firebase user profile
                         val updates = UserProfileChangeRequest.Builder()
                             .setDisplayName(username)
                             .build()
 
-                        user?.updateProfile(updates)?.addOnCompleteListener { upd ->
-                            btnRegister.isEnabled = true
-                            if (upd.isSuccessful) {
-                                Toast.makeText(this, "Account created. Log in now.", Toast.LENGTH_LONG).show()
-                                finish() // back to Login
+                        user?.updateProfile(updates)
+
+                        // 🔑 Send email verification
+                        user?.sendEmailVerification()?.addOnCompleteListener { verifyTask ->
+                            if (verifyTask.isSuccessful) {
+                                Toast.makeText(
+                                    this,
+                                    "Account created. Verification email sent. Check your inbox.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                                auth.signOut() // log them out until they verify
+                                finish() // back to LoginActivity
                             } else {
-                                Toast.makeText(this, upd.exception?.localizedMessage ?: "Profile update failed", Toast.LENGTH_LONG).show()
+                                Toast.makeText(
+                                    this,
+                                    verifyTask.exception?.localizedMessage ?: "Failed to send verification email",
+                                    Toast.LENGTH_LONG
+                                ).show()
                             }
                         }
                     } else {
-                        btnRegister.isEnabled = true
                         Toast.makeText(
                             this,
                             task.exception?.localizedMessage ?: "Registration failed",
