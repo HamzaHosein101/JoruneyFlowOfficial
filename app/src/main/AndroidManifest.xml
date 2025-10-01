@@ -15,7 +15,9 @@
         android:theme="@style/Theme.TravelPractice"
         tools:targetApi="31">
 
-
+        <activity
+            android:name=".ItineraryActivity"
+            android:exported="false" />
         <activity
             android:name=".ui.checklist.BagChecklistActivity"
             android:exported="false" />

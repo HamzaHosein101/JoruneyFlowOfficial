@@ -117,7 +117,11 @@ class TripDetailActivity : AppCompatActivity() {
             startActivity(i)
         }
         findViewById<MaterialCardView>(R.id.cardExpenses).setOnClickListener { toast("Expense tracker") }
-        findViewById<MaterialCardView>(R.id.cardItinerary).setOnClickListener { toast("Itinerary") }
+        findViewById<MaterialCardView>(R.id.cardItinerary).setOnClickListener {
+            val i = Intent(this, ItineraryActivity::class.java)
+            i.putExtra("extra_trip", trip)
+            startActivity(i)
+        }
 
         // ---------- WEATHER (Step 2) ----------
         val txtStatus = findViewById<TextView>(R.id.txtWeatherStatus)
