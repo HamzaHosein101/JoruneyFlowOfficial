@@ -18,19 +18,30 @@
         <activity
             android:name=".ItineraryActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".ExpenseTrackerActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/Theme.TravelPractice" />
+
         <activity
             android:name=".ui.checklist.BagChecklistActivity"
             android:exported="false" />
+
         <activity
             android:name=".TripDetailActivity"
             android:exported="false" />
+
         <!-- Home screen (trips) -->
         <activity
             android:name=".HomeActivity"
             android:exported="false" />
+
         <activity
             android:name=".RegisterActivity"
             android:exported="false" />
+
         <activity
             android:name=".LoginActivity"
             android:exported="true">
@@ -40,6 +51,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".MainActivity"
             android:exported="false" />

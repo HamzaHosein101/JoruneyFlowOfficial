@@ -1,5 +1,4 @@
 package com.example.travelpractice
-
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -17,8 +16,6 @@ import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.*
 
-
-
 class TripDetailActivity : AppCompatActivity() {
 
     private fun weatherEmoji(code: Int?): String = when (code) {
@@ -35,7 +32,6 @@ class TripDetailActivity : AppCompatActivity() {
 
     private var singleToast: Toast? = null
     private fun toast(msg: String) {
-
         singleToast?.cancel()
         singleToast = Toast.makeText(this, msg, Toast.LENGTH_SHORT).also { it.show() }
     }
@@ -75,7 +71,6 @@ class TripDetailActivity : AppCompatActivity() {
         }
     }
 
-
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -106,6 +101,20 @@ class TripDetailActivity : AppCompatActivity() {
             }
         }
 
+        // Expense Tracker - pass trip data to expense tracker
+        findViewById<MaterialCardView>(R.id.cardExpenses).setOnClickListener {
+            android.util.Log.d("TripDetailActivity", "Expense tracker clicked")
+            try {
+                val intent = Intent(this, ExpenseTrackerActivity::class.java)
+                intent.putExtra("TRIP_ID", trip.id)
+                intent.putExtra("TRIP_NAME", trip.title)
+                intent.putExtra("TRIP_BUDGET", trip.budget)
+                startActivity(intent)
+            } catch (e: Exception) {
+                android.util.Log.e("TripDetailActivity", "Error: ${e.message}", e)
+                toast("Error: ${e.message}")
+            }
+        }
 
         findViewById<MaterialCardView>(R.id.cardChatbot).setOnClickListener { toast("AI Chatbot") }
         findViewById<MaterialCardView>(R.id.cardReviews).setOnClickListener { toast("Reviews") }
@@ -116,7 +125,6 @@ class TripDetailActivity : AppCompatActivity() {
             }
             startActivity(i)
         }
-        findViewById<MaterialCardView>(R.id.cardExpenses).setOnClickListener { toast("Expense tracker") }
         findViewById<MaterialCardView>(R.id.cardItinerary).setOnClickListener {
             val i = Intent(this, ItineraryActivity::class.java)
             i.putExtra("extra_trip", trip)
@@ -128,9 +136,6 @@ class TripDetailActivity : AppCompatActivity() {
         val txtEmoji  = findViewById<TextView>(R.id.txtCurrentEmoji)
         val txtTemp   = findViewById<TextView>(R.id.txtCurrentTemp)
         val txtTitle = findViewById<TextView>(R.id.txtWeatherTitle)
-
-
-
 
         lifecycleScope.launch {
             try {
@@ -159,7 +164,6 @@ class TripDetailActivity : AppCompatActivity() {
                 // 2) Weather call
                 val wx = HttpClients.openMeteo.forecast(lat, lon, unit = "fahrenheit")
 
-
                 // Bind current
                 val t = wx.current?.temperature_2m
                 val c = wx.current?.weather_code
@@ -172,8 +176,6 @@ class TripDetailActivity : AppCompatActivity() {
                     .format(java.util.Date())
                 txtStatus.text = "Updated $timeStr"
                 txtStatus.visibility = android.view.View.VISIBLE
-
-
 
                 //Bind 7-day strip
                 stripDaily.removeAllViews()
@@ -209,9 +211,8 @@ class TripDetailActivity : AppCompatActivity() {
                 txtStatus.text = "Unable to load"
             }
         }
-
-
     }
 }
+
 
 
