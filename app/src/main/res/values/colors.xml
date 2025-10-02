@@ -10,4 +10,19 @@
     <color name="textPrimary">#172B4D</color>
     <color name="divider">#1F2D3D0F</color>
     <color name="errorRed">#D32F2F</color>
+
+    <color name="brandPrimary">#183371</color>
+    <color name="surfaceSoft">#EEF3FF</color>
+    <color name="accentBlue">#2E5BFF</color>
+    <color name="accentYellow">#FFC107</color>
+    <color name="accentRed">#FF6B6B</color>
+
+    <!-- Category colors -->
+    <color name="catFood">#00A86B</color>
+    <color name="catTransport">#0077CC</color>
+    <color name="catAccommodation">#8E44AD</color>
+    <color name="catEntertainment">#E67E22</color>
+    <color name="catShopping">#C0392B</color>
+    <color name="catOther">#607D8B</color>
+
 </resources>
