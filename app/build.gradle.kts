@@ -32,7 +32,6 @@ android {
         }
     }
 
-
     buildFeatures {
         viewBinding = true
     }
@@ -42,10 +41,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
         isCoreLibraryDesugaringEnabled = true
     }
+
     kotlinOptions {
         jvmTarget = "17"
     }
-
 }
 
 dependencies {
@@ -60,7 +59,7 @@ dependencies {
     implementation("androidx.gridlayout:gridlayout:1.0.0")
 
     // Google Play services
-    implementation("com.google.android.gms:play-services-auth:21.2.0") // Google Sign-In
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
     implementation("com.google.android.libraries.places:places:4.3.1")
 
     // Firebase (BOM manages versions)
@@ -68,9 +67,12 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
 
-    // Networking + coroutines
+    // Networking (Retrofit + Gson for Currency API)
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.google.code.gson:gson:2.10.1")
+
+    // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
 
     // Desugaring (for newer java.time APIs on old Android)
@@ -81,8 +83,3 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
 }
-
-
-
-
-
