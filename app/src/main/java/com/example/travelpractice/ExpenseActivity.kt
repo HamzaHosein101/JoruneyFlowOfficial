@@ -38,8 +38,6 @@ data class Expense(
     val userId: String = ""
 )
 
-
-
 class ExpenseTrackerActivity : AppCompatActivity() {
 
     // Firebase
@@ -52,10 +50,13 @@ class ExpenseTrackerActivity : AppCompatActivity() {
     private var tripName = "Trip"
     private var tripId = ""
 
+    // Currency conversion
+    private var currentDisplayCurrency = "USD"
+    private var conversionRates = mutableMapOf<String, Double>()
+
     // Add these for the expense list
     private lateinit var expenseAdapter: ExpenseAdapter
     private val expenseList = mutableListOf<Expense>()
-
 
     // UI Components
     private lateinit var txtSpentAmount: TextView
@@ -64,7 +65,6 @@ class ExpenseTrackerActivity : AppCompatActivity() {
     private lateinit var txtTotalExpenses: TextView
     private lateinit var txtEmptyState: TextView
     private lateinit var progressBudget: ProgressBar
-
 
     // Adapter class for RecyclerView
     inner class ExpenseAdapter(private val expenses: MutableList<Expense>) :
@@ -78,7 +78,7 @@ class ExpenseTrackerActivity : AppCompatActivity() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ExpenseViewHolder {
             val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.item_expense, parent, false)   // ← use your row layout
+                .inflate(R.layout.item_expense, parent, false)
             return ExpenseViewHolder(view)
         }
 
@@ -92,14 +92,13 @@ class ExpenseTrackerActivity : AppCompatActivity() {
             holder.btnDelete.setOnClickListener {
                 val pos = holder.bindingAdapterPosition
                 if (pos != RecyclerView.NO_POSITION) {
-                    confirmDeleteExpense(expenses[pos], pos)     // ← use your helpers
+                    confirmDeleteExpense(expenses[pos], pos)
                 }
             }
         }
 
         override fun getItemCount() = expenses.size
     }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -125,10 +124,14 @@ class ExpenseTrackerActivity : AppCompatActivity() {
 
             // Setup functionality
             setupExpenseList()
+            setupDisplayCurrencySpinner()
+            setupExpenseCurrencySpinner()
             setupCurrencyConverter()
             setupListeners()
+            setupRefreshButton()
 
-            // Load expenses from Firebase
+            // Load exchange rates and expenses
+            loadExchangeRates()
             loadExpensesFromFirebase()
 
         } catch (e: Exception) {
@@ -147,15 +150,76 @@ class ExpenseTrackerActivity : AppCompatActivity() {
         progressBudget = findViewById(R.id.progressBudget)
 
         // Set initial values
-        txtBudgetAmount.text = "/ $${String.format("%.2f", budgetLimit)}"
-        txtEmptyState.text = "No expenses added yet"
         txtBudgetAmount.text = "/ ${currencyFmt.format(budgetLimit)}"
-        txtSpentAmount.text = currencyFmt.format(totalSpent)         // $0.00
+        txtSpentAmount.text = currencyFmt.format(totalSpent)
         txtBudgetStatus.text = "Remaining: ${currencyFmt.format(budgetLimit)}"
-
+        txtEmptyState.text = "No expenses added yet"
     }
 
-    private var indexToastShown = false  // prevent repeated toasts
+    private fun setupDisplayCurrencySpinner() {
+        val spinnerDisplayCurrency = findViewById<Spinner>(R.id.spinnerDisplayCurrency)
+
+        val currencies = arrayOf("USD", "EUR", "GBP", "JPY", "CAD", "AUD", "CHF", "CNY", "INR", "KRW")
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, currencies)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerDisplayCurrency.adapter = adapter
+
+        spinnerDisplayCurrency.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                currentDisplayCurrency = currencies[position]
+                updateBudgetDisplay() // Refresh display with new currency
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+    }
+
+    private fun setupExpenseCurrencySpinner() {
+        val spinnerExpenseCurrency = findViewById<Spinner>(R.id.spinnerExpenseCurrency)
+
+        val currencies = arrayOf("USD", "EUR", "GBP", "JPY", "CAD", "AUD", "CHF", "CNY", "INR", "KRW")
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, currencies)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerExpenseCurrency.adapter = adapter
+    }
+
+    private fun loadExchangeRates() {
+        CurrencyApiManager.fetchExchangeRates(object : CurrencyApiManager.ExchangeRateCallback {
+            override fun onSuccess(rates: Map<String, Double>) {
+                conversionRates.clear()
+                conversionRates.putAll(rates)
+                Log.d("ExpenseTracker", "Exchange rates loaded: ${rates.size} currencies")
+                updateBudgetDisplay()
+            }
+
+            override fun onFailure(error: String) {
+                Log.e("ExpenseTracker", "Failed to load exchange rates: $error")
+                // Use fallback rates
+                conversionRates = mutableMapOf(
+                    "USD" to 1.0, "EUR" to 0.85, "GBP" to 0.73, "JPY" to 110.0,
+                    "CAD" to 1.25, "AUD" to 1.35, "CHF" to 0.92, "CNY" to 6.45,
+                    "INR" to 75.0, "KRW" to 1180.0
+                )
+            }
+        })
+    }
+
+    private fun setupRefreshButton() {
+        val btnRefreshRates = findViewById<MaterialButton>(R.id.btnRefreshRates)
+        btnRefreshRates.setOnClickListener {
+            Toast.makeText(this, "Refreshing exchange rates...", Toast.LENGTH_SHORT).show()
+            loadExchangeRates()
+        }
+    }
+
+    private fun convertCurrency(amountUSD: Double, toCurrency: String): Double {
+        if (conversionRates.isEmpty()) {
+            return amountUSD // Return USD if no rates loaded
+        }
+        val rate = conversionRates[toCurrency] ?: 1.0
+        return amountUSD * rate
+    }
+
+    private var indexToastShown = false
 
     private fun loadExpensesFromFirebase() {
         val userId = auth.currentUser?.uid ?: return
@@ -175,7 +239,6 @@ class ExpenseTrackerActivity : AppCompatActivity() {
                     val code = (error as? FirebaseFirestoreException)?.code
                     Log.e("ExpenseTracker", "Snapshot error: code=$code msg=${error.message}", error)
 
-                    // If the composite index isn’t ready, silently fallback so users see data without any popups
                     if (code == FirebaseFirestoreException.Code.FAILED_PRECONDITION) {
                         baseQuery.get()
                             .addOnSuccessListener { res ->
@@ -188,9 +251,7 @@ class ExpenseTrackerActivity : AppCompatActivity() {
                                         totalSpent += exp.amount
                                     }
                                 }
-                                // Local sort (DESC by timestamp)
                                 expenseList.sortByDescending { it.timestamp }
-
                                 expenseAdapter.notifyDataSetChanged()
                                 updateBudgetDisplay()
                                 updateEmptyState()
@@ -199,7 +260,6 @@ class ExpenseTrackerActivity : AppCompatActivity() {
                                 Log.e("ExpenseTracker", "Fallback query failed", e2)
                             }
                     }
-                    // No Toasts shown to users for any error
                     return@addSnapshotListener
                 }
 
@@ -225,6 +285,7 @@ class ExpenseTrackerActivity : AppCompatActivity() {
         val etExpenseDescription = findViewById<TextInputEditText>(R.id.etExpenseDescription)
         val etExpenseAmount = findViewById<TextInputEditText>(R.id.etExpenseAmount)
         val spinnerCategory = findViewById<Spinner>(R.id.spinnerCategory)
+        val spinnerExpenseCurrency = findViewById<Spinner>(R.id.spinnerExpenseCurrency)
         val btnAddExpense = findViewById<MaterialButton>(R.id.btnAddExpense)
 
         // Setup category spinner
@@ -238,48 +299,92 @@ class ExpenseTrackerActivity : AppCompatActivity() {
             val description = etExpenseDescription.text.toString().trim()
             val amountText = etExpenseAmount.text.toString().trim()
             val category = categories[spinnerCategory.selectedItemPosition]
+            val selectedCurrency = spinnerExpenseCurrency.selectedItem.toString()
 
             when {
                 description.isEmpty() -> {
-                    Toast.makeText(this, "Please enter a description", Toast.LENGTH_SHORT).show()
-                    etExpenseDescription.requestFocus()
+                    // Show error dialog for missing description
+                    MaterialAlertDialogBuilder(this)
+                        .setTitle("Missing Description")
+                        .setMessage("Please enter a description for your expense.")
+                        .setPositiveButton("OK") { dialog, _ ->
+                            dialog.dismiss()
+                            etExpenseDescription.requestFocus()
+                        }
+                        .show()
                 }
                 amountText.isEmpty() -> {
-                    Toast.makeText(this, "Please enter an amount", Toast.LENGTH_SHORT).show()
-                    etExpenseAmount.requestFocus()
+                    // Show error dialog for missing amount
+                    MaterialAlertDialogBuilder(this)
+                        .setTitle("Missing Amount")
+                        .setMessage("Please enter the cost of your expense.")
+                        .setPositiveButton("OK") { dialog, _ ->
+                            dialog.dismiss()
+                            etExpenseAmount.requestFocus()
+                        }
+                        .show()
                 }
                 else -> {
                     try {
                         val amount = amountText.toDouble()
                         if (amount <= 0) {
-                            Toast.makeText(this, "Please enter a valid amount greater than 0", Toast.LENGTH_SHORT).show()
+                            MaterialAlertDialogBuilder(this)
+                                .setTitle("Invalid Amount")
+                                .setMessage("Please enter a valid amount greater than 0.")
+                                .setPositiveButton("OK") { dialog, _ ->
+                                    dialog.dismiss()
+                                    etExpenseAmount.requestFocus()
+                                }
+                                .show()
                             return@setOnClickListener
                         }
 
-                        // Add the expense to Firebase
-                        addExpenseToFirebase(description, amount, category)
+                        // Convert to USD before storing
+                        val amountInUSD = if (selectedCurrency != "USD" && conversionRates.isNotEmpty()) {
+                            val rate = conversionRates[selectedCurrency] ?: 1.0
+                            amount / rate
+                        } else {
+                            amount
+                        }
 
-                        // Clear the input fields
-                        etExpenseDescription.setText("")
-                        etExpenseAmount.setText("")
-
+                        // Show confirmation dialog before adding
+                        MaterialAlertDialogBuilder(this)
+                            .setTitle("Confirm Expense")
+                            .setMessage("Add expense?\n\n" +
+                                    "Description: $description\n" +
+                                    "Amount: $amount $selectedCurrency\n" +
+                                    "Category: $category")
+                            .setPositiveButton("OK") { dialog, _ ->
+                                addExpenseToFirebase(description, amountInUSD, category)
+                                etExpenseDescription.setText("")
+                                etExpenseAmount.setText("")
+                                dialog.dismiss()
+                            }
+                            .setNegativeButton("Cancel") { dialog, _ ->
+                                dialog.dismiss()
+                            }
+                            .show()
 
                     } catch (e: NumberFormatException) {
-                        Toast.makeText(this, "Please enter a valid number for amount", Toast.LENGTH_SHORT).show()
-                        etExpenseAmount.requestFocus()
+                        MaterialAlertDialogBuilder(this)
+                            .setTitle("Invalid Amount")
+                            .setMessage("Please enter a valid number for the amount.")
+                            .setPositiveButton("OK") { dialog, _ ->
+                                dialog.dismiss()
+                                etExpenseAmount.requestFocus()
+                            }
+                            .show()
                     }
                 }
             }
         }
-
-
     }
 
     private fun addExpenseToFirebase(description: String, amount: Double, category: String) {
         val userId = auth.currentUser?.uid ?: return
 
         val newExpense = Expense(
-            id = "", // Firestore will give us this
+            id = "",
             description = description,
             amount = amount,
             category = category,
@@ -294,22 +399,38 @@ class ExpenseTrackerActivity : AppCompatActivity() {
                     "description" to newExpense.description,
                     "amount" to newExpense.amount,
                     "category" to newExpense.category,
-                    "timestamp" to newExpense.timestamp,   // keep using client time for instant sort
+                    "timestamp" to newExpense.timestamp,
                     "tripId" to newExpense.tripId,
                     "userId" to newExpense.userId
                 )
             )
             .addOnSuccessListener { ref ->
-                // Optimistic update so it shows instantly
                 newExpense.id = ref.id
-                expenseList.add(0, newExpense)              // add to top since DESC
+                expenseList.add(0, newExpense)
                 totalSpent += newExpense.amount
                 expenseAdapter.notifyItemInserted(0)
                 updateBudgetDisplay()
                 updateEmptyState()
 
+                // Show success message with Undo option
+                val snackbar = com.google.android.material.snackbar.Snackbar.make(
+                    findViewById(android.R.id.content),
+                    "Expense added: $description - ${String.format("%.2f", amount)}",
+                    com.google.android.material.snackbar.Snackbar.LENGTH_LONG
+                )
+
+                snackbar.setAction("UNDO") {
+                    // Undo the expense
+                    deleteExpense(newExpense, 0)
+                }
+
+                snackbar.show()
+
                 if (totalSpent > budgetLimit) {
-                    Toast.makeText(this, "Warning: You're over budget!", Toast.LENGTH_LONG).show()
+                    // Delay this slightly so it doesn't conflict with the snackbar
+                    findViewById<View>(android.R.id.content).postDelayed({
+                        Toast.makeText(this, "Warning: You're over budget!", Toast.LENGTH_LONG).show()
+                    }, 500)
                 }
             }
             .addOnFailureListener { e ->
@@ -318,16 +439,11 @@ class ExpenseTrackerActivity : AppCompatActivity() {
             }
     }
 
-
     private fun setupExpenseList() {
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewExpenses)
-
-        // Setup RecyclerView
         expenseAdapter = ExpenseAdapter(expenseList)
         recyclerView.adapter = expenseAdapter
         recyclerView.layoutManager = LinearLayoutManager(this)
-
-        // Show/hide empty state
         updateEmptyState()
     }
 
@@ -346,31 +462,44 @@ class ExpenseTrackerActivity : AppCompatActivity() {
     private val currencyFmt = NumberFormat.getCurrencyInstance()
 
     private fun updateBudgetDisplay() {
-        val remaining = budgetLimit - totalSpent
+        // Convert amounts to display currency
+        val displayTotal = convertCurrency(totalSpent, currentDisplayCurrency)
+        val displayBudget = convertCurrency(budgetLimit, currentDisplayCurrency)
+        val displayRemaining = displayBudget - displayTotal
 
-        txtSpentAmount.text = currencyFmt.format(totalSpent)
-        txtTotalExpenses.text = "Total: ${currencyFmt.format(totalSpent)}"
-
-        // Text: remaining or over by
-        if (remaining >= 0) {
-            txtBudgetStatus.text = "Remaining: ${currencyFmt.format(remaining)}"
-        } else {
-            txtBudgetStatus.text = "Over by ${currencyFmt.format(-remaining)}"
+        // Update currency formatter
+        val locale = when(currentDisplayCurrency) {
+            "EUR" -> Locale.GERMANY
+            "GBP" -> Locale.UK
+            "JPY" -> Locale.JAPAN
+            else -> Locale.US
+        }
+        val fmt = NumberFormat.getCurrencyInstance(locale)
+        if (currentDisplayCurrency != "USD") {
+            val currency = Currency.getInstance(currentDisplayCurrency)
+            fmt.currency = currency
         }
 
-        // Progress still shows % used (keeps a good visual)
+        txtSpentAmount.text = fmt.format(displayTotal)
+        txtBudgetAmount.text = "/ ${fmt.format(displayBudget)}"
+        txtTotalExpenses.text = "Total: ${fmt.format(displayTotal)}"
+
+        if (displayRemaining >= 0) {
+            txtBudgetStatus.text = "Remaining: ${fmt.format(displayRemaining)}"
+        } else {
+            txtBudgetStatus.text = "Over by ${fmt.format(-displayRemaining)}"
+        }
+
         val usedPct = if (budgetLimit > 0) ((totalSpent / budgetLimit) * 100).coerceIn(0.0, 100.0) else 0.0
         progressBudget.progress = usedPct.toInt()
 
-        // Color-code by remaining
         val color = when {
-            remaining < 0                         -> android.graphics.Color.parseColor("#FF6B6B") // red
-            remaining <= budgetLimit * 0.20       -> android.graphics.Color.parseColor("#FFC107") // yellow (<=20% left)
-            else                                  -> android.graphics.Color.parseColor("#2E5BFF") // blue
+            displayRemaining < 0 -> android.graphics.Color.parseColor("#FF6B6B")
+            displayRemaining <= displayBudget * 0.20 -> android.graphics.Color.parseColor("#FFC107")
+            else -> android.graphics.Color.parseColor("#2E5BFF")
         }
         txtBudgetStatus.setTextColor(color)
     }
-
 
     private fun setupCurrencyConverter() {
         val etAmount = findViewById<TextInputEditText>(R.id.etAmount)
@@ -395,16 +524,7 @@ class ExpenseTrackerActivity : AppCompatActivity() {
         spinnerFromCurrency.setSelection(0)
         spinnerToCurrency.setSelection(1)
 
-        val conversionRates = mapOf(
-            "USD" to 1.0, "EUR" to 0.85, "GBP" to 0.73, "JPY" to 110.0,
-            "CAD" to 1.25, "AUD" to 1.35, "CHF" to 0.92, "CNY" to 6.45,
-            "INR" to 75.0, "KRW" to 1180.0, "MXN" to 20.0, "BRL" to 5.2,
-            "ZAR" to 14.5, "SGD" to 1.35, "HKD" to 7.8
-        )
-
-
-
-        fun convertCurrency() {
+        fun convertCurrencyInConverter() {
             val amountText = etAmount.text.toString()
             if (amountText.isNotEmpty()) {
                 try {
@@ -412,13 +532,15 @@ class ExpenseTrackerActivity : AppCompatActivity() {
                     val fromCurrency = currencies[spinnerFromCurrency.selectedItemPosition].substring(0, 3)
                     val toCurrency = currencies[spinnerToCurrency.selectedItemPosition].substring(0, 3)
 
-                    val fromRate = conversionRates[fromCurrency] ?: 1.0
-                    val toRate = conversionRates[toCurrency] ?: 1.0
-
-                    val usdAmount = amount / fromRate
-                    val convertedAmount = usdAmount * toRate
-
-                    txtConvertedAmount.text = "Converted: ${String.format("%.2f", convertedAmount)} $toCurrency"
+                    if (conversionRates.isNotEmpty()) {
+                        val fromRate = conversionRates[fromCurrency] ?: 1.0
+                        val toRate = conversionRates[toCurrency] ?: 1.0
+                        val usdAmount = amount / fromRate
+                        val convertedAmount = usdAmount * toRate
+                        txtConvertedAmount.text = "Converted: ${String.format("%.2f", convertedAmount)} $toCurrency"
+                    } else {
+                        txtConvertedAmount.text = "Converted: Loading rates..."
+                    }
                 } catch (e: NumberFormatException) {
                     txtConvertedAmount.text = "Converted: Invalid amount"
                 }
@@ -428,21 +550,21 @@ class ExpenseTrackerActivity : AppCompatActivity() {
         }
 
         etAmount.addTextChangedListener(object : android.text.TextWatcher {
-            override fun afterTextChanged(s: android.text.Editable?) { convertCurrency() }
+            override fun afterTextChanged(s: android.text.Editable?) { convertCurrencyInConverter() }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
         spinnerFromCurrency.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                convertCurrency()
+                convertCurrencyInConverter()
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
         spinnerToCurrency.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                convertCurrency()
+                convertCurrencyInConverter()
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
@@ -457,6 +579,7 @@ class ExpenseTrackerActivity : AppCompatActivity() {
             else -> super.onOptionsItemSelected(item)
         }
     }
+
     private fun confirmDeleteExpense(expense: Expense, position: Int) {
         MaterialAlertDialogBuilder(this)
             .setTitle("Delete expense?")
@@ -465,7 +588,6 @@ class ExpenseTrackerActivity : AppCompatActivity() {
                 deleteExpense(expense, position)
             }
             .setNegativeButton("Cancel") { dialog, _ ->
-                // refresh the row so swipe/long-press visual resets if needed
                 expenseAdapter.notifyItemChanged(position)
                 dialog.dismiss()
             }
@@ -473,22 +595,17 @@ class ExpenseTrackerActivity : AppCompatActivity() {
     }
 
     private fun deleteExpense(expense: Expense, position: Int) {
-        // Optimistic UI: remove locally
         val removed = expenseList.removeAt(position)
         totalSpent -= removed.amount
         expenseAdapter.notifyItemRemoved(position)
         updateBudgetDisplay()
         updateEmptyState()
 
-        // Delete from Firestore
         if (expense.id.isNotBlank()) {
             db.collection("expenses").document(expense.id)
                 .delete()
-                .addOnSuccessListener {
-                    // Snapshot listener will reconcile if needed; nothing else to do
-                }
+                .addOnSuccessListener {}
                 .addOnFailureListener { e ->
-                    // Revert UI on failure
                     expenseList.add(position, removed)
                     totalSpent += removed.amount
                     expenseAdapter.notifyItemInserted(position)
@@ -497,9 +614,7 @@ class ExpenseTrackerActivity : AppCompatActivity() {
                     Toast.makeText(this, "Failed to delete: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
         } else {
-            // No id? Just refresh to resync with server
             loadExpensesFromFirebase()
         }
     }
-
 }
