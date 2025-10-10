@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.travelpractice.model.ItineraryItem
+import java.text.SimpleDateFormat
+import java.util.*
 
 class ItineraryAdapter(
     private val onEdit: (ItineraryItem) -> Unit,
@@ -28,24 +30,37 @@ class ItineraryAdapter(
     }
 
     inner class ItineraryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val txtDate: TextView = itemView.findViewById(R.id.txtDate)
         private val txtTime: TextView = itemView.findViewById(R.id.txtTime)
         private val txtDuration: TextView = itemView.findViewById(R.id.txtDuration)
         private val txtTitle: TextView = itemView.findViewById(R.id.txtTitle)
         private val txtLocation: TextView = itemView.findViewById(R.id.txtLocation)
         private val txtDescription: TextView = itemView.findViewById(R.id.txtDescription)
         private val txtCost: TextView = itemView.findViewById(R.id.txtCost)
-        private val itemIcon: ImageView = itemView.findViewById(R.id.itemIcon)
         private val checkBoxCompleted: CheckBox = itemView.findViewById(R.id.checkBoxCompleted)
         private val btnEdit: ImageView = itemView.findViewById(R.id.btnEdit)
+        private val btnDelete: ImageView = itemView.findViewById(R.id.btnDelete)
+        private val typeText: TextView = itemView.findViewById(R.id.typeText)
+        private val dateFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
 
         fun bind(item: ItineraryItem) {
+            // Format and display date
+            txtDate.text = if (item.date > 0) {
+                dateFormat.format(Date(item.date))
+            } else {
+                "No date"
+            }
+            
             txtTime.text = item.startTime
-            txtDuration.text = "${item.duration}m"
+            txtDuration.text = item.endTime
             txtTitle.text = item.title
             txtLocation.text = item.location.ifEmpty { "No location" }
             txtDescription.text = item.description.ifEmpty { "No description" }
             txtCost.text = if (item.cost > 0) "$${String.format("%.2f", item.cost)}" else ""
             checkBoxCompleted.isChecked = item.isCompleted
+
+            // Set type text based on item type
+            typeText.text = item.type
 
             // Hide description if empty
             txtDescription.visibility = if (item.description.isBlank()) {
@@ -61,29 +76,6 @@ class ItineraryAdapter(
                 View.GONE
             }
 
-            // Set icon and background based on item type
-            when {
-                item.title.contains("flight", ignoreCase = true) -> {
-                    itemIcon.setImageResource(R.drawable.ic_star_24)
-                    itemIcon.setBackgroundResource(R.drawable.circle_background_light_blue)
-                }
-                item.title.contains("hotel", ignoreCase = true) || item.title.contains("check-in", ignoreCase = true) -> {
-                    itemIcon.setImageResource(R.drawable.ic_home_24)
-                    itemIcon.setBackgroundResource(R.drawable.circle_background_light_green)
-                }
-                item.title.contains("restaurant", ignoreCase = true) || item.title.contains("dining", ignoreCase = true) || item.title.contains("lunch", ignoreCase = true) -> {
-                    itemIcon.setImageResource(android.R.drawable.ic_menu_agenda)
-                    itemIcon.setBackgroundResource(R.drawable.circle_background_blue)
-                }
-                item.title.contains("tour", ignoreCase = true) || item.title.contains("visit", ignoreCase = true) || item.title.contains("sightseeing", ignoreCase = true) -> {
-                    itemIcon.setImageResource(android.R.drawable.ic_menu_agenda)
-                    itemIcon.setBackgroundResource(R.drawable.circle_background_light_blue)
-                }
-                else -> {
-                    itemIcon.setImageResource(android.R.drawable.ic_menu_agenda)
-                    itemIcon.setBackgroundResource(R.drawable.circle_background_blue)
-                }
-            }
 
             // Set up checkbox click
             checkBoxCompleted.setOnCheckedChangeListener { _, isChecked ->
@@ -95,6 +87,11 @@ class ItineraryAdapter(
             // Set up edit button click
             btnEdit.setOnClickListener {
                 onEdit(item)
+            }
+
+            // Set up delete button click
+            btnDelete.setOnClickListener {
+                onDelete(item)
             }
 
             // Set up item click to edit

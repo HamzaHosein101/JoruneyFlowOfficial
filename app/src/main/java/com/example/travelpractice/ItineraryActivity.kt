@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.travelpractice.model.ItineraryItem
 import com.example.travelpractice.model.Trip
 import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
@@ -85,9 +86,7 @@ class ItineraryActivity : AppCompatActivity() {
                     .show(supportFragmentManager, "edit_itinerary_item")
             },
             onDelete = { item ->
-                // For now, we'll just show a snackbar
-                // In a real implementation, you'd delete from Firestore
-                Snackbar.make(findViewById(android.R.id.content), "Delete functionality coming soon", Snackbar.LENGTH_SHORT).show()
+                showDeleteConfirmationDialog(item)
             },
             onToggleComplete = { item ->
                 saveItineraryItem(item)
@@ -137,7 +136,7 @@ class ItineraryActivity : AppCompatActivity() {
                     document.toObject(ItineraryItem::class.java).apply {
                         id = document.id
                     }
-                }.sortedBy { it.startTime }
+                }.sortedWith(compareBy({ it.date }, { it.startTime }))
 
                 adapter.submitList(items)
                 updateEmptyState(items.isEmpty())
@@ -153,10 +152,17 @@ class ItineraryActivity : AppCompatActivity() {
         val total = items.size
         completedCount.text = "$completed/$total"
 
-        val totalMinutes = items.sumOf { it.duration }
-        val hours = totalMinutes / 60
-        val minutes = totalMinutes % 60
-        totalDuration.text = "${hours}h ${minutes}m"
+        // Calculate total span of days in the itinerary
+        val itemsWithDates = items.filter { it.date > 0 }
+        val totalDays = if (itemsWithDates.isEmpty()) {
+            0
+        } else {
+            val earliestDate = itemsWithDates.minOf { it.date }
+            val latestDate = itemsWithDates.maxOf { it.date }
+            val daysDiff = (latestDate - earliestDate) / (1000 * 60 * 60 * 24) // Convert milliseconds to days
+            daysDiff + 1 // +1 to include both start and end days
+        }
+        totalDuration.text = "$totalDays"
 
         val totalCostValue = items.sumOf { it.cost }
         totalCost.text = "$${String.format("%.0f", totalCostValue)}"
@@ -165,6 +171,30 @@ class ItineraryActivity : AppCompatActivity() {
     private fun updateEmptyState(isEmpty: Boolean) {
         recycler.visibility = if (isEmpty) View.GONE else View.VISIBLE
         empty.visibility = if (isEmpty) View.VISIBLE else View.GONE
+    }
+
+    private fun showDeleteConfirmationDialog(item: ItineraryItem) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Delete Item")
+            .setMessage("Are you sure you want to delete \"${item.title}\"? This action cannot be undone.")
+            .setPositiveButton("Delete") { _, _ ->
+                deleteItineraryItem(item)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun deleteItineraryItem(item: ItineraryItem) {
+        db.collection("itinerary")
+            .document(item.id)
+            .delete()
+            .addOnSuccessListener {
+                Snackbar.make(findViewById(android.R.id.content), "Item deleted successfully", Snackbar.LENGTH_SHORT).show()
+                loadItineraryItems() // Refresh the list
+            }
+            .addOnFailureListener {
+                Snackbar.make(findViewById(android.R.id.content), "Failed to delete item", Snackbar.LENGTH_SHORT).show()
+            }
     }
 }
 

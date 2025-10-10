@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5">
+    android:background="#E3F2FD">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -15,12 +15,12 @@
             android:id="@+id/topAppBar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@android:color/white"
+            android:background="#2E5BFF"
             app:title="Travel Itinerary"
             app:titleCentered="true"
-            app:titleTextColor="#000000"
+            app:titleTextColor="#FFFFFF"
             app:navigationIcon="@android:drawable/ic_menu_revert"
-            app:navigationIconTint="#000000"/>
+            app:navigationIconTint="#FFFFFF"/>
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -80,7 +80,7 @@
                 android:layout_marginBottom="16dp"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="2dp"
-                app:cardBackgroundColor="#E3F2FD">
+                app:cardBackgroundColor="@android:color/white">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -111,11 +111,15 @@
                             android:orientation="vertical"
                             android:gravity="center">
 
-                            <ImageView
+                            <TextView
                                 android:layout_width="24dp"
                                 android:layout_height="24dp"
-                                android:src="@android:drawable/ic_menu_agenda"
-                                app:tint="#2E5BFF" />
+                                android:text="✓"
+                                android:textSize="20sp"
+                                android:textColor="#4CAF50"
+                                android:textStyle="bold"
+                                android:gravity="center"
+                                android:layout_marginBottom="4dp" />
 
                             <TextView
                                 android:id="@+id/completedCount"
@@ -124,8 +128,7 @@
                                 android:text="0/5"
                                 android:textStyle="bold"
                                 android:textSize="14sp"
-                                android:textColor="#000000"
-                                android:layout_marginTop="4dp" />
+                                android:textColor="#000000" />
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -148,7 +151,8 @@
                                 android:layout_width="24dp"
                                 android:layout_height="24dp"
                                 android:src="@android:drawable/ic_menu_recent_history"
-                                app:tint="#2E5BFF" />
+                                app:tint="#2196F3"
+                                android:layout_marginBottom="4dp" />
 
                             <TextView
                                 android:id="@+id/totalDuration"
@@ -157,13 +161,12 @@
                                 android:text="14h 0m"
                                 android:textStyle="bold"
                                 android:textSize="14sp"
-                                android:textColor="#000000"
-                                android:layout_marginTop="4dp" />
+                                android:textColor="#000000" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Duration"
+                                android:text="Days"
                                 android:textSize="12sp"
                                 android:textColor="#666666" />
 
@@ -177,11 +180,15 @@
                             android:orientation="vertical"
                             android:gravity="center">
 
-                            <ImageView
+                            <TextView
                                 android:layout_width="24dp"
                                 android:layout_height="24dp"
-                                android:src="@android:drawable/ic_menu_agenda"
-                                app:tint="#2E5BFF" />
+                                android:text="$"
+                                android:textSize="20sp"
+                                android:textColor="#FF9800"
+                                android:textStyle="bold"
+                                android:gravity="center"
+                                android:layout_marginBottom="4dp" />
 
                             <TextView
                                 android:id="@+id/totalCost"
@@ -190,8 +197,7 @@
                                 android:text="$1300"
                                 android:textStyle="bold"
                                 android:textSize="14sp"
-                                android:textColor="#000000"
-                                android:layout_marginTop="4dp" />
+                                android:textColor="#000000" />
 
                             <TextView
                                 android:layout_width="wrap_content"
