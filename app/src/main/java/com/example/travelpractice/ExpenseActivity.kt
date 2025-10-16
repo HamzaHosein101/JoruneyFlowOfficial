@@ -141,6 +141,18 @@ class ExpenseTrackerActivity : AppCompatActivity() {
         }
     }
 
+    private fun syncTripRemaining() {
+        if (tripId.isBlank()) return
+        val remaining = (budgetLimit - totalSpent).coerceAtLeast(0.0)
+        val update = hashMapOf<String, Any>(
+            "remaining" to remaining,
+            "spent" to totalSpent // optional
+        )
+        db.collection("trips").document(tripId)
+            .update(update)
+            .addOnFailureListener { e -> Log.w("ExpenseTracker", "Failed to update remaining", e) }
+    }
+
     private fun initializeViews() {
         txtSpentAmount = findViewById(R.id.txtSpentAmount)
         txtBudgetAmount = findViewById(R.id.txtBudgetAmount)
@@ -168,6 +180,7 @@ class ExpenseTrackerActivity : AppCompatActivity() {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 currentDisplayCurrency = currencies[position]
                 updateBudgetDisplay() // Refresh display with new currency
+                syncTripRemaining()
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
@@ -255,6 +268,7 @@ class ExpenseTrackerActivity : AppCompatActivity() {
                                 expenseAdapter.notifyDataSetChanged()
                                 updateBudgetDisplay()
                                 updateEmptyState()
+                                syncTripRemaining()
                             }
                             .addOnFailureListener { e2 ->
                                 Log.e("ExpenseTracker", "Fallback query failed", e2)
@@ -600,6 +614,7 @@ class ExpenseTrackerActivity : AppCompatActivity() {
         expenseAdapter.notifyItemRemoved(position)
         updateBudgetDisplay()
         updateEmptyState()
+        syncTripRemaining()
 
         if (expense.id.isNotBlank()) {
             db.collection("expenses").document(expense.id)
@@ -611,6 +626,7 @@ class ExpenseTrackerActivity : AppCompatActivity() {
                     expenseAdapter.notifyItemInserted(position)
                     updateBudgetDisplay()
                     updateEmptyState()
+                    syncTripRemaining()
                     Toast.makeText(this, "Failed to delete: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
         } else {

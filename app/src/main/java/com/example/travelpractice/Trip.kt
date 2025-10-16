@@ -7,6 +7,8 @@ data class Trip(
     var title: String = "",
     var destination: String = "",
     var budget: Double = 0.0,
+    val remaining: Double = 0.0,
+    val spent: Double = 0.0,
     var startDate: Long = 0L,
     var endDate: Long = 0L,
     var createdAt: Long = System.currentTimeMillis(),

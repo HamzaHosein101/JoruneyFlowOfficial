@@ -177,8 +177,6 @@ class LoginActivity : AppCompatActivity() {
                 }
         }
 
-
-        // Forgot password (your existing code)
         tvForgotPassword.setOnClickListener {
             val email = etEmail.text.toString().trim()
             if (email.isEmpty()) {

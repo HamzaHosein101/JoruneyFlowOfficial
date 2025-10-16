@@ -15,8 +15,12 @@ import com.google.android.material.card.MaterialCardView
 import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.*
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+
 
 class TripDetailActivity : AppCompatActivity() {
+
 
     private fun weatherEmoji(code: Int?): String = when (code) {
         0 -> "☀️"
@@ -29,6 +33,21 @@ class TripDetailActivity : AppCompatActivity() {
         95, 96, 99 -> "⛈️"
         else -> "🌡️"
     }
+    private lateinit var openExpenses: ActivityResultLauncher<Intent>
+    private var lastTripId: String? = null
+    private var lastRemaining: Double? = null
+
+
+
+
+    private val usdFmt: java.text.NumberFormat =
+        java.text.NumberFormat.getCurrencyInstance(java.util.Locale.US).apply {
+            currency = java.util.Currency.getInstance("USD")
+        }
+
+
+
+
 
     private var singleToast: Toast? = null
     private fun toast(msg: String) {
@@ -71,10 +90,26 @@ class TripDetailActivity : AppCompatActivity() {
         }
     }
 
+
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_trip_detail)
+        // 🔸 Register activity result launcher FIRST
+        openExpenses = registerForActivityResult(
+            androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
+        ) { res ->
+            if (res.resultCode == RESULT_OK && res.data != null) {
+                lastTripId = res.data!!.getStringExtra("RESULT_TRIP_ID")
+                lastRemaining = res.data!!.getDoubleExtra("RESULT_REMAINING", 0.0)
+
+                // 🔥 Instantly update the header budget
+                findViewById<TextView>(R.id.txtHeaderBudget).text =
+                    "Remaining ${usdFmt.format(lastRemaining)}"
+            }
+        }
+
         val stripDaily = findViewById<android.widget.LinearLayout>(R.id.stripDaily)
         val trip = intent.getSerializableExtra("extra_trip") as? Trip
         if (trip == null) { toast("Trip not found"); finish(); return }
@@ -102,22 +137,33 @@ class TripDetailActivity : AppCompatActivity() {
         }
 
         // Expense Tracker - pass trip data to expense tracker
-        findViewById<MaterialCardView>(R.id.cardExpenses).setOnClickListener {
-            android.util.Log.d("TripDetailActivity", "Expense tracker clicked")
-            try {
-                val intent = Intent(this, ExpenseTrackerActivity::class.java)
-                intent.putExtra("TRIP_ID", trip.id)
-                intent.putExtra("TRIP_NAME", trip.title)
-                intent.putExtra("TRIP_BUDGET", trip.budget)
-                startActivity(intent)
-            } catch (e: Exception) {
-                android.util.Log.e("TripDetailActivity", "Error: ${e.message}", e)
-                toast("Error: ${e.message}")
-            }
+        val budgetView = findViewById<TextView>(R.id.txtHeaderBudget)
+
+
+
+// prefer saved remaining; fall back to computed; else show budget
+        val initialRemaining = when {
+            trip.remaining > 0.0 && trip.remaining <= trip.budget -> trip.remaining
+            trip.spent > 0.0 -> (trip.budget - trip.spent).coerceAtLeast(0.0)
+            else -> trip.budget
         }
+        budgetView.text = "Remaining ${usdFmt.format(initialRemaining)}"
+        budgetView.alpha = 1f
+
 
         findViewById<MaterialCardView>(R.id.cardChatbot).setOnClickListener { toast("AI Chatbot") }
         findViewById<MaterialCardView>(R.id.cardReviews).setOnClickListener { toast("Reviews") }
+        // Expense Tracker card → open ExpenseTrackerActivity
+        findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardExpenses)
+            .setOnClickListener {
+                val i = Intent(this, ExpenseTrackerActivity::class.java).apply {
+                    putExtra("TRIP_ID", trip.id)
+                    putExtra("TRIP_NAME", trip.title)
+                    putExtra("TRIP_BUDGET", trip.budget)
+                }
+                openExpenses.launch(i) // <-- use the launcher, not startActivity
+            }
+
         findViewById<MaterialCardView>(R.id.cardChecklist).setOnClickListener {
             val i = Intent(this, BagChecklistActivity::class.java).apply {
                 putExtra("extra_trip_id", trip.id)
