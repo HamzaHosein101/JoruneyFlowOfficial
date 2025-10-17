@@ -5,6 +5,7 @@
     <color name="aqua">#4AC1E0</color>
     <color name="accentCoral">#FF6B6B</color>
     <color name="bgSoft">#EAF6FB</color>
+    <color name="outlineVariant">#E0E0E0</color>
 
     <!-- Supporting -->
     <color name="textPrimary">#172B4D</color>
@@ -24,5 +25,10 @@
     <color name="catEntertainment">#E67E22</color>
     <color name="catShopping">#C0392B</color>
     <color name="catOther">#607D8B</color>
+
+    <color name="gold">#FFD700</color>         <!-- Gold for stars -->
+    <color name="approve_green">#4CAF50</color> <!-- Green for "Keep" -->
+    <color name="delete_red">#E53935</color>   <!-- Red for "Delete" -->
+
 
 </resources>
