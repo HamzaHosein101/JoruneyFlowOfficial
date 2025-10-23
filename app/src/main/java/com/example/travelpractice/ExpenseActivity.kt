@@ -57,6 +57,11 @@ class ExpenseTrackerActivity : AppCompatActivity() {
     // Add these for the expense list
     private lateinit var expenseAdapter: ExpenseAdapter
     private val expenseList = mutableListOf<Expense>()
+    private val filteredExpenseList = mutableListOf<Expense>()
+
+    // Sort and filter state
+    private var currentSortOption = "Date (Newest)"
+    private var currentSearchQuery = ""
 
     // UI Components
     private lateinit var txtSpentAmount: TextView
@@ -65,6 +70,8 @@ class ExpenseTrackerActivity : AppCompatActivity() {
     private lateinit var txtTotalExpenses: TextView
     private lateinit var txtEmptyState: TextView
     private lateinit var progressBudget: ProgressBar
+    private lateinit var etSearchExpenses: TextInputEditText
+    private lateinit var spinnerSortExpenses: Spinner
 
     // Adapter class for RecyclerView
     inner class ExpenseAdapter(private val expenses: MutableList<Expense>) :
@@ -124,6 +131,8 @@ class ExpenseTrackerActivity : AppCompatActivity() {
 
             // Setup functionality
             setupExpenseList()
+            setupSortSpinner()
+            setupSearchBar()
             setupDisplayCurrencySpinner()
             setupExpenseCurrencySpinner()
             setupCurrencyConverter()
@@ -146,7 +155,7 @@ class ExpenseTrackerActivity : AppCompatActivity() {
         val remaining = (budgetLimit - totalSpent).coerceAtLeast(0.0)
         val update = hashMapOf<String, Any>(
             "remaining" to remaining,
-            "spent" to totalSpent // optional
+            "spent" to totalSpent
         )
         db.collection("trips").document(tripId)
             .update(update)
@@ -160,12 +169,83 @@ class ExpenseTrackerActivity : AppCompatActivity() {
         txtTotalExpenses = findViewById(R.id.txtTotalExpenses)
         txtEmptyState = findViewById(R.id.txtEmptyState)
         progressBudget = findViewById(R.id.progressBudget)
+        etSearchExpenses = findViewById(R.id.etSearchExpenses)
+        spinnerSortExpenses = findViewById(R.id.spinnerSortExpenses)
 
         // Set initial values
         txtBudgetAmount.text = "/ ${currencyFmt.format(budgetLimit)}"
         txtSpentAmount.text = currencyFmt.format(totalSpent)
         txtBudgetStatus.text = "Remaining: ${currencyFmt.format(budgetLimit)}"
-        txtEmptyState.text = "No expenses added yet"
+        txtEmptyState.text = "No expenses match your search"
+    }
+
+    private fun setupSortSpinner() {
+        val sortOptions = arrayOf(
+            "Date (Newest)",
+            "Date (Oldest)",
+            "Amount (Highest)",
+            "Amount (Lowest)",
+            "Name (A-Z)",
+            "Name (Z-A)",
+            "Category"
+        )
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, sortOptions)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerSortExpenses.adapter = adapter
+
+        spinnerSortExpenses.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                currentSortOption = sortOptions[position]
+                applySortAndFilter()
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+    }
+
+    private fun setupSearchBar() {
+        etSearchExpenses.addTextChangedListener(object : android.text.TextWatcher {
+            override fun afterTextChanged(s: android.text.Editable?) {
+                currentSearchQuery = s.toString().trim()
+                applySortAndFilter()
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+    }
+
+    private fun applySortAndFilter() {
+        // First, filter based on search query
+        filteredExpenseList.clear()
+
+        if (currentSearchQuery.isEmpty()) {
+            filteredExpenseList.addAll(expenseList)
+        } else {
+            val query = currentSearchQuery.lowercase()
+            for (expense in expenseList) {
+                val matchesDescription = expense.description.lowercase().contains(query)
+                val matchesAmount = expense.amount.toString().contains(query)
+                val matchesCategory = expense.category.lowercase().contains(query)
+
+                if (matchesDescription || matchesAmount || matchesCategory) {
+                    filteredExpenseList.add(expense)
+                }
+            }
+        }
+
+        // Then sort the filtered list
+        when (currentSortOption) {
+            "Date (Newest)" -> filteredExpenseList.sortByDescending { it.timestamp }
+            "Date (Oldest)" -> filteredExpenseList.sortBy { it.timestamp }
+            "Amount (Highest)" -> filteredExpenseList.sortByDescending { it.amount }
+            "Amount (Lowest)" -> filteredExpenseList.sortBy { it.amount }
+            "Name (A-Z)" -> filteredExpenseList.sortBy { it.description.lowercase() }
+            "Name (Z-A)" -> filteredExpenseList.sortByDescending { it.description.lowercase() }
+            "Category" -> filteredExpenseList.sortBy { it.category }
+        }
+
+        expenseAdapter.notifyDataSetChanged()
+        updateEmptyState()
     }
 
     private fun setupDisplayCurrencySpinner() {
@@ -179,7 +259,7 @@ class ExpenseTrackerActivity : AppCompatActivity() {
         spinnerDisplayCurrency.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 currentDisplayCurrency = currencies[position]
-                updateBudgetDisplay() // Refresh display with new currency
+                updateBudgetDisplay()
                 syncTripRemaining()
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -206,7 +286,6 @@ class ExpenseTrackerActivity : AppCompatActivity() {
 
             override fun onFailure(error: String) {
                 Log.e("ExpenseTracker", "Failed to load exchange rates: $error")
-                // Use fallback rates
                 conversionRates = mutableMapOf(
                     "USD" to 1.0, "EUR" to 0.85, "GBP" to 0.73, "JPY" to 110.0,
                     "CAD" to 1.25, "AUD" to 1.35, "CHF" to 0.92, "CNY" to 6.45,
@@ -226,7 +305,7 @@ class ExpenseTrackerActivity : AppCompatActivity() {
 
     private fun convertCurrency(amountUSD: Double, toCurrency: String): Double {
         if (conversionRates.isEmpty()) {
-            return amountUSD // Return USD if no rates loaded
+            return amountUSD
         }
         val rate = conversionRates[toCurrency] ?: 1.0
         return amountUSD * rate
@@ -264,10 +343,8 @@ class ExpenseTrackerActivity : AppCompatActivity() {
                                         totalSpent += exp.amount
                                     }
                                 }
-                                expenseList.sortByDescending { it.timestamp }
-                                expenseAdapter.notifyDataSetChanged()
+                                applySortAndFilter()
                                 updateBudgetDisplay()
-                                updateEmptyState()
                                 syncTripRemaining()
                             }
                             .addOnFailureListener { e2 ->
@@ -289,9 +366,8 @@ class ExpenseTrackerActivity : AppCompatActivity() {
                     }
                 }
 
-                expenseAdapter.notifyDataSetChanged()
+                applySortAndFilter()
                 updateBudgetDisplay()
-                updateEmptyState()
             }
     }
 
@@ -302,13 +378,11 @@ class ExpenseTrackerActivity : AppCompatActivity() {
         val spinnerExpenseCurrency = findViewById<Spinner>(R.id.spinnerExpenseCurrency)
         val btnAddExpense = findViewById<MaterialButton>(R.id.btnAddExpense)
 
-        // Setup category spinner
         val categories = arrayOf("Food", "Transportation", "Accommodation", "Entertainment", "Shopping", "Other")
         val categoryAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categories)
         categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerCategory.adapter = categoryAdapter
 
-        // Add expense button click listener
         btnAddExpense.setOnClickListener {
             val description = etExpenseDescription.text.toString().trim()
             val amountText = etExpenseAmount.text.toString().trim()
@@ -317,7 +391,6 @@ class ExpenseTrackerActivity : AppCompatActivity() {
 
             when {
                 description.isEmpty() -> {
-                    // Show error dialog for missing description
                     MaterialAlertDialogBuilder(this)
                         .setTitle("Missing Description")
                         .setMessage("Please enter a description for your expense.")
@@ -328,7 +401,6 @@ class ExpenseTrackerActivity : AppCompatActivity() {
                         .show()
                 }
                 amountText.isEmpty() -> {
-                    // Show error dialog for missing amount
                     MaterialAlertDialogBuilder(this)
                         .setTitle("Missing Amount")
                         .setMessage("Please enter the cost of your expense.")
@@ -353,7 +425,6 @@ class ExpenseTrackerActivity : AppCompatActivity() {
                             return@setOnClickListener
                         }
 
-                        // Convert to USD before storing
                         val amountInUSD = if (selectedCurrency != "USD" && conversionRates.isNotEmpty()) {
                             val rate = conversionRates[selectedCurrency] ?: 1.0
                             amount / rate
@@ -361,7 +432,6 @@ class ExpenseTrackerActivity : AppCompatActivity() {
                             amount
                         }
 
-                        // Show confirmation dialog before adding
                         MaterialAlertDialogBuilder(this)
                             .setTitle("Confirm Expense")
                             .setMessage("Add expense?\n\n" +
@@ -420,13 +490,11 @@ class ExpenseTrackerActivity : AppCompatActivity() {
             )
             .addOnSuccessListener { ref ->
                 newExpense.id = ref.id
-                expenseList.add(0, newExpense)
+                expenseList.add(newExpense)
                 totalSpent += newExpense.amount
-                expenseAdapter.notifyItemInserted(0)
+                applySortAndFilter()
                 updateBudgetDisplay()
-                updateEmptyState()
 
-                // Show success message with Undo option
                 val snackbar = com.google.android.material.snackbar.Snackbar.make(
                     findViewById(android.R.id.content),
                     "Expense added: $description - ${String.format("%.2f", amount)}",
@@ -434,14 +502,15 @@ class ExpenseTrackerActivity : AppCompatActivity() {
                 )
 
                 snackbar.setAction("UNDO") {
-                    // Undo the expense
-                    deleteExpense(newExpense, 0)
+                    val position = filteredExpenseList.indexOf(newExpense)
+                    if (position != -1) {
+                        deleteExpense(newExpense, position)
+                    }
                 }
 
                 snackbar.show()
 
                 if (totalSpent > budgetLimit) {
-                    // Delay this slightly so it doesn't conflict with the snackbar
                     findViewById<View>(android.R.id.content).postDelayed({
                         Toast.makeText(this, "Warning: You're over budget!", Toast.LENGTH_LONG).show()
                     }, 500)
@@ -455,7 +524,7 @@ class ExpenseTrackerActivity : AppCompatActivity() {
 
     private fun setupExpenseList() {
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewExpenses)
-        expenseAdapter = ExpenseAdapter(expenseList)
+        expenseAdapter = ExpenseAdapter(filteredExpenseList)
         recyclerView.adapter = expenseAdapter
         recyclerView.layoutManager = LinearLayoutManager(this)
         updateEmptyState()
@@ -464,9 +533,15 @@ class ExpenseTrackerActivity : AppCompatActivity() {
     private fun updateEmptyState() {
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewExpenses)
 
-        if (expenseList.isEmpty()) {
+        if (filteredExpenseList.isEmpty()) {
             txtEmptyState.visibility = View.VISIBLE
             recyclerView.visibility = View.GONE
+
+            txtEmptyState.text = if (expenseList.isEmpty()) {
+                "No expenses added yet"
+            } else {
+                "No expenses match your search"
+            }
         } else {
             txtEmptyState.visibility = View.GONE
             recyclerView.visibility = View.VISIBLE
@@ -476,12 +551,10 @@ class ExpenseTrackerActivity : AppCompatActivity() {
     private val currencyFmt = NumberFormat.getCurrencyInstance()
 
     private fun updateBudgetDisplay() {
-        // Convert amounts to display currency
         val displayTotal = convertCurrency(totalSpent, currentDisplayCurrency)
         val displayBudget = convertCurrency(budgetLimit, currentDisplayCurrency)
         val displayRemaining = displayBudget - displayTotal
 
-        // Update currency formatter
         val locale = when(currentDisplayCurrency) {
             "EUR" -> Locale.GERMANY
             "GBP" -> Locale.UK
@@ -609,8 +682,9 @@ class ExpenseTrackerActivity : AppCompatActivity() {
     }
 
     private fun deleteExpense(expense: Expense, position: Int) {
-        val removed = expenseList.removeAt(position)
-        totalSpent -= removed.amount
+        expenseList.remove(expense)
+        filteredExpenseList.removeAt(position)
+        totalSpent -= expense.amount
         expenseAdapter.notifyItemRemoved(position)
         updateBudgetDisplay()
         updateEmptyState()
@@ -621,11 +695,10 @@ class ExpenseTrackerActivity : AppCompatActivity() {
                 .delete()
                 .addOnSuccessListener {}
                 .addOnFailureListener { e ->
-                    expenseList.add(position, removed)
-                    totalSpent += removed.amount
-                    expenseAdapter.notifyItemInserted(position)
+                    expenseList.add(expense)
+                    totalSpent += expense.amount
+                    applySortAndFilter()
                     updateBudgetDisplay()
-                    updateEmptyState()
                     syncTripRemaining()
                     Toast.makeText(this, "Failed to delete: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
