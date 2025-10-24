@@ -3,6 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 
     <application
         android:allowBackup="true"
@@ -17,7 +20,8 @@
 
         <activity
             android:name=".ItineraryActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:parentActivityName=".TripDetailActivity" />
 
         <activity
             android:name=".ExpenseTrackerActivity"
@@ -54,6 +58,11 @@
 
         <activity
             android:name=".MainActivity"
+            android:exported="false" />
+
+        <!-- Notification receiver for itinerary reminders -->
+        <receiver
+            android:name=".ItineraryNotificationReceiver"
             android:exported="false" />
     </application>
 

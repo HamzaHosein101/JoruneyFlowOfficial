@@ -1,9 +1,19 @@
 package com.example.travelpractice
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.travelpractice.model.ItineraryItem
@@ -30,6 +40,19 @@ class ItineraryActivity : AppCompatActivity() {
     private val db by lazy { FirebaseFirestore.getInstance() }
     private val dateFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
     private val dayFormat = SimpleDateFormat("EEE", Locale.getDefault())
+    private lateinit var notificationManager: ItineraryNotificationManager
+
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            scheduleNotificationsForCurrentItems()
+        } else {
+            Snackbar.make(findViewById(android.R.id.content), 
+                "Notifications disabled. You can enable them in Settings.", 
+                Snackbar.LENGTH_LONG).show()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,7 +68,11 @@ class ItineraryActivity : AppCompatActivity() {
         setupViews()
         setupRecyclerView()
         setupFab()
+        setupNotificationManager()
         loadItineraryItems()
+        
+        // Handle notification tap
+        handleNotificationIntent()
     }
 
     private fun setupToolbar() {
@@ -55,6 +82,11 @@ class ItineraryActivity : AppCompatActivity() {
         toolbar.setNavigationOnClickListener {
             onBackPressedDispatcher.onBackPressed()
         }
+        setSupportActionBar(toolbar)
+        
+        // Enable the back button
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
     }
 
     private fun setupViews() {
@@ -107,6 +139,24 @@ class ItineraryActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupNotificationManager() {
+        notificationManager = ItineraryNotificationManager(this)
+        checkNotificationPermission()
+    }
+
+    private fun checkNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            when {
+                ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED -> {
+                    // Permission already granted
+                }
+                else -> {
+                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+        }
+    }
+
     private fun saveItineraryItem(item: ItineraryItem) {
         val itemData = if (item.id.isEmpty()) {
             // New item
@@ -119,6 +169,14 @@ class ItineraryActivity : AppCompatActivity() {
             .document(itemData.id)
             .set(itemData)
             .addOnSuccessListener {
+                // Schedule notification for the new/updated item
+                if (!itemData.isCompleted && itemData.date > 0) {
+                    notificationManager.scheduleNotification(itemData, trip)
+                } else if (itemData.isCompleted) {
+                    // Cancel notification if item is marked as completed
+                    notificationManager.cancelNotification(itemData)
+                }
+                
                 Snackbar.make(findViewById(android.R.id.content), "Item saved", Snackbar.LENGTH_SHORT).show()
                 loadItineraryItems()
             }
@@ -141,6 +199,7 @@ class ItineraryActivity : AppCompatActivity() {
                 adapter.submitList(items)
                 updateEmptyState(items.isEmpty())
                 updateDaySummary(items)
+                scheduleNotificationsForCurrentItems(items)
             }
             .addOnFailureListener {
                 Snackbar.make(findViewById(android.R.id.content), "Failed to load items", Snackbar.LENGTH_SHORT).show()
@@ -185,6 +244,9 @@ class ItineraryActivity : AppCompatActivity() {
     }
 
     private fun deleteItineraryItem(item: ItineraryItem) {
+        // Cancel notification before deleting
+        notificationManager.cancelNotification(item)
+        
         db.collection("itinerary")
             .document(item.id)
             .delete()
@@ -195,6 +257,98 @@ class ItineraryActivity : AppCompatActivity() {
             .addOnFailureListener {
                 Snackbar.make(findViewById(android.R.id.content), "Failed to delete item", Snackbar.LENGTH_SHORT).show()
             }
+    }
+
+    private fun scheduleNotificationsForCurrentItems(items: List<ItineraryItem> = emptyList()) {
+        if (notificationManager.areNotificationsEnabled()) {
+            val itemsToSchedule = if (items.isEmpty()) {
+                // If no items provided, get current adapter items
+                adapter.currentList
+            } else {
+                items
+            }
+            notificationManager.scheduleAllNotifications(trip, itemsToSchedule)
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_itinerary, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                // Handle back button press
+                onBackPressedDispatcher.onBackPressed()
+                true
+            }
+            R.id.action_notification_settings -> {
+                showNotificationSettingsDialog()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun showNotificationSettingsDialog() {
+        val isEnabled = notificationManager.areNotificationsEnabled()
+        
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Notification Settings")
+            .setMessage(if (isEnabled) {
+                "Notifications are currently enabled. You'll receive reminders for upcoming itinerary items."
+            } else {
+                "Notifications are currently disabled. Enable them to receive reminders for upcoming itinerary items."
+            })
+            .setPositiveButton(if (isEnabled) "Disable" else "Enable") { _, _ ->
+                if (isEnabled) {
+                    // Disable notifications by opening app settings
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = Uri.fromParts("package", packageName, null)
+                    }
+                    startActivity(intent)
+                } else {
+                    // Request notification permission
+                    checkNotificationPermission()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .setNeutralButton("Test Notification") { _, _ ->
+                if (isEnabled) {
+                    showTestNotification()
+                } else {
+                    Snackbar.make(findViewById(android.R.id.content), 
+                        "Please enable notifications first", 
+                        Snackbar.LENGTH_SHORT).show()
+                }
+            }
+            .show()
+    }
+
+    private fun showTestNotification() {
+        val testItem = ItineraryItem(
+            id = "test_${System.currentTimeMillis()}",
+            title = "Test Notification",
+            description = "This is a test notification for itinerary reminders",
+            startTime = "Now",
+            location = "Test Location",
+            date = System.currentTimeMillis() + 5000 // 5 seconds from now
+        )
+        notificationManager.scheduleNotification(testItem, trip)
+        Snackbar.make(findViewById(android.R.id.content), 
+            "Test notification scheduled for 5 seconds from now", 
+            Snackbar.LENGTH_SHORT).show()
+    }
+
+    private fun handleNotificationIntent() {
+        // Check if the activity was opened from a notification
+        if (intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY == 0) {
+            // Show a welcome message if opened from notification
+            Snackbar.make(findViewById(android.R.id.content), 
+                "Welcome to your itinerary! Check your upcoming items below.", 
+                Snackbar.LENGTH_LONG).show()
+        }
     }
 }
 

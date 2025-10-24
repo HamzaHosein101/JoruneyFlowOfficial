@@ -20,7 +20,8 @@
             app:titleCentered="true"
             app:titleTextColor="#FFFFFF"
             app:navigationIcon="@android:drawable/ic_menu_revert"
-            app:navigationIconTint="#FFFFFF"/>
+            app:navigationIconTint="#FFFFFF"
+            app:menu="@menu/menu_itinerary"/>
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
