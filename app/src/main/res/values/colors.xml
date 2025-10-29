@@ -30,5 +30,13 @@
     <color name="approve_green">#4CAF50</color> <!-- Green for "Keep" -->
     <color name="delete_red">#E53935</color>   <!-- Red for "Delete" -->
 
+    <color name="jf_blue">#2F6BFD</color>
+    <color name="jf_blue_dark">#1E4ED8</color>
+    <color name="jf_surface">#F7F8FF</color>
+    <color name="jf_card_stroke">#E7E9F6</color>
+    <color name="jf_chip_bg">#EAF1FF</color>
+    <color name="jf_chip_text">#2F6BFD</color>
+    <color name="jf_star">#FFC107</color>
+
 
 </resources>

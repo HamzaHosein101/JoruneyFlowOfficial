@@ -43,6 +43,12 @@
             android:exported="false" />
 
         <activity
+            android:name=".reviews.ReviewsActivity"
+            android:exported="false"
+            android:label="Reviews" />
+
+
+        <activity
             android:name=".RegisterActivity"
             android:exported="false" />
 

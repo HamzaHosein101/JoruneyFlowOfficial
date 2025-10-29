@@ -152,7 +152,19 @@ class TripDetailActivity : AppCompatActivity() {
 
 
         findViewById<MaterialCardView>(R.id.cardChatbot).setOnClickListener { toast("AI Chatbot") }
-        findViewById<MaterialCardView>(R.id.cardReviews).setOnClickListener { toast("Reviews") }
+
+
+        findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardReviews)
+            .setOnClickListener {
+                val intent = Intent(this, com.example.travelpractice.reviews.ReviewsActivity::class.java)
+                intent.putExtra(
+                    com.example.travelpractice.reviews.ReviewsActivity.EXTRA_LOCATION_FILTER,
+                    "Paris, France" // or your dynamic location
+                )
+                startActivity(intent)
+            }
+
+
         // Expense Tracker card → open ExpenseTrackerActivity
         findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardExpenses)
             .setOnClickListener {
