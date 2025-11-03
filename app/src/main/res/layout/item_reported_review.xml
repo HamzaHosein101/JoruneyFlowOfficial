@@ -70,6 +70,8 @@
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipReason"
                 style="@style/Widget.Material3.Chip.Assist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:text="Reported: Abuse"
                 app:chipIconVisible="false" />
@@ -83,6 +85,56 @@
             android:layout_height="wrap_content"
             android:paddingTop="8dp"
             tools:text="Great place, but the streets were a bit dirty. The people were very nice" />
+
+        <!-- Report Details Section -->
+        <LinearLayout
+            android:id="@+id/reportDetailsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="12dp"
+            android:paddingBottom="8dp"
+            android:background="@android:color/transparent"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Report Reason:"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:textColor="#666666"
+                android:paddingBottom="4dp" />
+
+            <TextView
+                android:id="@+id/txtReportReason"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="@android:color/black"
+                android:paddingBottom="8dp"
+                tools:text="Spam or misleading" />
+
+            <TextView
+                android:id="@+id/txtReportDescriptionLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Report Description:"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:textColor="#666666"
+                android:paddingBottom="4dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/txtReportDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="@android:color/black"
+                android:visibility="gone"
+                tools:text="This review contains misleading information about the location." />
+        </LinearLayout>
 
         <!-- Actions -->
         <LinearLayout

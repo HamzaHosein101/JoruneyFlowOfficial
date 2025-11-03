@@ -155,6 +155,49 @@ class ReviewsRepository(
     } catch (e: Exception) {
         Result.failure(e)
     }
+
+    /** Report review with reason and optional description. */
+    suspend fun reportReviewWithDetails(reviewId: String, reason: String, description: String?): Result<Unit> = try {
+        val user = auth.currentUser ?: return Result.failure(IllegalStateException("Not signed in"))
+        
+        android.util.Log.d("ReviewsRepo", "Reporting review $reviewId with reason: $reason")
+        
+        // Increment report count
+        val newReportCount = db.runTransaction { tr ->
+            val ref = col.document(reviewId)
+            val snap = tr.get(ref)
+            val currentCount = (snap.getLong("reportCount") ?: 0L)
+            val newCount = currentCount + 1
+            tr.update(ref, mapOf("reportCount" to newCount, "updatedAt" to Timestamp.now()))
+            android.util.Log.d("ReviewsRepo", "Updated reportCount from $currentCount to $newCount for review $reviewId")
+            newCount
+        }.await()
+        
+        android.util.Log.d("ReviewsRepo", "Report count updated to $newReportCount for review $reviewId")
+        
+        // Store report details in a subcollection
+        val reportData = hashMapOf(
+            "reviewId" to reviewId,
+            "userId" to user.uid,
+            "username" to (user.displayName ?: user.email ?: "Anonymous"),
+            "reason" to reason,
+            "description" to (description ?: ""),
+            "createdAt" to Timestamp.now()
+        )
+        
+        db.collection("reviews").document(reviewId)
+            .collection("reports")
+            .add(reportData)
+            .await()
+        
+        android.util.Log.d("ReviewsRepo", "Report details saved successfully for review $reviewId")
+        
+        Result.success(Unit)
+    } catch (e: Exception) {
+        android.util.Log.e("ReviewsRepo", "Error reporting review $reviewId", e)
+        e.printStackTrace()
+        Result.failure(e)
+    }
 }
 
 /** Defensive conversion of various types to Firestore Timestamp. */

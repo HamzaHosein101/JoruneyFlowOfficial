@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.travelpractice.model.Trip
+import com.example.travelpractice.admin.AdminLoginActivity
 import com.example.travelpractice.ui.home.AddTripBottomSheetDialogFragment
 import com.example.travelpractice.ui.home.TripAdapter
 import com.google.android.material.appbar.MaterialToolbar
@@ -62,12 +63,22 @@ class HomeActivity : AppCompatActivity() {
                 .show(supportFragmentManager, "add_trip")
         }
 
-        // Toolbar logout (only if toolbar has a menu item)
-        findViewById<MaterialToolbar?>(R.id.topAppBar)?.setOnMenuItemClickListener { item ->
-            if (item.itemId == R.id.action_logout) {
-                doLogout()
-                true
-            } else false
+        // Toolbar menu items
+        findViewById<MaterialToolbar?>(R.id.topAppBar)?.apply {
+            inflateMenu(R.menu.menu_home)
+            setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.action_admin -> {
+                        startActivity(Intent(this@HomeActivity, AdminLoginActivity::class.java))
+                        true
+                    }
+                    R.id.action_logout -> {
+                        doLogout()
+                        true
+                    }
+                    else -> false
+                }
+            }
         }
 
         // Bottom "Log out" button (only if present in your layout)

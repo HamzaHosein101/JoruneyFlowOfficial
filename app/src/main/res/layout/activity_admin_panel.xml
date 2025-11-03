@@ -25,7 +25,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#959494"
-            app:layout_scrollFlags="scroll|enterAlways">
+            app:layout_scrollFlags="scroll|enterAlways"
+            app:menu="@menu/menu_admin">
 
             <TextView
                 android:id="@+id/toolbarTitle"
@@ -68,6 +69,8 @@
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipReported"
                 style="@style/Widget.Material3.Chip.Assist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="Reported"
                 android:checked="true"
                 app:checkedIconVisible="true" />
@@ -75,11 +78,15 @@
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipKept"
                 style="@style/Widget.Material3.Chip.Assist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="Kept" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipDeleted"
                 style="@style/Widget.Material3.Chip.Assist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="Deleted" />
 
         </com.google.android.material.chip.ChipGroup>
@@ -109,6 +116,8 @@
             <include
                 android:id="@+id/emptyState"
                 layout="@layout/item_empty_state"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:visibility="gone"
                 tools:visibility="visible" />
 

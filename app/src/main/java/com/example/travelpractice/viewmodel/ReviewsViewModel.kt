@@ -57,4 +57,19 @@ class ReviewsViewModel(private val repo: ReviewsRepository) : ViewModel() {
     fun report(reviewId: String) {
         viewModelScope.launch { repo.reportReview(reviewId) }
     }
+
+    fun reportWithDetails(reviewId: String, reason: String, description: String?) {
+        viewModelScope.launch { 
+            val result = repo.reportReviewWithDetails(reviewId, reason, description)
+            result.onFailure { error ->
+                android.util.Log.e("ReviewsViewModel", "Failed to report review $reviewId", error)
+            }.onSuccess {
+                android.util.Log.d("ReviewsViewModel", "Successfully reported review $reviewId")
+            }
+        }
+    }
+    
+    suspend fun reportWithDetailsAsync(reviewId: String, reason: String, description: String?): Result<Unit> {
+        return repo.reportReviewWithDetails(reviewId, reason, description)
+    }
 }

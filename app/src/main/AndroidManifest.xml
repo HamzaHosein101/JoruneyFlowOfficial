@@ -66,6 +66,14 @@
             android:name=".MainActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".admin.AdminLoginActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".admin.AdminPanelActivity"
+            android:exported="false" />
+
         <!-- Notification receiver for itinerary reminders -->
         <receiver
             android:name=".ItineraryNotificationReceiver"

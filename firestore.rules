@@ -1,0 +1,54 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Reviews collection
+    match /reviews/{reviewId} {
+      // Allow authenticated users to read all reviews
+      allow read: if request.auth != null;
+      
+      // Allow authenticated users to create their own reviews
+      allow create: if request.auth != null
+                   && request.resource.data.userId == request.auth.uid;
+      
+      // Allow users to update their own reviews OR allow updating reportCount/updatedAt fields (for reporting)
+      allow update: if request.auth != null 
+                   && (
+                     // User is updating their own review (all fields can be updated)
+                     (resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid)
+                     ||
+                     // OR: Only reportCount and updatedAt are being changed (for reporting feature)
+                     // This allows any authenticated user to report any review by incrementing reportCount
+                     (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reportCount', 'updatedAt']))
+                   );
+      
+      // Allow users to delete their own reviews OR allow deletion of reported reviews (for admin moderation)
+      allow delete: if request.auth != null 
+                   && (
+                     // User deleting their own review
+                     resource.data.userId == request.auth.uid
+                     ||
+                     // OR: Any authenticated user can delete a review that has been reported (reportCount > 0)
+                     // This allows admins to delete reported reviews
+                     (resource.data.reportCount is int && resource.data.reportCount > 0)
+                   );
+      
+      // Reports subcollection - allow authenticated users to create and read reports
+      match /reports/{reportId} {
+        allow read: if request.auth != null;
+        // Allow any authenticated user to create a report (they set their own userId)
+        allow create: if request.auth != null
+                     && request.resource.data.userId == request.auth.uid;
+        allow update, delete: if false; // Reports are immutable
+      }
+    }
+    
+    // Trips collection
+    match /trips/{tripId} {
+      allow read: if request.auth != null;
+      allow create, update, delete: if request.auth != null 
+                                     && request.resource.data.userId == request.auth.uid;
+    }
+  }
+}
+

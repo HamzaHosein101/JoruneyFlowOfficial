@@ -15,6 +15,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import com.example.travelpractice.admin.AdminLoginActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.GoogleAuthProvider
@@ -87,6 +88,7 @@ class LoginActivity : AppCompatActivity() {
         val tvGoToRegister = findViewById<TextView>(R.id.tvGoToRegister)
         val tvForgotPassword = findViewById<TextView>(R.id.tvForgotPassword)
         val btnGoogle = findViewById<com.google.android.gms.common.SignInButton>(R.id.btnGoogle)
+        val btnAdminLogin = findViewById<Button>(R.id.btnAdminLogin)
 
         // Email/password login (your existing code)
         btnLogin.setOnClickListener {
@@ -220,6 +222,11 @@ class LoginActivity : AppCompatActivity() {
             // Optional: sign-out any prior cached Google account to force chooser:
             // googleClient.signOut()
             googleSignInLauncher.launch(googleClient.signInIntent)
+        }
+
+        // Admin login button
+        btnAdminLogin.setOnClickListener {
+            startActivity(Intent(this, AdminLoginActivity::class.java))
         }
     }
 }

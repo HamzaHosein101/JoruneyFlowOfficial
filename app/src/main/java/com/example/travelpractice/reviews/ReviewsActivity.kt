@@ -1,12 +1,14 @@
 package com.example.travelpractice.reviews
 
 import android.os.Bundle
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -14,6 +16,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.example.travelpractice.R
 import com.example.travelpractice.databinding.ActivityReviewsBinding
 import com.example.travelpractice.databinding.DialogAddReviewBinding
+import com.example.travelpractice.databinding.DialogReportReviewBinding
 import com.example.travelpractice.di.ReviewsProvider
 import com.example.travelpractice.viewmodel.ReviewsViewModel
 import com.example.travelpractice.viewmodel.ReviewsViewModelFactory
@@ -55,7 +58,7 @@ class ReviewsActivity : AppCompatActivity() {
         // Recycler
         adapter = ReviewAdapter(
             currentUserId = auth.currentUser?.uid,
-            onReport = { review -> vm.report(review.id) },
+            onReport = { review -> showReportDialog(review) },
             onDelete = { review -> vm.delete(review.id) }
         )
         binding.reviewsRecycler.adapter = adapter
@@ -185,5 +188,96 @@ class ReviewsActivity : AppCompatActivity() {
     private fun formatDate(ts: Timestamp): String {
         val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         return sdf.format(ts.toDate())
+    }
+
+    // -- Report Review dialog ----------------------------------------------------
+
+    private fun showReportDialog(review: com.example.travelpractice.data.Review) {
+        val dlgBinding = DialogReportReviewBinding.inflate(LayoutInflater.from(this))
+        val dialog = MaterialAlertDialogBuilder(this)
+            .setView(dlgBinding.root)
+            .create()
+
+        // Setup reason dropdown
+        val reasons = listOf(
+            "Spam or misleading",
+            "Inappropriate",
+            "Hateful or abusive content",
+            "Harassment or bullying"
+        )
+        
+        val adapter = android.widget.ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, reasons)
+        dlgBinding.spinnerReason.setAdapter(adapter)
+        dlgBinding.spinnerReason.setText(reasons[0], false)
+        dlgBinding.spinnerReason.threshold = 1 // Show dropdown after 1 character (always show on click)
+        
+        // Make it show dropdown when clicked or touched
+        dlgBinding.spinnerReason.setOnClickListener {
+            dlgBinding.spinnerReason.showDropDown()
+        }
+        
+        dlgBinding.spinnerReason.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                dlgBinding.spinnerReason.showDropDown()
+            }
+        }
+        
+        dlgBinding.spinnerReason.setOnItemClickListener { _, _, position, _ ->
+            dlgBinding.spinnerReason.setText(adapter.getItem(position), false)
+            dlgBinding.spinnerReason.dismissDropDown()
+        }
+
+        // Setup description text watcher for word count validation
+        dlgBinding.etDescription.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                val text = s?.toString() ?: ""
+                val words = text.trim().split(Regex("\\s+")).filter { it.isNotBlank() }
+                val wordCount = if (text.isBlank()) 0 else words.size
+                
+                // Show error if over 500 words
+                if (wordCount > 500) {
+                    dlgBinding.textInputDescription.error = "Maximum 500 words allowed ($wordCount words)"
+                } else {
+                    dlgBinding.textInputDescription.error = null
+                }
+            }
+        })
+
+        dlgBinding.btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dlgBinding.btnSubmit.setOnClickListener {
+            val reason = dlgBinding.spinnerReason.text.toString().trim()
+            val description = dlgBinding.etDescription.text.toString().trim()
+            val words = description.split(Regex("\\s+")).filter { it.isNotBlank() }
+            
+            if (reason.isEmpty()) {
+                Snackbar.make(binding.reviewsRoot, "Please select a reason", Snackbar.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            
+            if (words.size > 500) {
+                Snackbar.make(binding.reviewsRoot, "Description must be 500 words or less", Snackbar.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            
+            // Submit report
+            lifecycleScope.launch {
+                val result = vm.reportWithDetailsAsync(review.id, reason, description.takeIf { it.isNotBlank() })
+                if (result.isSuccess) {
+                    Snackbar.make(binding.reviewsRoot, "Report submitted successfully", Snackbar.LENGTH_SHORT).show()
+                    android.util.Log.d("ReviewsActivity", "Report submitted for review ${review.id}")
+                } else {
+                    Snackbar.make(binding.reviewsRoot, "Failed to submit report: ${result.exceptionOrNull()?.message}", Snackbar.LENGTH_LONG).show()
+                    android.util.Log.e("ReviewsActivity", "Failed to submit report", result.exceptionOrNull())
+                }
+            }
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 }
