@@ -1,5 +1,4 @@
 package com.example.travelpractice.data
-
 import com.google.firebase.Timestamp
 
 data class Review(
@@ -16,5 +15,3 @@ data class Review(
     val likeCount: Int = 0,
     val reportCount: Int = 0
 )
-
-

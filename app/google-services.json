@@ -12,7 +12,20 @@
           "package_name": "com.example.travelpractice"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "140126773874-3007subrqjak48r9vh7ie2pb35cqnh9q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.travelpractice",
+            "certificate_hash": "e0ffc8a15a60215c300ee0b67e7e3859b4ee42ee"
+          }
+        },
+        {
+          "client_id": "140126773874-tss94rpusc0le9kjuia1cn84t22jhtu1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBz0ssl0g0FT0ZYBiRxLRaMibormbIjdOs"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "140126773874-fn3hqtnvo6rg9v3a6f5gk3s6vfjt1h39.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
