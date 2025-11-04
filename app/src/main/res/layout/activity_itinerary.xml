@@ -15,7 +15,7 @@
             android:id="@+id/topAppBar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="#2E5BFF"
+            android:background="#183371"
             app:title="Travel Itinerary"
             app:titleCentered="true"
             app:titleTextColor="#FFFFFF"
@@ -44,7 +44,7 @@
                 android:layout_marginBottom="16dp"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="2dp"
-                app:cardBackgroundColor="#2E5BFF">
+                app:cardBackgroundColor="#183371">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -246,7 +246,7 @@
         android:contentDescription="Add itinerary item"
         app:srcCompat="@android:drawable/ic_input_add"
         app:tint="@android:color/white"
-        app:backgroundTint="#2E5BFF"
+        app:backgroundTint="#183371"
         app:layout_anchor="@id/content"
         app:layout_anchorGravity="bottom|end"
         android:layout_margin="20dp"/>
