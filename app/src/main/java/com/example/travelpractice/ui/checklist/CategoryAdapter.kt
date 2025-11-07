@@ -22,14 +22,16 @@ class CategoryAdapter(
     private val onToggleExpand: (PackingCategory) -> Unit
 ) : RecyclerView.Adapter<CategoryAdapter.VH>() {
 
-    // (Optional) shared pool to make nested RVs smoother
+    // NEW: filter toggle (set from Activity)
+    var showUncheckedOnly: Boolean = false
+
     private val sharedPool = RecyclerView.RecycledViewPool()
 
     inner class VH(parent: ViewGroup) : RecyclerView.ViewHolder(
         LayoutInflater.from(parent.context).inflate(R.layout.item_category, parent, false)
     ) {
         val title: TextView = itemView.findViewById(R.id.tvCategoryTitle)
-        val tvProgress: TextView = itemView.findViewById(R.id.tvCategoryProgress) // <- add this id in XML
+        val tvProgress: TextView = itemView.findViewById(R.id.tvCategoryProgress)
         val btnAddItem: MaterialButton = itemView.findViewById(R.id.btnAddItem)
         val btnDeleteCategory: ImageButton = itemView.findViewById(R.id.btnDeleteCategory)
         val btnExpand: ImageButton = itemView.findViewById(R.id.btnExpand)
@@ -49,23 +51,22 @@ class CategoryAdapter(
         val cat = categories[position]
         holder.title.text = cat.title
 
-        // Items for this category
-        val items = (itemsByCategory[cat.id] ?: mutableListOf()).toMutableList()
+        // All items for this category
+        val allItems = (itemsByCategory[cat.id] ?: mutableListOf()).toMutableList()
 
-        // Progress: checked/total
-        val total = items.size
-        val checked = items.count { it.checked }
+        // Apply filter for child list
+        val visibleItems = if (showUncheckedOnly) allItems.filter { !it.checked } else allItems
+
+        // Progress should reflect ALL items
+        val total = allItems.size
+        val checked = allItems.count { it.checked }
         holder.tvProgress.text = "$checked/$total"
 
-        // Child adapter
-        val childAdapter = ItemAdapter(items, onToggleItem, onDeleteItem)
+        // Child adapter uses the filtered list
+        val childAdapter = ItemAdapter(visibleItems.toMutableList(), onToggleItem, onDeleteItem)
         holder.rvItems.adapter = childAdapter
         holder.rvItems.visibility = if (cat.expanded) View.VISIBLE else View.GONE
 
-        // Optional: change expand icon if you have collapse icon
-        // holder.btnExpand.setImageResource(if (cat.expanded) R.drawable.ic_expand_less_24 else R.drawable.ic_expand_more_24)
-
-        // Clicks
         holder.btnExpand.setOnClickListener { onToggleExpand(cat) }
         holder.btnAddItem.setOnClickListener { onAddItem(cat) }
         holder.btnDeleteCategory.setOnClickListener { onDeleteCategory(cat) }
@@ -81,6 +82,3 @@ class CategoryAdapter(
         notifyDataSetChanged()
     }
 }
-
-
-

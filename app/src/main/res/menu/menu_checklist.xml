@@ -1,13 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item
-        android:id="@+id/action_add_task"
-        android:title="Add Task"
-        app:showAsAction="never" />
+
 
     <item
-        android:id="@+id/action_show_remaining"
-        android:title="Show Remaining"
-        app:showAsAction="never" />
+        android:id="@+id/action_filter_unchecked"
+        android:title="Show Unchecked"
+        android:checkable="true"
+        app:showAsAction="never"/>
 </menu>

@@ -22,11 +22,12 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="#183371"
+            android:theme="@style/ThemeOverlay.Material3.Dark.ActionBar"
             app:titleTextColor="#FFFFFF"
             app:navigationIconTint="#CCDCF4"
             app:titleCentered="true"
-            app:backgroundTint="@android:color/white"
-            />
+            app:popupTheme="@style/ThemeOverlay.Material3.Light" />
+
     </com.google.android.material.appbar.AppBarLayout>
 
     <!-- Shown when no categories (backend will toggle visibility) -->

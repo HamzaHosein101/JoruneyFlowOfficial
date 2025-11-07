@@ -24,13 +24,12 @@ class ChatViewModel(private val geminiApiKey: String) : ViewModel() {
     init {
         addMessage(Message(
             id = System.currentTimeMillis(),
-            text = "Hi! 👋 I'm your AI Travel Assistant powered by Google Gemini!\n\n" +
-                    "I can help you with:\n" +
+            text = "Hi! 👋 I'm your AI Travel Assistant!\n\n" +
                     "✈️ Trip planning & destinations\n" +
-                    "🌤️ Real-time weather (try: 'weather in Paris')\n" +
-                    "💱 Currency conversion (try: 'convert 100 USD to EUR')\n" +
+                    "🌤️ Real-time weather\n" +
+                    "💱 Currency conversion\n" +
                     "🏨 Hotels, flights & activities\n\n" +
-                    "What would you like to know about your trip?",
+                    "What is your question?",
             sender = MessageSender.BOT,
             timestamp = Date(),
             type = MessageType.GREETING

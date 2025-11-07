@@ -41,35 +41,42 @@ class BagChecklistActivity : AppCompatActivity() {
     private val categories = mutableListOf<PackingCategory>()
     private val itemsByCategory = mutableMapOf<String, MutableList<PackingItem>>()
 
+    // keeps the toggle state across config changes if you want (simple var is fine too)
+    private var showUncheckedOnly: Boolean = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_bag_checklist)
 
-
-        // If not logged in, just finish quietly
         if (uid.isEmpty()) { finish(); return }
 
-        // views
         topBar = findViewById(R.id.topAppBar)
         tvEmpty = findViewById(R.id.emptyState)
         recycler = findViewById(R.id.recyclerCategories)
         fabAddCategory = findViewById(R.id.fabAddCategory)
 
-        // title
         val tripTitle = intent.getStringExtra(EXTRA_TRIP_TITLE) ?: "Bag Checklist"
         topBar.title = tripTitle
 
-        // DROP DOWN FOR ADD TASK AND SHOW UNCHECKED
-       // topBar.inflateMenu(R.menu.menu_checklist)
-       // topBar.setOnMenuItemClickListener { item ->
-       //     when (item.itemId) {
-        //        R.id.action_add_task -> { showAddTaskDialog(); true }
-       //         R.id.action_show_remaining -> { showRemainingDialog(); true }
-       //         else -> false
-       //     }
-       // }
+        // ===== Toolbar menu (Add Task, Show Remaining, Show Unchecked / Show All)
+        topBar.inflateMenu(R.menu.menu_checklist)
+        topBar.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
 
-        // adapter
+                R.id.action_filter_unchecked -> {
+                    showUncheckedOnly = !showUncheckedOnly
+                    item.isChecked = showUncheckedOnly
+                    item.title = if (showUncheckedOnly) "Show All" else "Show Unchecked"
+                    categoryAdapter.showUncheckedOnly = showUncheckedOnly
+                    categoryAdapter.notifyDataSetChanged()
+                    true
+                }
+
+                else -> false
+            }
+        }
+        // ======================================
+
         categoryAdapter = CategoryAdapter(
             categories,
             itemsByCategory,
@@ -78,13 +85,15 @@ class BagChecklistActivity : AppCompatActivity() {
             onToggleItem = { item, checked -> setItemChecked(item, checked) },
             onDeleteItem = { deleteItem(it) },
             onToggleExpand = { toggleExpand(it) }
-        )
+        ).apply {
+            showUncheckedOnly = this@BagChecklistActivity.showUncheckedOnly
+        }
+
         recycler.layoutManager = LinearLayoutManager(this)
         recycler.adapter = categoryAdapter
 
         fabAddCategory.setOnClickListener { showAddCategoryDialog() }
 
-        // data
         listenToCategories()
         maybeSeedDefaultsOnce()
     }
@@ -94,7 +103,6 @@ class BagChecklistActivity : AppCompatActivity() {
         db.collection("users").document(uid)
             .collection("checklists").document(listId)
 
-    // listeners
     private fun listenToCategories() {
         userListRef().collection("categories")
             .orderBy("title")
@@ -125,7 +133,6 @@ class BagChecklistActivity : AppCompatActivity() {
             }
     }
 
-    // seed once
     private fun maybeSeedDefaultsOnce() {
         userListRef().collection("categories").limit(1).get()
             .addOnSuccessListener { res ->
@@ -155,7 +162,6 @@ class BagChecklistActivity : AppCompatActivity() {
             }
     }
 
-    // actions
     private fun showAddCategoryDialog() {
         val view = LayoutInflater.from(this).inflate(R.layout.dialog_add_category, null, false)
         val input = view.findViewById<EditText>(R.id.inputCategoryName)
@@ -202,19 +208,37 @@ class BagChecklistActivity : AppCompatActivity() {
     }
 
     private fun deleteCategory(category: PackingCategory) {
-        val catRef = userListRef().collection("categories").document(category.id)
-        catRef.collection("items").get().addOnSuccessListener { snap ->
-            val batch = db.batch()
-            snap.documents.forEach { batch.delete(it.reference) }
-            batch.delete(catRef)
-            batch.commit()
-        }
+        AlertDialog.Builder(this)
+            .setTitle("Delete Category")
+            .setMessage("Are you sure you want to delete \"${category.title}\" and all items in it?")
+            .setPositiveButton("Yes") { d, _ ->
+                val catRef = userListRef().collection("categories").document(category.id)
+                catRef.collection("items").get().addOnSuccessListener { snap ->
+                    val batch = db.batch()
+                    snap.documents.forEach { batch.delete(it.reference) }
+                    batch.delete(catRef)
+                    batch.commit()
+                }
+                d.dismiss()
+            }
+            .setNegativeButton("No", null)
+            .show()
     }
 
+
     private fun deleteItem(item: PackingItem) {
-        userListRef().collection("categories").document(item.categoryId)
-            .collection("items").document(item.id).delete()
+        AlertDialog.Builder(this)
+            .setTitle("Delete Item")
+            .setMessage("Remove \"${item.name}\" from the checklist?")
+            .setPositiveButton("Yes") { d, _ ->
+                userListRef().collection("categories").document(item.categoryId)
+                    .collection("items").document(item.id).delete()
+                d.dismiss()
+            }
+            .setNegativeButton("No", null)
+            .show()
     }
+
 
     private fun setItemChecked(item: PackingItem, checked: Boolean) {
         userListRef().collection("categories").document(item.categoryId)
@@ -276,4 +300,3 @@ class BagChecklistActivity : AppCompatActivity() {
         }
     }
 }
-
