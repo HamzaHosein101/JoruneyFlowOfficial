@@ -49,14 +49,14 @@ class RegisterActivity : AppCompatActivity() {
                     if (task.isSuccessful) {
                         val user = auth.currentUser
 
-                        // Set displayName (username) on the Firebase user profile
+                        // Set displayName on the Firebase profile
                         val updates = UserProfileChangeRequest.Builder()
                             .setDisplayName(username)
                             .build()
 
                         user?.updateProfile(updates)
 
-                        // 🔑 Send email verification
+                        //Send email verification
                         user?.sendEmailVerification()?.addOnCompleteListener { verifyTask ->
                             if (verifyTask.isSuccessful) {
                                 Toast.makeText(

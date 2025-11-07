@@ -49,7 +49,6 @@ class AddTripBottomSheetDialogFragment : BottomSheetDialogFragment() {
             etDates.setText(formatRange(sel.first ?: 0L, sel.second ?: 0L))
         }
 
-        // Prefill if editing
         editingTrip?.let { t ->
             etTitle.setText(t.title)
             etDestination.setText(t.destination)

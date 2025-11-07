@@ -96,7 +96,6 @@ class TripDetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_trip_detail)
-        // 🔸 Register activity result launcher FIRST
         openExpenses = registerForActivityResult(
             androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
         ) { res ->
@@ -104,7 +103,6 @@ class TripDetailActivity : AppCompatActivity() {
                 lastTripId = res.data!!.getStringExtra("RESULT_TRIP_ID")
                 lastRemaining = res.data!!.getDoubleExtra("RESULT_REMAINING", 0.0)
 
-                // 🔥 Instantly update the header budget
                 findViewById<TextView>(R.id.txtHeaderBudget).text =
                     "Remaining ${usdFmt.format(lastRemaining)}"
             }
@@ -165,7 +163,7 @@ class TripDetailActivity : AppCompatActivity() {
             }
 
 
-        // Expense Tracker card → open ExpenseTrackerActivity
+        // Expense Tracker card, open ExpenseTrackerActivity
         findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardExpenses)
             .setOnClickListener {
                 val i = Intent(this, ExpenseTrackerActivity::class.java).apply {
@@ -219,16 +217,16 @@ class TripDetailActivity : AppCompatActivity() {
                     }
                 }
 
-                // 2) Weather call
+                //Weather
                 val wx = HttpClients.openMeteo.forecast(lat, lon, unit = "fahrenheit")
 
-                // Bind current
+                //Bind current
                 val t = wx.current?.temperature_2m
                 val c = wx.current?.weather_code
                 txtTemp.text = if (t != null) "${t.toInt()}°" else "--°"
                 txtEmoji.text = weatherEmoji(c)
 
-                // Show updated time
+                //Show updated time
                 val timeStr = android.text.format.DateFormat
                     .getTimeFormat(this@TripDetailActivity)
                     .format(java.util.Date())
@@ -242,7 +240,7 @@ class TripDetailActivity : AppCompatActivity() {
                 val mins  = wx.daily?.temperature_2m_min.orEmpty()
                 val codes = wx.daily?.weather_code.orEmpty()
 
-                // 5) Reverse geocode
+                //Reverse geocode
                 runCatching {
                     HttpClients.nominatim.reverse(lat, lon)
                 }.onSuccess { rev ->

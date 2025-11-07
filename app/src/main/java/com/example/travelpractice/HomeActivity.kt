@@ -57,13 +57,13 @@ class HomeActivity : AppCompatActivity() {
         )
         recycler.adapter = adapter
 
-        // + FAB → Add Trip
+        //Add Trip
         findViewById<View>(R.id.fabAddTrip)?.setOnClickListener {
             AddTripBottomSheetDialogFragment.newInstance()
                 .show(supportFragmentManager, "add_trip")
         }
 
-        // Toolbar menu items
+        //Toolbar menu items
         findViewById<MaterialToolbar?>(R.id.topAppBar)?.apply {
             inflateMenu(R.menu.menu_home)
             setOnMenuItemClickListener { item ->
@@ -81,7 +81,7 @@ class HomeActivity : AppCompatActivity() {
             }
         }
 
-        // Bottom "Log out" button (only if present in your layout)
+        //Bottom "Log out" button
         findViewById<View?>(R.id.btnLogout)?.setOnClickListener { doLogout() }
     }
 
@@ -99,7 +99,6 @@ class HomeActivity : AppCompatActivity() {
 
         val q = db.collection("trips")
             .whereEqualTo("userId", uid)
-        //.orderBy("startDate", Query.Direction.ASCENDING) // re-enable after creating composite index (userId+startDate)
 
         reg = q.addSnapshotListener { snap, err ->
             if (err != null) {
