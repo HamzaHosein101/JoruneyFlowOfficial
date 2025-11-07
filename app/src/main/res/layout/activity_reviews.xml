@@ -23,7 +23,9 @@
             app:title="Reviews"
             app:titleCentered="true"
             app:titleTextColor="@android:color/white"
-            app:navigationIcon="@drawable/abc_ic_ab_back_material"/>
+            app:navigationIcon="@drawable/abc_ic_ab_back_material"
+            app:navigationIconTint="@android:color/white"
+            />
     </com.google.android.material.appbar.AppBarLayout>
 
     <!-- Content area: search field + list -->
@@ -34,7 +36,7 @@
         android:orientation="vertical"
         android:layout_marginTop="?attr/actionBarSize">
 
-        <!-- Inline search bar (rounded, with clear icon) -->
+        <!-- -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilSearch"
             style="@style/Widget.Material3.TextInputLayout.FilledBox.Dense"
@@ -47,15 +49,17 @@
             app:boxCornerRadiusTopStart="14dp"
             app:boxCornerRadiusTopEnd="14dp"
             app:boxCornerRadiusBottomStart="14dp"
-            app:boxCornerRadiusBottomEnd="14dp"
-            app:endIconMode="clear_text">
+            app:boxCornerRadiusBottomEnd="14dp">
 
+
+            <!-- Search feature original
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etSearch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:imeOptions="actionSearch"
                 android:inputType="textCapWords|textNoSuggestions"/>
+                -->
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Reviews list -->
