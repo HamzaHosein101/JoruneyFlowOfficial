@@ -1,4 +1,4 @@
-package com.example.travelpractice.models
+package com.example.travelpractice.model
 
 data class TodoTask(
     val id: String = "",

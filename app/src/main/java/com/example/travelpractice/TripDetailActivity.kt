@@ -16,7 +16,6 @@ import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.*
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 
 
 class TripDetailActivity : AppCompatActivity() {
@@ -149,7 +148,9 @@ class TripDetailActivity : AppCompatActivity() {
         budgetView.alpha = 1f
 
 
-        findViewById<MaterialCardView>(R.id.cardChatbot).setOnClickListener { toast("AI Chatbot") }
+        findViewById<MaterialCardView>(R.id.cardChatbot).setOnClickListener {
+            startActivity(Intent(this, ChatActivity::class.java))
+        }
 
 
         findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardReviews)
