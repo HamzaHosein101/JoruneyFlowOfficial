@@ -6,7 +6,7 @@ import android.widget.ImageButton
 import com.google.android.material.checkbox.MaterialCheckBox
 import androidx.recyclerview.widget.RecyclerView
 import com.example.travelpractice.R
-import com.example.travelpractice.models.PackingItem
+import com.example.travelpractice.model.PackingItem
 
 class ItemAdapter(
     private val items: MutableList<PackingItem>,

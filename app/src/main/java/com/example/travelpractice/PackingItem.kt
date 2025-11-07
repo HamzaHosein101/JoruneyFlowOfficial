@@ -1,4 +1,4 @@
-package com.example.travelpractice.models
+package com.example.travelpractice.model
 
 data class PackingItem(
     val id: String = "",          // Firestore doc id (we'll set after fetch)

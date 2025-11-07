@@ -8,8 +8,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.travelpractice.R
-import com.example.travelpractice.models.PackingCategory
-import com.example.travelpractice.models.PackingItem
+import com.example.travelpractice.model.PackingCategory
+import com.example.travelpractice.model.PackingItem
 import com.google.android.material.button.MaterialButton
 
 class CategoryAdapter(

@@ -2,10 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 
     <application
         android:allowBackup="true"
@@ -18,10 +16,18 @@
         android:theme="@style/Theme.TravelPractice"
         tools:targetApi="31">
 
+        <!-- 🤖 NEW: AI Chat Activity -->
+        <activity
+            android:name=".ChatActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/Theme.TravelPractice" />
+
+        <!-- Your existing activities -->
         <activity
             android:name=".ItineraryActivity"
-            android:exported="false"
-            android:parentActivityName=".TripDetailActivity" />
+            android:exported="false" />
 
         <activity
             android:name=".ExpenseTrackerActivity"
@@ -45,19 +51,19 @@
         <activity
             android:name=".reviews.ReviewsActivity"
             android:exported="false"
-            android:label="Reviews" />
-
+            android:label="Reviews"/>
 
         <activity
             android:name=".RegisterActivity"
             android:exported="false" />
 
+
+        <!-- Login Activity - App entry point -->
         <activity
             android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -66,18 +72,6 @@
             android:name=".MainActivity"
             android:exported="false" />
 
-        <activity
-            android:name=".admin.AdminLoginActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".admin.AdminPanelActivity"
-            android:exported="false" />
-
-        <!-- Notification receiver for itinerary reminders -->
-        <receiver
-            android:name=".ItineraryNotificationReceiver"
-            android:exported="false" />
     </application>
 
 </manifest>
