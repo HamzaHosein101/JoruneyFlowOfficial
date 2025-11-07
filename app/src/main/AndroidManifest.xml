@@ -30,6 +30,8 @@
             android:exported="false" />
 
 
+
+
         <!-- Your existing activities -->
         <activity
             android:name=".ItineraryActivity"
