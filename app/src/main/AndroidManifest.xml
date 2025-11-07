@@ -29,7 +29,10 @@
             android:label="Admin Login"
             android:exported="false" />
 
-
+        <activity
+            android:name=".admin.AdminPanelActivity"
+            android:label="Admin Login"
+            android:exported="false" />
 
 
         <!-- Your existing activities -->
