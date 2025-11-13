@@ -30,6 +30,11 @@
             android:exported="false" />
 
         <activity
+            android:name=".reviews.TownReviewsActivity"
+            android:exported="false" />
+
+
+        <activity
             android:name=".admin.AdminPanelActivity"
             android:label="Admin Login"
             android:exported="false" />
@@ -68,6 +73,11 @@
             android:name=".RegisterActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".reviews.MapReviewsActivity"
+            android:exported="false" />
+
+
 
         <!-- Login Activity - App entry point -->
         <activity
@@ -82,6 +92,11 @@
         <activity
             android:name=".MainActivity"
             android:exported="false" />
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
+
 
     </application>
 

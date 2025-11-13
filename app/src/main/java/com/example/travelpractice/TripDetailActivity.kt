@@ -153,15 +153,25 @@ class TripDetailActivity : AppCompatActivity() {
         }
 
 
+   //     findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardReviews)
+     //       .setOnClickListener {
+      //          val intent = Intent(this, com.example.travelpractice.reviews.ReviewsActivity::class.java)
+     //           intent.putExtra(
+        //            com.example.travelpractice.reviews.ReviewsActivity.EXTRA_LOCATION_FILTER,
+       //             "Paris, France" // or your dynamic location
+      //          )
+       //         startActivity(intent)
+       //    }
+
         findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardReviews)
             .setOnClickListener {
-                val intent = Intent(this, com.example.travelpractice.reviews.ReviewsActivity::class.java)
-                intent.putExtra(
-                    com.example.travelpractice.reviews.ReviewsActivity.EXTRA_LOCATION_FILTER,
-                    "Paris, France" // or your dynamic location
-                )
+                val intent = Intent(this, com.example.travelpractice.reviews.MapReviewsActivity::class.java)
                 startActivity(intent)
             }
+
+
+
+
 
 
         // Expense Tracker card, open ExpenseTrackerActivity

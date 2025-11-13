@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/map_reviews_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#CCDCF4">
+
+    <!-- Top blue bar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#183371"
+        android:elevation="4dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/topAppBarMap"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="#183371"
+            app:title="Explore by Map"
+            app:titleCentered="true"
+            app:titleTextColor="@android:color/white"
+            app:navigationIcon="@drawable/abc_ic_ab_back_material"
+            app:navigationIconTint="@android:color/white" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Map container -->
+    <FrameLayout
+        android:id="@+id/map_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize" />
+
+    <!-- Floating bottom card for selected town info + actions -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardSelectedTown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="24dp"
+        app:cardCornerRadius="28dp"
+        app:cardElevation="8dp"
+        app:backgroundTint="@color/place_details_attribution_color_white">
+
+        <LinearLayout
+            android:layout_width="280dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Selected town name -->
+            <TextView
+                android:id="@+id/tvTownName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Tap on the map to select a town"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="@android:color/black" />
+
+            <!-- Optional subtitle (country / region) -->
+            <TextView
+                android:id="@+id/tvTownSubtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="13sp"
+                android:textColor="#666666"
+                android:layout_marginTop="2dp" />
+
+            <!-- Single action button -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="12dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnAddReviewDirect"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="View/Add Reviews"
+                    android:enabled="false"
+                    app:backgroundTint="#183371"
+                    app:tint="@android:color/white"
+                    android:textColor="@android:color/white"
+                    />
+
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
