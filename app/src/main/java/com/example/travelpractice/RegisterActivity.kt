@@ -6,6 +6,8 @@ import android.util.Patterns
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
@@ -59,27 +61,48 @@ class RegisterActivity : AppCompatActivity() {
                             .setDisplayName(username)
                             .build()
 
-                        user?.updateProfile(updates)
-                        user?.let { saveUserProfile(it, username) }
+                        if (user == null) {
+                            Toast.makeText(
+                                this,
+                                "Registration incomplete. Please try again.",
+                                Toast.LENGTH_LONG
+                            ).show()
+                            return@addOnCompleteListener
+                        }
 
-                        //Send email verification
-                        user?.sendEmailVerification()?.addOnCompleteListener { verifyTask ->
-                            if (verifyTask.isSuccessful) {
+                        val updateTask = user.updateProfile(updates)
+                        val saveTask = saveUserProfile(user, username)
+
+                        Tasks.whenAll(updateTask, saveTask)
+                            .addOnSuccessListener {
+                                user.sendEmailVerification()
+                                    .addOnCompleteListener { verifyTask ->
+                                        if (verifyTask.isSuccessful) {
+                                            Toast.makeText(
+                                                this,
+                                                "Account created. Verification email sent. Check your inbox.",
+                                                Toast.LENGTH_LONG
+                                            ).show()
+                                            auth.signOut() // log them out until they verify
+                                            finish() // back to LoginActivity
+                                        } else {
+                                            Toast.makeText(
+                                                this,
+                                                verifyTask.exception?.localizedMessage
+                                                    ?: "Failed to send verification email",
+                                                Toast.LENGTH_LONG
+                                            ).show()
+                                        }
+                                    }
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e("RegisterActivity", "Failed to finalize registration", e)
                                 Toast.makeText(
                                     this,
-                                    "Account created. Verification email sent. Check your inbox.",
-                                    Toast.LENGTH_LONG
-                                ).show()
-                                auth.signOut() // log them out until they verify
-                                finish() // back to LoginActivity
-                            } else {
-                                Toast.makeText(
-                                    this,
-                                    verifyTask.exception?.localizedMessage ?: "Failed to send verification email",
+                                    "Unable to finish registration. Please try again.",
                                     Toast.LENGTH_LONG
                                 ).show()
                             }
-                        }
                     } else {
                         Toast.makeText(
                             this,
@@ -91,7 +114,7 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
-    private fun saveUserProfile(user: FirebaseUser, username: String) {
+    private fun saveUserProfile(user: FirebaseUser, username: String): Task<Void> {
         val firestore = FirebaseFirestore.getInstance()
         val userDoc = firestore.collection("users").document(user.uid)
         val data = hashMapOf(
@@ -105,10 +128,7 @@ class RegisterActivity : AppCompatActivity() {
             "emailVerified" to user.isEmailVerified
         )
 
-        userDoc.set(data, SetOptions.merge())
-            .addOnFailureListener { e ->
-                Log.e("RegisterActivity", "Failed to save user profile", e)
-            }
+        return userDoc.set(data, SetOptions.merge())
     }
 }
 
