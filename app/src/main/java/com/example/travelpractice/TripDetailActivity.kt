@@ -275,7 +275,8 @@ class TripDetailActivity : AppCompatActivity() {
                     addDailyChip(stripDaily, dow, sub, emj)
                 }
             } catch (e: Exception) {
-                txtStatus.text = "Unable to load"
+                android.util.Log.e("TripDetailActivity", "Weather error", e)
+                txtStatus.text = "Unable: ${e::class.simpleName} - ${e.message}"
             }
         }
     }

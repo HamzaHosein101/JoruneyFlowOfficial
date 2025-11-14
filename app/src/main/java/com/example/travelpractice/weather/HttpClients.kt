@@ -1,5 +1,7 @@
 package com.example.travelpractice.weather
 
+import com.example.travelpractice.NominatimService
+import com.example.travelpractice.OpenMeteoService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
