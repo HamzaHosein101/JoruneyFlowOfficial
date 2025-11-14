@@ -4,20 +4,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#A5C5EF"
-    android:padding="24dp"
-    android:fillViewport="true">
+    android:fillViewport="true"
+    android:padding="24dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center_horizontal">
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
 
         <ImageView
             android:id="@+id/imgLogo"
-            android:layout_width="250dp"
-            android:layout_height="250dp"
-            android:layout_marginBottom="48dp"
+            android:layout_width="220dp"
+            android:layout_height="220dp"
+            android:layout_marginBottom="40dp"
             android:background="@drawable/rounded_mask"
             android:clipToOutline="true"
             android:contentDescription="JourneyFlow Logo"
@@ -28,8 +28,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Username"
-            app:boxBackgroundMode="outline"
             app:boxBackgroundColor="@android:color/white"
+            app:boxBackgroundMode="outline"
             app:boxStrokeColor="#567CAD"
             app:boxStrokeWidth="1dp">
 
@@ -37,7 +37,7 @@
                 android:id="@+id/etUsername"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textPersonName"/>
+                android:inputType="textPersonName" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -45,8 +45,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:hint="Email"
-            app:boxBackgroundMode="outline"
             app:boxBackgroundColor="@android:color/white"
+            app:boxBackgroundMode="outline"
             app:boxStrokeColor="#567CAD"
             app:boxStrokeWidth="1dp">
 
@@ -54,56 +54,136 @@
                 android:id="@+id/etEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textEmailAddress"/>
+                android:inputType="textEmailAddress" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:hint="Password (min 6)"
-            app:endIconMode="password_toggle"
-            app:boxBackgroundMode="outline"
+            android:hint="Password"
             app:boxBackgroundColor="@android:color/white"
+            app:boxBackgroundMode="outline"
             app:boxStrokeColor="#567CAD"
-            app:boxStrokeWidth="1dp">
+            app:boxStrokeWidth="1dp"
+            app:endIconMode="password_toggle">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textPassword"/>
+                android:inputType="textPassword" />
         </com.google.android.material.textfield.TextInputLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@android:color/white"
+            android:elevation="2dp"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <TextView
+                android:id="@+id/tvPasswordRequirements"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:text="Password Requirements:"
+                android:textColor="#1A3A5C"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvReqLength"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✗ At least 8 characters"
+                android:textColor="@android:color/holo_red_dark"
+                android:textSize="12sp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvReqUppercase"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✗ One uppercase letter (A-Z)"
+                android:textColor="@android:color/holo_red_dark"
+                android:textSize="12sp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvReqLowercase"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✗ One lowercase letter (a-z)"
+                android:textColor="@android:color/holo_red_dark"
+                android:textSize="12sp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvReqNumber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✗ One number (0-9)"
+                android:textColor="@android:color/holo_red_dark"
+                android:textSize="12sp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvReqSpecial"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✗ One special character"
+                android:textColor="@android:color/holo_red_dark"
+                android:textSize="12sp"
+                android:visibility="gone" />
+        </LinearLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:hint="Confirm password"
-            app:endIconMode="password_toggle"
-            app:boxBackgroundMode="outline"
             app:boxBackgroundColor="@android:color/white"
+            app:boxBackgroundMode="outline"
             app:boxStrokeColor="#567CAD"
-            app:boxStrokeWidth="1dp">
+            app:boxStrokeWidth="1dp"
+            app:endIconMode="password_toggle">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etConfirm"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textPassword"/>
+                android:inputType="textPassword" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnRegister"
             style="@style/Widget.MaterialComponents.Button"
-            android:text="@string/register_create_account"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
+            android:text="@string/register_create_account"
+            android:textAllCaps="false"
             app:cornerRadius="12dp"
-            app:iconPadding="0dp"
             app:iconGravity="textStart"
-            app:rippleColor="@color/jf_card_stroke"
-            android:textAllCaps="false"/>
+            app:iconPadding="0dp"
+            app:rippleColor="@color/jf_card_stroke" />
+
+        <TextView
+            android:id="@+id/tvGoToLogin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:text="Already have an account? Login"
+            android:textColor="#1A3A5C"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
+
