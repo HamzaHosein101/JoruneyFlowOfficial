@@ -1,13 +1,18 @@
 package com.example.travelpractice  // keep your package
 
 import android.os.Bundle
+import android.util.Log
 import android.util.Patterns
-import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
+import com.google.android.material.button.MaterialButton
 
 class RegisterActivity : AppCompatActivity() {
 
@@ -23,7 +28,7 @@ class RegisterActivity : AppCompatActivity() {
         val etEmail = findViewById<EditText>(R.id.etEmail)
         val etPassword = findViewById<EditText>(R.id.etPassword)
         val etConfirm = findViewById<EditText>(R.id.etConfirm)
-        val btnRegister = findViewById<Button>(R.id.btnRegister)
+        val btnRegister = findViewById<MaterialButton>(R.id.btnRegister)
 
         btnRegister.setOnClickListener {
             val username = etUsername.text.toString().trim()
@@ -55,6 +60,7 @@ class RegisterActivity : AppCompatActivity() {
                             .build()
 
                         user?.updateProfile(updates)
+                        user?.let { saveUserProfile(it, username) }
 
                         //Send email verification
                         user?.sendEmailVerification()?.addOnCompleteListener { verifyTask ->
@@ -83,6 +89,26 @@ class RegisterActivity : AppCompatActivity() {
                     }
                 }
         }
+    }
+
+    private fun saveUserProfile(user: FirebaseUser, username: String) {
+        val firestore = FirebaseFirestore.getInstance()
+        val userDoc = firestore.collection("users").document(user.uid)
+        val data = hashMapOf(
+            "uid" to user.uid,
+            "email" to user.email.orEmpty(),
+            "displayName" to username.ifBlank { user.displayName },
+            "photoUrl" to user.photoUrl?.toString(),
+            "createdAt" to FieldValue.serverTimestamp(),
+            "lastLoginAt" to FieldValue.serverTimestamp(),
+            "providers" to user.providerData.map { it.providerId }.distinct(),
+            "emailVerified" to user.isEmailVerified
+        )
+
+        userDoc.set(data, SetOptions.merge())
+            .addOnFailureListener { e ->
+                Log.e("RegisterActivity", "Failed to save user profile", e)
+            }
     }
 }
 

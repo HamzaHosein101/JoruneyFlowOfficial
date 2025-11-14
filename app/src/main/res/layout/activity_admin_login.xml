@@ -29,9 +29,10 @@
         android:layout_marginBottom="32dp" />
 
     <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilAdminEmail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Username"
+        android:hint="@string/admin_login_email_hint"
         android:layout_marginTop="8dp"
         app:boxBackgroundColor="@android:color/white"
         app:boxStrokeWidth="0dp"
@@ -42,15 +43,16 @@
             android:id="@+id/etAdminUsername"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:autofillHints="username"
-            android:inputType="text"
+            android:autofillHints="emailAddress"
+            android:inputType="textEmailAddress"
             android:textColor="@android:color/black" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilAdminPassword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Password"
+        android:hint="@string/admin_login_password_hint"
         android:layout_marginTop="12dp"
         app:boxBackgroundColor="@android:color/white"
         app:boxStrokeWidth="0dp"
@@ -72,7 +74,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:backgroundTint="#498FC9"
-        android:text="Log In" />
+        android:text="@string/admin_login_button" />
 
 </LinearLayout>
 

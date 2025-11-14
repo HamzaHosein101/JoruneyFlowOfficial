@@ -56,6 +56,39 @@
             app:layout_anchor="@id/searchBar"
             app:useDrawerArrowDrawable="false" />
 
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/toggleSections"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="4dp"
+            app:selectionRequired="true"
+            app:singleSelection="true"
+            app:checkedButton="@id/btnSectionReviews">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSectionReviews"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:text="Reviews"
+                android:textAllCaps="false" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSectionUsers"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Users"
+                android:textAllCaps="false" />
+
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
         <!-- Filter Chips -->
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/chipGroupFilters"
@@ -93,35 +126,73 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- 🧾 MAIN REVIEWS CONTAINER (SCROLLABLE LIST) -->
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipeRefresh"
+    <ViewFlipper
+        android:id="@+id/viewFlipper"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:displayedChild="0">
 
-        <FrameLayout
+        <!-- 🧾 MAIN REVIEWS CONTAINER (SCROLLABLE LIST) -->
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipeRefresh"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerReports"
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:clipToPadding="false"
-                android:padding="12dp"
-                tools:listitem="@layout/item_reported_review"
-                tools:itemCount="3" />
+                android:layout_height="match_parent">
 
-            <include
-                android:id="@+id/emptyState"
-                layout="@layout/item_empty_state"
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerReports"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    android:padding="12dp"
+                    tools:itemCount="3"
+                    tools:listitem="@layout/item_reported_review" />
+
+                <include
+                    android:id="@+id/emptyState"
+                    layout="@layout/item_empty_state"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+            </FrameLayout>
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+        <!-- 👥 USERS CONTAINER -->
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipeUsers"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="gone"
-                tools:visibility="visible" />
+                android:layout_height="match_parent">
 
-        </FrameLayout>
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerUsers"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    android:padding="12dp"
+                    tools:itemCount="2"
+                    tools:listitem="@layout/item_admin_user" />
+
+                <include
+                    android:id="@+id/usersEmptyState"
+                    layout="@layout/item_empty_state_users"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+            </FrameLayout>
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    </ViewFlipper>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
