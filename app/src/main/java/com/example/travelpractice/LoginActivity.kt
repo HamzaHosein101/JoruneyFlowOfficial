@@ -32,13 +32,24 @@ class LoginActivity : AppCompatActivity() {
                 startActivity(Intent(this, HomeActivity::class.java))
                 finish()
             } else {
-                // optional: show a gentle reminder
                 Toast.makeText(this, "Please verify your email to continue.", Toast.LENGTH_SHORT).show()
                 FirebaseAuth.getInstance().signOut()
             }
         }
     }
 
+    // Password validation function
+    private fun isPasswordSecure(password: String): Pair<Boolean, String> {
+        return when {
+            password.length < 8 -> Pair(false, "Password must be at least 8 characters")
+            !password.any { it.isUpperCase() } -> Pair(false, "Password must contain at least one uppercase letter")
+            !password.any { it.isLowerCase() } -> Pair(false, "Password must contain at least one lowercase letter")
+            !password.any { it.isDigit() } -> Pair(false, "Password must contain at least one number")
+            !password.any { !it.isLetterOrDigit() } -> Pair(false, "Password must contain at least one special character (!@#$%^&*)")
+            password.contains(" ") -> Pair(false, "Password cannot contain spaces")
+            else -> Pair(true, "Password is secure")
+        }
+    }
 
     // Register for Activity Result (Google sign-in)
     private val googleSignInLauncher = registerForActivityResult(
@@ -67,7 +78,6 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
@@ -76,7 +86,7 @@ class LoginActivity : AppCompatActivity() {
 
         // --- Google Sign-In config ---
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id)) // from google-services.json
+            .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
             .build()
         googleClient = GoogleSignIn.getClient(this, gso)
@@ -90,7 +100,7 @@ class LoginActivity : AppCompatActivity() {
         val btnGoogle = findViewById<com.google.android.gms.common.SignInButton>(R.id.btnGoogle)
         val btnAdminLogin = findViewById<Button>(R.id.btnAdminLogin)
 
-        // Email/password login (your existing code)
+        // Email/password login
         btnLogin.setOnClickListener {
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString()
@@ -100,8 +110,11 @@ class LoginActivity : AppCompatActivity() {
                 etEmail.requestFocus()
                 return@setOnClickListener
             }
-            if (password.length < 6) {
-                etPassword.error = "Password must be at least 6 characters"
+
+            // Note: For LOGIN, we don't validate password strength since the user
+            // already created their account. We only validate during REGISTRATION.
+            if (password.isEmpty()) {
+                etPassword.error = "Password is required"
                 etPassword.requestFocus()
                 return@setOnClickListener
             }
@@ -112,7 +125,6 @@ class LoginActivity : AppCompatActivity() {
                     btnLogin.isEnabled = true
                     if (task.isSuccessful) {
                         val user = auth.currentUser
-                        // 🔑 check email verification before entering HomeActivity
                         if (user != null && user.isEmailVerified) {
                             Toast.makeText(this, "Welcome back!", Toast.LENGTH_SHORT).show()
                             startActivity(Intent(this, HomeActivity::class.java))
@@ -123,7 +135,7 @@ class LoginActivity : AppCompatActivity() {
                                 "Please verify your email before logging in.",
                                 Toast.LENGTH_LONG
                             ).show()
-                            auth.signOut() // keep them logged out until verified
+                            auth.signOut()
                         }
                     } else {
                         Toast.makeText(
@@ -142,15 +154,18 @@ class LoginActivity : AppCompatActivity() {
             val password = etPassword.text.toString()
 
             if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                etEmail.error = "Enter a valid email"; etEmail.requestFocus(); return@setOnClickListener
+                etEmail.error = "Enter a valid email"
+                etEmail.requestFocus()
+                return@setOnClickListener
             }
-            if (password.length < 6) {
-                etPassword.error = "Enter your password"; etPassword.requestFocus(); return@setOnClickListener
+            if (password.isEmpty()) {
+                etPassword.error = "Enter your password"
+                etPassword.requestFocus()
+                return@setOnClickListener
             }
 
             tvResendVerification.isEnabled = false
 
-            // Temporarily sign in just to send the verification email, then sign out.
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { signInTask ->
                     if (signInTask.isSuccessful) {
@@ -173,7 +188,7 @@ class LoginActivity : AppCompatActivity() {
                             }
                         }
                     } else {
-                        Toast.makeText(this, signInTask.exception?.localizedMessage ?: "Couldn’t sign in to resend email.", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, signInTask.exception?.localizedMessage ?: "Couldn't sign in to resend email.", Toast.LENGTH_LONG).show()
                         tvResendVerification.isEnabled = true
                     }
                 }
@@ -219,15 +234,11 @@ class LoginActivity : AppCompatActivity() {
 
         // Google sign-in button
         btnGoogle.setOnClickListener {
-            // Optional: sign-out any prior cached Google account to force chooser:
-            // googleClient.signOut()
             googleSignInLauncher.launch(googleClient.signInIntent)
         }
 
-        // Admin login button
         btnAdminLogin.setOnClickListener {
             startActivity(Intent(this, AdminLoginActivity::class.java))
         }
     }
 }
-
