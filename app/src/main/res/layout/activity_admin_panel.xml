@@ -101,26 +101,32 @@
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipReported"
-                style="@style/Widget.Material3.Chip.Assist"
+                style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Reported"
+                android:checkable="true"
                 android:checked="true"
+                android:clickable="true"
                 app:checkedIconVisible="true" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipKept"
-                style="@style/Widget.Material3.Chip.Assist"
+                style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Kept" />
+                android:text="Kept"
+                android:checkable="true"
+                android:clickable="true" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipDeleted"
-                style="@style/Widget.Material3.Chip.Assist"
+                style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Deleted" />
+                android:text="Deleted"
+                android:checkable="true"
+                android:clickable="true" />
 
         </com.google.android.material.chip.ChipGroup>
 

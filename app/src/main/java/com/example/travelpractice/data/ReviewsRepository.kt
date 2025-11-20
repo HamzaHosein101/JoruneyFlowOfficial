@@ -35,7 +35,13 @@ class ReviewsRepository(
                 return@addSnapshotListener
             }
 
-            val items = snap?.documents?.map { d ->
+            val items = snap?.documents?.mapNotNull { d ->
+                // Filter out deleted reviews from regular user views
+                val adminStatus = d.getString("adminStatus")
+                if (adminStatus == "deleted") {
+                    return@mapNotNull null
+                }
+                
                 Review(
                     id = d.id,
                     userId = d.getString("userId") ?: "",
@@ -48,7 +54,8 @@ class ReviewsRepository(
                     createdAt = d.get("createdAt")?.let { toTimestamp(it) } ?: Timestamp.now(),
                     updatedAt = d.get("updatedAt")?.let { toTimestamp(it) } ?: Timestamp.now(),
                     likeCount = (d.getLong("likeCount") ?: 0L).toInt(),
-                    reportCount = (d.getLong("reportCount") ?: 0L).toInt()
+                    reportCount = (d.getLong("reportCount") ?: 0L).toInt(),
+                    adminStatus = adminStatus
                 )
             } ?: emptyList()
 
@@ -75,7 +82,13 @@ class ReviewsRepository(
                 android.util.Log.e("ReviewsRepo", "Search listener error", err)
                 trySend(emptyList()); return@addSnapshotListener
             }
-            val items = snap?.documents?.map { d ->
+            val items = snap?.documents?.mapNotNull { d ->
+                // Filter out deleted reviews from regular user views
+                val adminStatus = d.getString("adminStatus")
+                if (adminStatus == "deleted") {
+                    return@mapNotNull null
+                }
+                
                 Review(
                     id = d.id,
                     userId = d.getString("userId") ?: "",
@@ -88,7 +101,8 @@ class ReviewsRepository(
                     createdAt = d.get("createdAt")?.let { toTimestamp(it) } ?: com.google.firebase.Timestamp.now(),
                     updatedAt = d.get("updatedAt")?.let { toTimestamp(it) } ?: com.google.firebase.Timestamp.now(),
                     likeCount = (d.getLong("likeCount") ?: 0L).toInt(),
-                    reportCount = (d.getLong("reportCount") ?: 0L).toInt()
+                    reportCount = (d.getLong("reportCount") ?: 0L).toInt(),
+                    adminStatus = adminStatus
                 )
             } ?: emptyList()
             trySend(items)

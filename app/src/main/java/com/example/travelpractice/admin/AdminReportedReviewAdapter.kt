@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.travelpractice.R
 import com.example.travelpractice.data.Review
 import com.google.android.material.button.MaterialButton
-import com.google.android.material.chip.Chip
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -37,7 +36,6 @@ class AdminReportedReviewAdapter(
         val txtUserName: TextView = itemView.findViewById(R.id.txtUserName)
         val txtPlaceAndDate: TextView = itemView.findViewById(R.id.txtPlaceAndDate)
         val ratingBar: RatingBar = itemView.findViewById(R.id.ratingBar)
-        val chipReason: Chip = itemView.findViewById(R.id.chipReason)
         val txtReview: TextView = itemView.findViewById(R.id.txtReview)
         val btnKeep: MaterialButton = itemView.findViewById(R.id.btnKeep)
         val btnDelete: MaterialButton = itemView.findViewById(R.id.btnDelete)
@@ -64,14 +62,6 @@ class AdminReportedReviewAdapter(
         holder.txtPlaceAndDate.text = "${review.locationName} • ${dateFormat.format(review.tripDate.toDate())}"
         
         holder.ratingBar.rating = review.rating.toFloat()
-        
-        // Show report count if > 0
-        val reportText = if (review.reportCount > 0) {
-            "Reported (${review.reportCount})"
-        } else {
-            "Reported"
-        }
-        holder.chipReason.text = reportText
         
         // Show report details if available
         if (reviewWithReports.reportReason != null) {

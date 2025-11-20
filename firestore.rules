@@ -162,6 +162,7 @@ service cloud.firestore {
         && request.resource.data.updatedAt is timestamp;
 
       // Allow author to update their own review OR allow any user to update reportCount/updatedAt (for reporting)
+      // OR allow admin to update adminStatus, reportCount, and updatedAt (for moderation)
       allow update: if request.auth != null
         && (
           // Author updating their own review
@@ -169,6 +170,9 @@ service cloud.firestore {
           ||
           // OR: Any authenticated user can update reportCount and updatedAt (for reporting feature)
           (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reportCount', 'updatedAt']))
+          ||
+          // OR: Admin can update adminStatus, reportCount, and updatedAt (for moderation)
+          (isAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['adminStatus', 'reportCount', 'updatedAt']))
         );
 
       // Allow users to delete their own reviews OR allow deletion of reported reviews (for admin moderation)

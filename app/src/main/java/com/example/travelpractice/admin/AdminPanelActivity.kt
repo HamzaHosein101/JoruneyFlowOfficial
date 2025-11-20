@@ -295,28 +295,63 @@ class AdminPanelActivity : AppCompatActivity() {
     
     private fun setupFilters() {
         try {
-            findViewById<Chip>(R.id.chipReported)?.setOnCheckedChangeListener { _, isChecked ->
-                if (isChecked) {
+            // Setup ChipGroup listener
+            chipGroupFilters.setOnCheckedStateChangeListener { group, checkedIds ->
+                if (checkedIds.isEmpty()) {
+                    // If nothing is checked, keep current filter
+                    return@setOnCheckedStateChangeListener
+                }
+                
+                val checkedId = checkedIds[0]
+                val newFilter = when (checkedId) {
+                    R.id.chipReported -> FilterType.REPORTED
+                    R.id.chipKept -> FilterType.KEPT
+                    R.id.chipDeleted -> FilterType.DELETED
+                    else -> {
+                        android.util.Log.w("AdminPanel", "Unknown chip checked: $checkedId")
+                        return@setOnCheckedStateChangeListener
+                    }
+                }
+                
+                if (newFilter != currentFilter) {
+                    currentFilter = newFilter
+                    android.util.Log.d("AdminPanel", "Filter changed to: $currentFilter")
+                    loadReviews()
+                }
+            }
+            
+            // Also add individual click listeners as backup
+            findViewById<Chip>(R.id.chipReported)?.setOnClickListener {
+                android.util.Log.d("AdminPanel", "chipReported clicked")
+                if (currentFilter != FilterType.REPORTED) {
                     currentFilter = FilterType.REPORTED
+                    chipGroupFilters.check(R.id.chipReported)
                     loadReviews()
                 }
             }
             
-            findViewById<Chip>(R.id.chipKept)?.setOnCheckedChangeListener { _, isChecked ->
-                if (isChecked) {
+            findViewById<Chip>(R.id.chipKept)?.setOnClickListener {
+                android.util.Log.d("AdminPanel", "chipKept clicked")
+                if (currentFilter != FilterType.KEPT) {
                     currentFilter = FilterType.KEPT
+                    chipGroupFilters.check(R.id.chipKept)
                     loadReviews()
                 }
             }
             
-            findViewById<Chip>(R.id.chipDeleted)?.setOnCheckedChangeListener { _, isChecked ->
-                if (isChecked) {
+            findViewById<Chip>(R.id.chipDeleted)?.setOnClickListener {
+                android.util.Log.d("AdminPanel", "chipDeleted clicked")
+                if (currentFilter != FilterType.DELETED) {
                     currentFilter = FilterType.DELETED
+                    chipGroupFilters.check(R.id.chipDeleted)
                     loadReviews()
                 }
             }
+            
+            android.util.Log.d("AdminPanel", "Filters setup complete")
         } catch (e: Exception) {
             android.util.Log.e("AdminPanel", "Failed to setup filters", e)
+            e.printStackTrace()
             // Continue without filters
         }
     }
@@ -455,7 +490,8 @@ class AdminPanelActivity : AppCompatActivity() {
                                         createdAt = doc.get("createdAt") as? com.google.firebase.Timestamp ?: com.google.firebase.Timestamp.now(),
                                         updatedAt = doc.get("updatedAt") as? com.google.firebase.Timestamp ?: com.google.firebase.Timestamp.now(),
                                         likeCount = (doc.getLong("likeCount") ?: 0L).toInt(),
-                                        reportCount = reportCount
+                                        reportCount = reportCount,
+                                        adminStatus = doc.getString("adminStatus")
                                     )
                                 } catch (e: Exception) {
                                     android.util.Log.e("AdminPanel", "Error parsing review ${doc.id}", e)
@@ -465,24 +501,45 @@ class AdminPanelActivity : AppCompatActivity() {
                             
                             android.util.Log.d("AdminPanel", "Parsed ${reviews.size} reviews")
                             android.util.Log.d("AdminPanel", "Reviews with reportCount > 0: ${reviews.count { it.reportCount > 0 }}")
+                            android.util.Log.d("AdminPanel", "Reviews with adminStatus='kept': ${reviews.count { it.adminStatus == "kept" }}")
+                            android.util.Log.d("AdminPanel", "Reviews with adminStatus='deleted': ${reviews.count { it.adminStatus == "deleted" }}")
+                            android.util.Log.d("AdminPanel", "Reviews with adminStatus=null: ${reviews.count { it.adminStatus == null }}")
+                            android.util.Log.d("AdminPanel", "Current filter: $currentFilter")
                             
-                            // Sort by report count (descending) for reported, by createdAt for others
-                            val sorted = when (currentFilter) {
+                            // Filter by admin status first
+                            val filteredByStatus = when (currentFilter) {
                                 FilterType.REPORTED -> {
-                                    val reported = reviews.sortedByDescending { it.reportCount }
-                                    android.util.Log.d("AdminPanel", "REPORTED filter: ${reported.size} reviews")
-                                    reported
+                                    // Show reviews that have reports and haven't been handled yet
+                                    reviews.filter { it.reportCount > 0 && it.adminStatus == null }
                                 }
                                 FilterType.KEPT -> {
-                                    val kept = reviews.sortedByDescending { it.createdAt.toDate().time }
-                                    android.util.Log.d("AdminPanel", "KEPT filter: ${kept.size} reviews")
-                                    kept
+                                    // Show reviews that were kept by admin
+                                    val keptReviews = reviews.filter { it.adminStatus == "kept" }
+                                    android.util.Log.d("AdminPanel", "KEPT filter found ${keptReviews.size} kept reviews")
+                                    keptReviews
                                 }
-                                FilterType.DELETED -> emptyList()
+                                FilterType.DELETED -> {
+                                    // Show reviews that were deleted by admin
+                                    val deletedReviews = reviews.filter { it.adminStatus == "deleted" }
+                                    android.util.Log.d("AdminPanel", "DELETED filter found ${deletedReviews.size} deleted reviews")
+                                    deletedReviews
+                                }
                             }
                             
+                            // Sort the filtered results
+                            val sorted = when (currentFilter) {
+                                FilterType.REPORTED -> {
+                                    filteredByStatus.sortedByDescending { it.reportCount }
+                                }
+                                FilterType.KEPT, FilterType.DELETED -> {
+                                    filteredByStatus.sortedByDescending { it.updatedAt.toDate().time }
+                                }
+                            }
+                            
+                            android.util.Log.d("AdminPanel", "${currentFilter} filter: ${sorted.size} reviews")
+                            
                             // Filter by search query
-                            val filtered = if (searchQuery.isNotBlank()) {
+                            val finalReviewList = if (searchQuery.isNotBlank()) {
                                 sorted.filter { 
                                     it.locationName.contains(searchQuery, ignoreCase = true) ||
                                     it.username.contains(searchQuery, ignoreCase = true) ||
@@ -492,20 +549,7 @@ class AdminPanelActivity : AppCompatActivity() {
                                 sorted
                             }
                             
-                            // Final filter by status
-                            val finalReviewList = when (currentFilter) {
-                                FilterType.REPORTED -> {
-                                    val reported = filtered.filter { it.reportCount > 0 }
-                                    android.util.Log.d("AdminPanel", "Final REPORTED list: ${reported.size} reviews")
-                                    reported
-                                }
-                                FilterType.KEPT -> {
-                                    val kept = filtered.filter { it.reportCount == 0 }
-                                    android.util.Log.d("AdminPanel", "Final KEPT list: ${kept.size} reviews")
-                                    kept
-                                }
-                                FilterType.DELETED -> emptyList()
-                            }
+                            android.util.Log.d("AdminPanel", "Final ${currentFilter} list after search: ${finalReviewList.size} reviews")
                             
                             android.util.Log.d("AdminPanel", "Final list size: ${finalReviewList.size}")
                             
@@ -702,7 +746,7 @@ class AdminPanelActivity : AppCompatActivity() {
         
         MaterialAlertDialogBuilder(this)
             .setTitle("Keep Review")
-            .setMessage("Are you sure you want to keep this review? This will clear the reports.")
+            .setMessage("Are you sure you want to keep this review? This will clear the reports and mark it as kept.")
             .setPositiveButton("Keep") { _, _ ->
                 lifecycleScope.launch {
                     try {
@@ -712,6 +756,7 @@ class AdminPanelActivity : AppCompatActivity() {
                             .update(
                                 mapOf(
                                     "reportCount" to 0,
+                                    "adminStatus" to "kept",
                                     "updatedAt" to com.google.firebase.Timestamp.now()
                                 )
                             )
@@ -744,14 +789,20 @@ class AdminPanelActivity : AppCompatActivity() {
         
         MaterialAlertDialogBuilder(this)
             .setTitle("Delete Review")
-            .setMessage("Are you sure you want to delete this review? This action cannot be undone.")
+            .setMessage("Are you sure you want to delete this review? It will be marked as deleted and hidden from users.")
             .setPositiveButton("Delete") { _, _ ->
                 lifecycleScope.launch {
                     try {
+                        // Soft delete: mark as deleted instead of permanently deleting
                         FirebaseFirestore.getInstance()
                             .collection("reviews")
                             .document(review.id)
-                            .delete()
+                            .update(
+                                mapOf(
+                                    "adminStatus" to "deleted",
+                                    "updatedAt" to com.google.firebase.Timestamp.now()
+                                )
+                            )
                             .await()
                         Snackbar.make(findViewById(R.id.root), "Review deleted", Snackbar.LENGTH_SHORT).show()
                         loadReviews()

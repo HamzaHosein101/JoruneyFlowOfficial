@@ -13,5 +13,6 @@ data class Review(
     val createdAt: Timestamp = Timestamp.now(),
     val updatedAt: Timestamp = Timestamp.now(),
     val likeCount: Int = 0,
-    val reportCount: Int = 0
+    val reportCount: Int = 0,
+    val adminStatus: String? = null    // "kept", "deleted", or null
 )
