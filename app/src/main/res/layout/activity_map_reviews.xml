@@ -34,16 +34,48 @@
         android:layout_height="match_parent"
         android:layout_marginTop="?attr/actionBarSize" />
 
+    <!-- Search town bar overlay -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilSearchTown"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:layout_gravity="top"
+        android:hint="Enter town name"
+        app:endIconMode="custom"
+        app:endIconDrawable="@android:drawable/ic_menu_search"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:boxStrokeColor="#183371"
+        app:boxBackgroundColor="#FFFFFF">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etSearchTown"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionSearch"
+            android:inputType="textCapWords"
+            android:maxLines="1"
+            android:textColor="@android:color/black"
+            app:hintTextColor="#777777"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+
     <!-- Floating bottom card for selected town info + actions -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardSelectedTown"
-        android:layout_width="wrap_content"
+        android:layout_width="269dp"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
         android:layout_marginBottom="24dp"
+        app:cardBackgroundColor="#FFFFFF"
         app:cardCornerRadius="28dp"
-        app:cardElevation="8dp"
-        app:backgroundTint="@color/place_details_attribution_color_white">
+        app:cardElevation="8dp">
 
         <LinearLayout
             android:layout_width="280dp"
@@ -57,38 +89,37 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Tap on the map to select a town"
-                android:textStyle="bold"
+                android:textColor="@android:color/black"
                 android:textSize="16sp"
-                android:textColor="@android:color/black" />
+                android:textStyle="bold" />
 
             <!-- Optional subtitle (country / region) -->
             <TextView
                 android:id="@+id/tvTownSubtitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
                 android:text=""
-                android:textSize="13sp"
                 android:textColor="#666666"
-                android:layout_marginTop="2dp" />
+                android:textSize="13sp" />
 
             <!-- Single action button -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:layout_marginTop="12dp"
                 android:gravity="center"
-                android:layout_marginTop="12dp">
+                android:orientation="horizontal">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnAddReviewDirect"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="View/Add Reviews"
                     android:enabled="false"
+                    android:text="View/Add Reviews"
+                    android:textColor="#FFFFFF"
                     app:backgroundTint="#183371"
-                    app:tint="@android:color/white"
-                    android:textColor="@android:color/white"
-                    />
+                    app:tint="@android:color/white" />
 
             </LinearLayout>
         </LinearLayout>
