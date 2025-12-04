@@ -2,8 +2,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-
+    <!-- ✅ Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- ✅ Queries - MUST be here, NOT inside <application> -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+    </queries>
 
     <application
         android:allowBackup="true"
@@ -14,9 +23,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TravelPractice"
+        android:usesCleartextTraffic="true"
         tools:targetApi="31">
 
-        <!-- 🤖 NEW: AI Chat Activity -->
+        <!-- 🤖 AI Chat Activity -->
         <activity
             android:name=".ChatActivity"
             android:exported="false"
@@ -24,23 +34,32 @@
             android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.TravelPractice" />
 
+        <!-- Admin Activities -->
         <activity
             android:name=".admin.AdminLoginActivity"
             android:label="Admin Login"
             android:exported="false" />
 
         <activity
+            android:name=".admin.AdminPanelActivity"
+            android:label="Admin Panel"
+            android:exported="false" />
+
+        <!-- Review Activities -->
+        <activity
             android:name=".reviews.TownReviewsActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".reviews.ReviewsActivity"
+            android:exported="false"
+            android:label="Reviews" />
 
         <activity
-            android:name=".admin.AdminPanelActivity"
-            android:label="Admin Login"
+            android:name=".reviews.MapReviewsActivity"
             android:exported="false" />
 
-
-        <!-- Your existing activities -->
+        <!-- Trip Management Activities -->
         <activity
             android:name=".ItineraryActivity"
             android:exported="false" />
@@ -59,27 +78,17 @@
             android:name=".TripDetailActivity"
             android:exported="false" />
 
-        <!-- Home screen (trips) -->
+        <!-- Home Activity -->
         <activity
             android:name=".HomeActivity"
             android:exported="false" />
 
-        <activity
-            android:name=".reviews.ReviewsActivity"
-            android:exported="false"
-            android:label="Reviews"/>
-
+        <!-- Auth Activities -->
         <activity
             android:name=".RegisterActivity"
             android:exported="false" />
 
-        <activity
-            android:name=".reviews.MapReviewsActivity"
-            android:exported="false" />
-
-
-
-        <!-- Login Activity - App entry point -->
+        <!-- Login Activity - App Entry Point -->
         <activity
             android:name=".LoginActivity"
             android:exported="true">
@@ -89,14 +98,15 @@
             </intent-filter>
         </activity>
 
+        <!-- Main Activity -->
         <activity
             android:name=".MainActivity"
             android:exported="false" />
 
+        <!-- ✅ Google Maps API Key -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
-
 
     </application>
 

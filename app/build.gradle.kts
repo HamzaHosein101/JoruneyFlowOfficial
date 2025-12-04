@@ -48,35 +48,50 @@ android {
 }
 
 dependencies {
-    // AndroidX
+    // AndroidX Core
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
-    implementation("com.google.android.material:material:1.11.0")
+    implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.activity:activity-ktx:1.9.2")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.coordinatorlayout:coordinatorlayout:1.2.0")
     implementation("androidx.gridlayout:gridlayout:1.0.0")
-    implementation("com.google.android.material:material:1.12.0") //added
+    implementation("androidx.cardview:cardview:1.0.0")
 
-    // Google Play services
+    // Google Play Services
     implementation("com.google.android.gms:play-services-auth:21.2.0")
     implementation("com.google.android.libraries.places:places:4.3.1")
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
 
     // Firebase (BOM manages versions)
     implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
 
-    // Networking (Retrofit + Gson for Currency API)
+    // Networking (Retrofit + Gson)
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.google.code.gson:gson:2.10.1")
 
+    // OkHttp - For HTTP API calls
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1")
-    implementation(libs.generativeai)
+
+    // ViewModel & LiveData
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
+
+    // Google Gemini AI
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+
+    // ✅ Chrome Custom Tabs - FOR CLICKABLE LINKS
+    implementation("androidx.browser:browser:1.8.0")
 
     // Desugaring (for newer java.time APIs on old Android)
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
@@ -85,23 +100,4 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
-
-    // ========== 🤖 AI DEPENDENCIES (REQUIRED!) ========== //
-
-    // CardView - For message bubbles
-    implementation("androidx.cardview:cardview:1.0.0")
-
-    // OkHttp - For HTTP API calls (Weather & Currency)
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
-
-    // ViewModel & LiveData - For managing chat state
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
-    implementation("com.google.android.gms:play-services-maps:18.2.0")
-
-    // 🤖 Google Gemini AI - THE AI BRAIN!
-    implementation("com.google.ai.client.generativeai:generativeai:0.7.0")
-
 }
