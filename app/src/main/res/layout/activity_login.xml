@@ -81,14 +81,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"/>
 
-    <Button
-        android:id="@+id/btnAdminLogin"
-        android:backgroundTint="#959494"
-        android:text="Admin Sign In"
-        android:layout_marginTop="12dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
     <TextView
         android:id="@+id/tvResendVerification"
         android:text="Resend verification email"

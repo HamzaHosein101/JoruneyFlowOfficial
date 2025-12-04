@@ -1,7 +1,9 @@
 package com.example.travelpractice
 
 import android.util.Log
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Patterns
 import android.widget.Button
@@ -15,22 +17,40 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.example.travelpractice.admin.AdminLoginActivity
+import com.example.travelpractice.admin.AdminPanelActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.firestore.FirebaseFirestore
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var googleClient: GoogleSignInClient
+    private lateinit var prefs: SharedPreferences
+
+    companion object {
+        private const val PREF_NAME = "admin_prefs"
+        private const val KEY_IS_LOGGED_IN = "is_admin_logged_in"
+    }
 
     override fun onStart() {
         super.onStart()
+        if (!::prefs.isInitialized) {
+            prefs = getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        }
         FirebaseAuth.getInstance().currentUser?.let { user ->
             if (user.isEmailVerified) {
-                startActivity(Intent(this, HomeActivity::class.java))
-                finish()
+                // Check if user is admin before redirecting
+                verifyAdminRole(user.uid) { isAdmin ->
+                    if (isAdmin) {
+                        prefs.edit().putBoolean(KEY_IS_LOGGED_IN, true).apply()
+                        navigateToAdminPanel()
+                    } else {
+                        startActivity(Intent(this, HomeActivity::class.java))
+                        finish()
+                    }
+                }
             } else {
                 Toast.makeText(this, "Please verify your email to continue.", Toast.LENGTH_SHORT).show()
                 FirebaseAuth.getInstance().signOut()
@@ -64,9 +84,23 @@ class LoginActivity : AppCompatActivity() {
             }
             val credential = GoogleAuthProvider.getCredential(idToken, null)
             auth.signInWithCredential(credential)
-                .addOnSuccessListener {
-                    startActivity(Intent(this, HomeActivity::class.java))
-                    finish()
+                .addOnSuccessListener { result ->
+                    val user = result.user
+                    if (user != null) {
+                        // Check if user is admin
+                        verifyAdminRole(user.uid) { isAdmin ->
+                            if (isAdmin) {
+                                prefs.edit().putBoolean(KEY_IS_LOGGED_IN, true).apply()
+                                navigateToAdminPanel()
+                            } else {
+                                startActivity(Intent(this, HomeActivity::class.java))
+                                finish()
+                            }
+                        }
+                    } else {
+                        startActivity(Intent(this, HomeActivity::class.java))
+                        finish()
+                    }
                 }
                 .addOnFailureListener { e ->
                     Log.e("GFirebase", "signInWithCredential failed", e)
@@ -83,6 +117,7 @@ class LoginActivity : AppCompatActivity() {
         setContentView(R.layout.activity_login)
 
         auth = FirebaseAuth.getInstance()
+        prefs = getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
 
         // --- Google Sign-In config ---
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -98,7 +133,6 @@ class LoginActivity : AppCompatActivity() {
         val tvGoToRegister = findViewById<TextView>(R.id.tvGoToRegister)
         val tvForgotPassword = findViewById<TextView>(R.id.tvForgotPassword)
         val btnGoogle = findViewById<com.google.android.gms.common.SignInButton>(R.id.btnGoogle)
-        val btnAdminLogin = findViewById<Button>(R.id.btnAdminLogin)
 
         // Email/password login
         btnLogin.setOnClickListener {
@@ -126,9 +160,18 @@ class LoginActivity : AppCompatActivity() {
                     if (task.isSuccessful) {
                         val user = auth.currentUser
                         if (user != null && user.isEmailVerified) {
-                            Toast.makeText(this, "Welcome back!", Toast.LENGTH_SHORT).show()
-                            startActivity(Intent(this, HomeActivity::class.java))
-                            finish()
+                            // Check if user is admin
+                            verifyAdminRole(user.uid) { isAdmin ->
+                                if (isAdmin) {
+                                    prefs.edit().putBoolean(KEY_IS_LOGGED_IN, true).apply()
+                                    Toast.makeText(this, "Welcome back, Admin!", Toast.LENGTH_SHORT).show()
+                                    navigateToAdminPanel()
+                                } else {
+                                    Toast.makeText(this, "Welcome back!", Toast.LENGTH_SHORT).show()
+                                    startActivity(Intent(this, HomeActivity::class.java))
+                                    finish()
+                                }
+                            }
                         } else {
                             Toast.makeText(
                                 this,
@@ -236,9 +279,27 @@ class LoginActivity : AppCompatActivity() {
         btnGoogle.setOnClickListener {
             googleSignInLauncher.launch(googleClient.signInIntent)
         }
+    }
 
-        btnAdminLogin.setOnClickListener {
-            startActivity(Intent(this, AdminLoginActivity::class.java))
-        }
+    private fun verifyAdminRole(uid: String, onComplete: (Boolean) -> Unit) {
+        FirebaseFirestore.getInstance()
+            .collection("users")
+            .document(uid)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val isAdmin = snapshot.exists() && snapshot.getString("role") == "admin"
+                onComplete(isAdmin)
+            }
+            .addOnFailureListener { e ->
+                Log.e("LoginActivity", "Failed to verify admin role", e)
+                onComplete(false)
+            }
+    }
+
+    private fun navigateToAdminPanel() {
+        val intent = Intent(this, AdminPanelActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 }

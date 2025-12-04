@@ -16,7 +16,8 @@
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="@drawable/ic_back"
         app:title="AI Travel Assistant"
-        app:titleTextColor="@android:color/white"/>
+        app:titleTextColor="@android:color/white"
+        app:menu="@menu/menu_chat" />
 
     <!-- Scrolling list of messages -->
     <androidx.recyclerview.widget.RecyclerView

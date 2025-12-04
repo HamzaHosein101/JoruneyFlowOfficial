@@ -8,7 +8,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.travelpractice.model.Trip
-import com.example.travelpractice.admin.AdminLoginActivity
 import com.example.travelpractice.ui.home.AddTripBottomSheetDialogFragment
 import com.example.travelpractice.ui.home.TripAdapter
 import com.google.android.material.appbar.MaterialToolbar
@@ -65,10 +64,6 @@ class HomeActivity : AppCompatActivity() {
             inflateMenu(R.menu.menu_home)
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {
-                    R.id.action_admin -> {
-                        startActivity(Intent(this@HomeActivity, AdminLoginActivity::class.java))
-                        true
-                    }
                     R.id.action_logout -> {
                         doLogout()
                         true

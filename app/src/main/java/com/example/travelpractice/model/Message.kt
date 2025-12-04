@@ -1,14 +1,21 @@
 package com.example.travelpractice.model
 
+import com.example.travelpractice.handlers.ActionOption
 import java.util.Date
 
 data class Message(
     val id: Long,
     val text: String,
     val sender: MessageSender,
-    val timestamp: Date = Date(),
-    val type: MessageType = MessageType.GENERAL
-)
+    val timestamp: Date,
+    val type: MessageType = MessageType.GENERAL,
+    val actionOptions: List<ActionOption>? = null
+) {
+    /**
+     * Check if message has action buttons
+     */
+    fun hasActions(): Boolean = !actionOptions.isNullOrEmpty()
+}
 
 enum class MessageSender {
     USER,
@@ -16,18 +23,15 @@ enum class MessageSender {
 }
 
 enum class MessageType {
+    GENERAL,
     GREETING,
-    DESTINATION,
     BUDGET,
     ITINERARY,
-    ACCOMMODATION,
-    FLIGHTS,
-    DINING,
-    DOCUMENTS,
-    WEATHER,
     PACKING,
-    CURRENCY,
-    SPECIFIC_DESTINATION,
-    THANKS,
-    GENERAL
+    WEATHER,        // Weather-related messages
+    CURRENCY,       // Currency conversion messages
+    DESTINATION,    // Destination info messages
+    ACCOMMODATION,  // Hotel/lodging messages
+    FLIGHTS,        // Flight-related messages
+    DINING          // Restaurant/food messages
 }

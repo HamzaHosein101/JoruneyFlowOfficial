@@ -14,6 +14,11 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.snackbar.Snackbar
 import java.io.IOException
 import java.util.Locale
+import android.view.inputmethod.EditorInfo
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
+
+
 
 class MapReviewsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -28,6 +33,25 @@ class MapReviewsActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onCreate(savedInstanceState)
         binding = ActivityMapReviewsBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val etSearch = binding.etSearchTown
+        val tilSearch = binding.tilSearchTown
+
+// Pressing Search on keyboard
+        etSearch.setOnEditorActionListener { v, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                val query = v.text?.toString()?.trim().orEmpty()
+                if (query.isNotEmpty()) searchTown(query)
+                true
+            } else false
+        }
+
+// Tapping the search icon
+        tilSearch.setEndIconOnClickListener {
+            val query = etSearch.text?.toString()?.trim().orEmpty()
+            if (query.isNotEmpty()) searchTown(query)
+        }
+
 
         // Toolbar
         setSupportActionBar(binding.topAppBarMap)
@@ -79,6 +103,37 @@ class MapReviewsActivity : AppCompatActivity(), OnMapReadyCallback {
             handleMapTap(latLng)
         }
     }
+
+    private fun searchTown(query: String) {
+        try {
+            val geocoder = Geocoder(this, Locale.getDefault())
+            val results = geocoder.getFromLocationName(query, 1)
+
+            if (!results.isNullOrEmpty()) {
+                val addr = results[0]
+                val latLng = com.google.android.gms.maps.model.LatLng(
+                    addr.latitude,
+                    addr.longitude
+                )
+
+                // ✅ Reuse your existing selection logic
+                handleMapTap(latLng)
+
+            } else {
+                Snackbar.make(binding.mapReviewsRoot,
+                    "No results found for \"$query\"",
+                    Snackbar.LENGTH_SHORT
+                ).show()
+            }
+        } catch (e: Exception) {
+            Snackbar.make(binding.mapReviewsRoot,
+                "Could not find that town. Try adding country/state.",
+                Snackbar.LENGTH_SHORT
+            ).show()
+            e.printStackTrace()
+        }
+    }
+
 
     private fun handleMapTap(latLng: LatLng) {
         selectedLatLng = latLng

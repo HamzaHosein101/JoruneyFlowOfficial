@@ -1,4 +1,4 @@
-package com.example.travelpractice.weather
+package com.example.travelpractice
 
 import retrofit2.http.GET
 import retrofit2.http.Query

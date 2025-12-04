@@ -1,4 +1,4 @@
-package com.example.travelpractice.weather
+package com.example.travelpractice
 
 import retrofit2.http.GET
 import retrofit2.http.Headers
@@ -18,7 +18,7 @@ data class NominatimReverse(
 )
 
 interface NominatimService {
-    @Headers("User-Agent: JourneyFlow/1.0 (contact: youremail@example.com)")
+    @Headers("User-Agent: JourneyFlow/1.0 (contact: journeyflow100@gmail.com)")
     @GET("search")
     suspend fun search(
         @Query("q") q: String,
@@ -27,7 +27,7 @@ interface NominatimService {
     ): NominatimResults
 
     // ⬇️ New: lat/lon -> human-readable place
-    @Headers("User-Agent: JourneyFlow/1.0 (contact: youremail@example.com)")
+    @Headers("User-Agent: JourneyFlow/1.0 (contact:  journeyflow100@gmail.com)")
     @GET("reverse")
     suspend fun reverse(
         @Query("lat") lat: Double,

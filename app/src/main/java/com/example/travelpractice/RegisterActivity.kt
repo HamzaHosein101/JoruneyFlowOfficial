@@ -4,33 +4,27 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.util.Patterns
 import android.view.View
-import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
+import com.google.android.material.button.MaterialButton
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 
 class RegisterActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
-
-    // Strong password validation function
-    private fun isPasswordSecure(password: String): Pair<Boolean, String> {
-        return when {
-            password.length < 8 -> Pair(false, "Password must be at least 8 characters")
-            !password.any { it.isUpperCase() } -> Pair(false, "Must contain at least one uppercase letter (A-Z)")
-            !password.any { it.isLowerCase() } -> Pair(false, "Must contain at least one lowercase letter (a-z)")
-            !password.any { it.isDigit() } -> Pair(false, "Must contain at least one number (0-9)")
-            !password.any { !it.isLetterOrDigit() } -> Pair(false, "Must contain at least one special character (!@#$%^&*)")
-            password.contains(" ") -> Pair(false, "Password cannot contain spaces")
-            else -> Pair(true, "Password is secure")
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,25 +36,21 @@ class RegisterActivity : AppCompatActivity() {
         val etEmail = findViewById<EditText>(R.id.etEmail)
         val etPassword = findViewById<EditText>(R.id.etPassword)
         val etConfirmPassword = findViewById<EditText>(R.id.etConfirm)
-        val btnRegister = findViewById<Button>(R.id.btnRegister)
+        val btnRegister = findViewById<MaterialButton>(R.id.btnRegister)
         val tvGoToLogin = findViewById<TextView>(R.id.tvGoToLogin)
 
-        // Password requirement TextViews
+        val tvPasswordRequirements = findViewById<TextView>(R.id.tvPasswordRequirements)
         val tvReqLength = findViewById<TextView>(R.id.tvReqLength)
         val tvReqUppercase = findViewById<TextView>(R.id.tvReqUppercase)
         val tvReqLowercase = findViewById<TextView>(R.id.tvReqLowercase)
         val tvReqNumber = findViewById<TextView>(R.id.tvReqNumber)
         val tvReqSpecial = findViewById<TextView>(R.id.tvReqSpecial)
-        val tvPasswordRequirements = findViewById<TextView>(R.id.tvPasswordRequirements)
 
-        // Add TextWatcher to validate password in real-time
         etPassword.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
                 val password = s.toString()
-
-                // Show requirements when user starts typing
                 if (password.isNotEmpty()) {
                     tvPasswordRequirements.visibility = View.VISIBLE
                     tvReqLength.visibility = View.VISIBLE
@@ -69,14 +59,12 @@ class RegisterActivity : AppCompatActivity() {
                     tvReqNumber.visibility = View.VISIBLE
                     tvReqSpecial.visibility = View.VISIBLE
 
-                    // Update each requirement
                     updateRequirement(tvReqLength, password.length >= 8)
                     updateRequirement(tvReqUppercase, password.any { it.isUpperCase() })
                     updateRequirement(tvReqLowercase, password.any { it.isLowerCase() })
                     updateRequirement(tvReqNumber, password.any { it.isDigit() })
                     updateRequirement(tvReqSpecial, password.any { !it.isLetterOrDigit() })
                 } else {
-                    // Hide requirements when field is empty
                     tvPasswordRequirements.visibility = View.GONE
                     tvReqLength.visibility = View.GONE
                     tvReqUppercase.visibility = View.GONE
@@ -93,21 +81,18 @@ class RegisterActivity : AppCompatActivity() {
             val password = etPassword.text.toString()
             val confirmPassword = etConfirmPassword.text.toString()
 
-            // Validate username
             if (username.isEmpty()) {
                 etUsername.error = "Enter a username"
                 etUsername.requestFocus()
                 return@setOnClickListener
             }
 
-            // Validate email
             if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                 etEmail.error = "Invalid email address"
                 etEmail.requestFocus()
                 return@setOnClickListener
             }
 
-            // Validate password security
             val (isSecure, message) = isPasswordSecure(password)
             if (!isSecure) {
                 etPassword.error = message
@@ -116,51 +101,67 @@ class RegisterActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Validate password match
             if (password != confirmPassword) {
                 etConfirmPassword.error = "Passwords do not match"
                 etConfirmPassword.requestFocus()
                 return@setOnClickListener
             }
 
-            // Disable button to prevent double-clicks
             btnRegister.isEnabled = false
 
-            // Create user with Firebase
             auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     btnRegister.isEnabled = true
                     if (task.isSuccessful) {
                         val user = auth.currentUser
 
-                        // Set displayName (username) on the Firebase profile
+                        if (user == null) {
+                            Toast.makeText(
+                                this,
+                                "Registration incomplete. Please try again.",
+                                Toast.LENGTH_LONG
+                            ).show()
+                            return@addOnCompleteListener
+                        }
+
                         val profileUpdates = UserProfileChangeRequest.Builder()
                             .setDisplayName(username)
                             .build()
 
-                        user?.updateProfile(profileUpdates)?.addOnCompleteListener { profileTask ->
-                            // Send email verification
-                            user?.sendEmailVerification()?.addOnCompleteListener { emailTask ->
-                                if (emailTask.isSuccessful) {
-                                    Toast.makeText(
-                                        this,
-                                        "Registration successful! Please check your email to verify your account.",
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                    // Sign out user until they verify email
-                                    auth.signOut()
-                                    // Go back to login
-                                    startActivity(Intent(this, LoginActivity::class.java))
-                                    finish()
-                                } else {
-                                    Toast.makeText(
-                                        this,
-                                        "Account created but failed to send verification email: ${emailTask.exception?.message}",
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                }
+                        val updateTask = user.updateProfile(profileUpdates)
+                        val saveTask = saveUserProfile(user, username)
+
+                        Tasks.whenAll(updateTask, saveTask)
+                            .addOnSuccessListener {
+                                user.sendEmailVerification()
+                                    .addOnCompleteListener { verifyTask ->
+                                        if (verifyTask.isSuccessful) {
+                                            Toast.makeText(
+                                                this,
+                                                "Registration successful! Please check your email to verify your account.",
+                                                Toast.LENGTH_LONG
+                                            ).show()
+                                            auth.signOut()
+                                            startActivity(Intent(this, LoginActivity::class.java))
+                                            finish()
+                                        } else {
+                                            Toast.makeText(
+                                                this,
+                                                verifyTask.exception?.localizedMessage
+                                                    ?: "Failed to send verification email",
+                                                Toast.LENGTH_LONG
+                                            ).show()
+                                        }
+                                    }
                             }
-                        }
+                            .addOnFailureListener { e ->
+                                Log.e("RegisterActivity", "Failed to finalize registration", e)
+                                Toast.makeText(
+                                    this,
+                                    "Unable to finish registration. Please try again.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
                     } else {
                         val errorMessage = when {
                             task.exception?.message?.contains("email address is already in use") == true ->
@@ -180,9 +181,37 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
-    // Helper function to update requirement text color
+    private fun saveUserProfile(user: FirebaseUser, username: String): Task<Void> {
+        val firestore = FirebaseFirestore.getInstance()
+        val userDoc = firestore.collection("users").document(user.uid)
+        val data = hashMapOf(
+            "uid" to user.uid,
+            "email" to user.email.orEmpty(),
+            "displayName" to username.ifBlank { user.displayName },
+            "photoUrl" to user.photoUrl?.toString(),
+            "createdAt" to FieldValue.serverTimestamp(),
+            "lastLoginAt" to FieldValue.serverTimestamp(),
+            "providers" to user.providerData.map { it.providerId }.distinct(),
+            "emailVerified" to user.isEmailVerified
+        )
+
+        return userDoc.set(data, SetOptions.merge())
+    }
+
+    private fun isPasswordSecure(password: String): Pair<Boolean, String> {
+        return when {
+            password.length < 8 -> Pair(false, "Password must be at least 8 characters")
+            !password.any { it.isUpperCase() } -> Pair(false, "Must contain at least one uppercase letter (A-Z)")
+            !password.any { it.isLowerCase() } -> Pair(false, "Must contain at least one lowercase letter (a-z)")
+            !password.any { it.isDigit() } -> Pair(false, "Must contain at least one number (0-9)")
+            !password.any { !it.isLetterOrDigit() } -> Pair(false, "Must contain at least one special character (!@#$%^&*)")
+            password.contains(" ") -> Pair(false, "Password cannot contain spaces")
+            else -> Pair(true, "Password is secure")
+        }
+    }
+
     private fun updateRequirement(textView: TextView, isMet: Boolean) {
-        val baseText = when(textView.id) {
+        val baseText = when (textView.id) {
             R.id.tvReqLength -> "At least 8 characters"
             R.id.tvReqUppercase -> "One uppercase letter (A-Z)"
             R.id.tvReqLowercase -> "One lowercase letter (a-z)"
@@ -200,3 +229,4 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 }
+

@@ -1,89 +1,142 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:fillViewport="true"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_margin="12dp"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="8dp"
+    app:cardBackgroundColor="@android:color/white">
 
     <LinearLayout
-        android:orientation="vertical"
-        android:padding="16dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="18dp">
 
-        <com.google.android.material.textfield.TextInputLayout
+        <!-- Title -->
+        <TextView
+            android:id="@+id/tvDialogTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:hintEnabled="true"
-            android:hint="Location (city, country)">
+            android:text="Leave a review"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:textColor="@android:color/black"
+            android:gravity="center"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Location -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilLocation"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Location (city, country)"
+            app:boxStrokeColor="#183371"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusBottomEnd="12dp"
+            android:layout_marginBottom="10dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etLocation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textCapWords" />
+                android:textColor="@android:color/black"
+                android:inputType="textCapWords"/>
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- Date row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginTop="12dp">
+            android:layout_marginBottom="10dp">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnPickDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Pick trip date" />
+                android:text="Pick trip date"
+                app:backgroundTint="#183371"
+                android:textColor="@android:color/white"
+                app:cornerRadius="14dp"/>
 
             <TextView
                 android:id="@+id/tvSelectedDate"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
                 android:layout_weight="1"
-                android:gravity="end|center_vertical"
                 android:text="No date selected"
-                android:layout_marginStart="12dp" />
+                android:textColor="#666666"
+                android:textSize="14sp"/>
         </LinearLayout>
 
-
+        <!-- Rating label -->
         <TextView
+            android:id="@+id/tvRatingLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Rating"
-            android:layout_marginTop="12dp" />
+            android:textColor="@android:color/black"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp"/>
 
+        <!-- Rating bar (yellow stars) -->
         <RatingBar
             android:id="@+id/ratingBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:numStars="5"
-            android:stepSize="1.0" />
+            android:stepSize="1"
+            android:rating="5"
+            android:layout_marginBottom="12dp"
+            android:progressTint="#FFC107"
+            android:secondaryProgressTint="#FFD54F"
+            android:backgroundTint="#DDDDDD"
+            />
 
+        <!-- Comment -->
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilComment"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:hint="Your review / advice">
+            android:hint="Your review / advice"
+            app:boxStrokeColor="#183371"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusBottomEnd="12dp"
+            android:layout_marginBottom="14dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etComment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:minLines="3"
-                android:gravity="top"
-                android:inputType="textMultiLine" />
+                android:maxLines="5"
+                android:gravity="top|start"
+                android:inputType="textMultiLine|textCapSentences"
+                android:textColor="@android:color/black"/>
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- Post button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnPost"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Post review"
-            android:layout_marginTop="16dp" />
-
-
-
+            app:backgroundTint="#183371"
+            android:textColor="@android:color/white"
+            app:cornerRadius="18dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"/>
     </LinearLayout>
-</ScrollView>
+
+</com.google.android.material.card.MaterialCardView>
