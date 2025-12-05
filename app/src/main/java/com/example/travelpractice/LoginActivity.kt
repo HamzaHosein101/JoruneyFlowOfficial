@@ -132,7 +132,7 @@ class LoginActivity : AppCompatActivity() {
         val btnLogin = findViewById<Button>(R.id.btnLogin)
         val tvGoToRegister = findViewById<TextView>(R.id.tvGoToRegister)
         val tvForgotPassword = findViewById<TextView>(R.id.tvForgotPassword)
-        val btnGoogle = findViewById<com.google.android.gms.common.SignInButton>(R.id.btnGoogle)
+
 
         // Email/password login
         btnLogin.setOnClickListener {
@@ -276,9 +276,9 @@ class LoginActivity : AppCompatActivity() {
         }
 
         // Google sign-in button
-        btnGoogle.setOnClickListener {
-            googleSignInLauncher.launch(googleClient.signInIntent)
-        }
+      //  btnGoogle.setOnClickListener {
+     //       googleSignInLauncher.launch(googleClient.signInIntent)
+      //  }
     }
 
     private fun verifyAdminRole(uid: String, onComplete: (Boolean) -> Unit) {
