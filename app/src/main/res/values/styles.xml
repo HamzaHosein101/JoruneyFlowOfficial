@@ -62,6 +62,19 @@
     </style>
 
 
+    <style name="RoundedAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="shapeAppearanceOverlay">@style/RoundedDialogShape</item>
+    </style>
+
+    <style name="RoundedDialogShape">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">24dp</item>
+    </style>
+
+    <style name="WhiteToolbarPopup" parent="ThemeOverlay.Material3.Light">
+        <item name="android:popupBackground">@drawable/bg_popup_white</item>
+    </style>
+
 
 
 

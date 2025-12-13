@@ -26,7 +26,8 @@
             app:titleTextColor="#FFFFFF"
             app:navigationIconTint="#CCDCF4"
             app:titleCentered="true"
-            app:popupTheme="@style/ThemeOverlay.Material3.Light" />
+            app:popupTheme="@style/WhiteToolbarPopup"
+            />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -61,7 +62,7 @@
         android:contentDescription="Add category"
         app:srcCompat="@drawable/ic_add_24"
         app:tint="#FFFFFF"
-        app:backgroundTint="#4984E9"
+        app:backgroundTint="#183371"
         android:layout_margin="16dp"
         app:borderWidth="0dp"
         android:layout_gravity="bottom|end" />

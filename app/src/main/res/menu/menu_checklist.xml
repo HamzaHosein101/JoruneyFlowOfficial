@@ -2,11 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-
-
     <item
         android:id="@+id/action_filter_unchecked"
-        android:title="Show Unchecked"
+        android:icon="@drawable/show_everyting"
+        android:title="Show unchecked items"
         android:checkable="true"
-        app:showAsAction="never"/>
+        app:showAsAction="always" />
+
+
 </menu>
