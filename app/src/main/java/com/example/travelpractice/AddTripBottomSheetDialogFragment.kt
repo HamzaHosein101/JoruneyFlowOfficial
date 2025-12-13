@@ -22,6 +22,10 @@ import android.graphics.Typeface
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import android.view.Gravity
+import java.text.SimpleDateFormat
+import java.util.TimeZone
+import java.util.Calendar
+import androidx.core.util.Pair
 
 
 class AddTripBottomSheetDialogFragment : DialogFragment() {
@@ -29,6 +33,25 @@ class AddTripBottomSheetDialogFragment : DialogFragment() {
     private var startMillis: Long? = null
     private var endMillis: Long? = null
     private var editingTrip: Trip? = null
+
+    private val HALF_DAY_MS = 12 * 60 * 60 * 1000L
+
+    // Store-safe value (no timezone “previous day” surprises)
+    private fun toStoreMillis(utcMidnightMillis: Long): Long = utcMidnightMillis + HALF_DAY_MS
+
+    // Convert any stored millis back to the exact UTC midnight for the same UTC date
+    private fun toPickerUtcMidnight(storedMillis: Long): Long {
+        val cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        cal.timeInMillis = storedMillis
+        cal.set(Calendar.HOUR_OF_DAY, 0)
+        cal.set(Calendar.MINUTE, 0)
+        cal.set(Calendar.SECOND, 0)
+        cal.set(Calendar.MILLISECOND, 0)
+        return cal.timeInMillis
+    }
+
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,26 +69,48 @@ class AddTripBottomSheetDialogFragment : DialogFragment() {
         val etDates       = view.findViewById<EditText>(R.id.etDates)
         val btnSave       = view.findViewById<MaterialButton>(R.id.btnSave)
 
-        val picker = MaterialDatePicker.Builder.dateRangePicker()
+        val pickerBuilder = MaterialDatePicker.Builder.dateRangePicker()
             .setTitleText("Select trip dates")
-            .build()
+            .setTheme(R.style.ThemeOverlay_JourneyFlow_DatePicker)
+
+// ✅ If editing, pre-select the saved range (normalized to UTC midnight)
+        editingTrip?.let { t ->
+            pickerBuilder.setSelection(Pair(toPickerUtcMidnight(t.startDate), toPickerUtcMidnight(t.endDate)))
+
+        }
+
+        val picker = pickerBuilder.build()
+
+
 
         etDates.setOnClickListener { picker.show(parentFragmentManager, "date_range") }
+
         picker.addOnPositiveButtonClickListener { sel ->
-            startMillis = sel.first
-            endMillis = sel.second
-            etDates.setText(formatRange(sel.first ?: 0L, sel.second ?: 0L))
+            val s = sel.first ?: return@addOnPositiveButtonClickListener
+            val e = sel.second ?: return@addOnPositiveButtonClickListener
+
+            // Picker gives UTC midnight; store as UTC noon
+            startMillis = toStoreMillis(s)
+            endMillis = toStoreMillis(e)
+
+            // Display using the picker-normalized date (so it prints the correct day)
+            etDates.setText(formatRange(toPickerUtcMidnight(startMillis!!), toPickerUtcMidnight(endMillis!!)))
         }
+
+
 
         editingTrip?.let { t ->
             etTitle.setText(t.title)
             etDestination.setText(t.destination)
             if (t.budget > 0.0) etBudget.setText(t.budget.toString())
+
             startMillis = t.startDate
             endMillis = t.endDate
-            etDates.setText(formatRange(t.startDate, t.endDate))
+            etDates.setText(formatRange(toPickerUtcMidnight(startMillis!!), toPickerUtcMidnight(endMillis!!)))
+
             btnSave.text = "Update"
         }
+
 
         btnSave.setOnClickListener {
             val uid = FirebaseAuth.getInstance().currentUser?.uid
@@ -134,17 +179,19 @@ class AddTripBottomSheetDialogFragment : DialogFragment() {
 
         dialog.window?.setBackgroundDrawableResource(R.drawable.dialog_rounded_white)
 
-
-
-
         // Helps keyboard not cover fields
         dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
 
         return dialog
     }
 
+
+
+
     private fun formatRange(start: Long, end: Long): String {
-        val fmt = DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault())
+        val fmt = SimpleDateFormat("MMM d, yyyy", Locale.getDefault()).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
+        }
         return "${fmt.format(Date(start))} — ${fmt.format(Date(end))}"
     }
 

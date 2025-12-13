@@ -4,4 +4,65 @@
         <item name="cornerSize">24dp</item>
     </style>
 
+    <style name="ThemeOverlay.JourneyFlow.DatePicker" parent="ThemeOverlay.MaterialComponents.MaterialCalendar">
+        <!-- Make selected date blue -->
+        <item name="colorPrimary">#183371</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+
+        <!-- Make the picker background white -->
+        <item name="colorSurface">#FFFFFF</item>
+        <item name="colorOnSurface">#0D1B3E</item>
+
+        <!-- This controls the “range fill” (the purple strip) -->
+        <item name="colorSecondary">#183371</item>
+        <item name="colorSecondaryContainer">#D6E4FF</item>  <!-- light blue fill -->
+        <item name="colorOnSecondaryContainer">#0D1B3E</item>
+    </style>
+
+    <style name="ThemeOverlay.JourneyFlow.AlertDialog"
+        parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="colorSurface">#FFFFFF</item>
+        <item name="colorOnSurface">#0D1B3E</item>
+        <item name="cornerSize">20dp</item>
+    </style>
+
+    <style name="JourneyFlow_PopupMenu" parent="ThemeOverlay.AppCompat.Light">
+        <item name="android:popupBackground">@drawable/bg_popup_menu</item>
+        <item name="android:textColor">#0D1B3E</item>
+
+        <!-- REAL divider -->
+        <item name="android:listDivider">@drawable/popup_divider</item>
+    </style>
+
+
+    <style name="ThemeOverlay.JourneyFlow.AlertDialogAnchor"
+        parent="ThemeOverlay.Material3.MaterialAlertDialog">
+
+        <!-- Force dialog background to WHITE (Material3 uses these container colors) -->
+        <item name="colorSurface">#FFFFFF</item>
+        <item name="colorSurfaceContainer">#FFFFFF</item>
+        <item name="colorSurfaceContainerHigh">#FFFFFF</item>
+        <item name="colorSurfaceContainerHighest">#FFFFFF</item>
+
+        <item name="colorOnSurface">#0D1B3E</item>
+
+        <!-- Force accents to blue (prevents purple fallback) -->
+        <item name="colorPrimary">#183371</item>
+        <item name="colorSecondary">#183371</item>
+
+        <!-- Rounded corners -->
+        <item name="cornerSize">20dp</item>
+
+        <!-- IMPORTANT: make dialog buttons BLUE instead of purple -->
+        <item name="buttonBarButtonStyle">@style/JourneyFlow.DialogButton</item>
+    </style>
+
+    <style name="JourneyFlow.DialogButton" parent="Widget.Material3.Button.TextButton.Dialog">
+        <item name="android:textColor">#183371</item>
+    </style>
+
+
+
+
+
 </resources>
