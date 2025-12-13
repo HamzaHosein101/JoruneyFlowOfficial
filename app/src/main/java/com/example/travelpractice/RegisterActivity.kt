@@ -45,33 +45,31 @@ class RegisterActivity : AppCompatActivity() {
         val tvReqLowercase = findViewById<TextView>(R.id.tvReqLowercase)
         val tvReqNumber = findViewById<TextView>(R.id.tvReqNumber)
         val tvReqSpecial = findViewById<TextView>(R.id.tvReqSpecial)
+        val passwordRequirementsContainer =
+            findViewById<View>(R.id.passwordRequirementsContainer)
+
 
         etPassword.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
                 val password = s.toString()
-                if (password.isNotEmpty()) {
-                    tvPasswordRequirements.visibility = View.VISIBLE
-                    tvReqLength.visibility = View.VISIBLE
-                    tvReqUppercase.visibility = View.VISIBLE
-                    tvReqLowercase.visibility = View.VISIBLE
-                    tvReqNumber.visibility = View.VISIBLE
-                    tvReqSpecial.visibility = View.VISIBLE
+                etPassword.addTextChangedListener(object : TextWatcher {
+                    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
-                    updateRequirement(tvReqLength, password.length >= 8)
-                    updateRequirement(tvReqUppercase, password.any { it.isUpperCase() })
-                    updateRequirement(tvReqLowercase, password.any { it.isLowerCase() })
-                    updateRequirement(tvReqNumber, password.any { it.isDigit() })
-                    updateRequirement(tvReqSpecial, password.any { !it.isLetterOrDigit() })
-                } else {
-                    tvPasswordRequirements.visibility = View.GONE
-                    tvReqLength.visibility = View.GONE
-                    tvReqUppercase.visibility = View.GONE
-                    tvReqLowercase.visibility = View.GONE
-                    tvReqNumber.visibility = View.GONE
-                    tvReqSpecial.visibility = View.GONE
-                }
+                    override fun afterTextChanged(s: Editable?) {
+                        val password = s?.toString().orEmpty()
+
+                        updateRequirement(tvReqLength, password.length >= 8)
+                        updateRequirement(tvReqUppercase, password.any { it.isUpperCase() })
+                        updateRequirement(tvReqLowercase, password.any { it.isLowerCase() })
+                        updateRequirement(tvReqNumber, password.any { it.isDigit() })
+                        updateRequirement(tvReqSpecial, password.any { !it.isLetterOrDigit() })
+                    }
+                })
+
+
             }
         })
 
