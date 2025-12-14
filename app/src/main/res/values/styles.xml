@@ -48,19 +48,18 @@
         <item name="colorSurfaceContainer">#FFFFFF</item>
         <item name="colorSurfaceContainerHigh">#FFFFFF</item>
         <item name="colorSurfaceContainerHighest">#FFFFFF</item>
-
         <item name="colorOnSurface">#0D1B3E</item>
-
         <!-- Force accents to blue (prevents purple fallback) -->
         <item name="colorPrimary">#183371</item>
         <item name="colorSecondary">#183371</item>
-
         <!-- Rounded corners -->
         <item name="cornerSize">20dp</item>
-
+        <item name="android:textSize">16sp</item>
         <!-- IMPORTANT: make dialog buttons BLUE instead of purple -->
         <item name="buttonBarButtonStyle">@style/JourneyFlow.DialogButton</item>
     </style>
+
+
 
     <style name="JourneyFlow.DialogButton" parent="Widget.Material3.Button.TextButton.Dialog">
         <item name="android:textColor">#183371</item>

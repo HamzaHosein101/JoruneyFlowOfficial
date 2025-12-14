@@ -22,6 +22,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class BagChecklistActivity : AppCompatActivity() {
@@ -268,9 +269,13 @@ class BagChecklistActivity : AppCompatActivity() {
 
 
     private fun deleteCategory(category: PackingCategory) {
-        MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_JourneyFlow_AlertDialogAnchor)
+        val dialog = MaterialAlertDialogBuilder(
+            this,
+            R.style.ThemeOverlay_JourneyFlow_AlertDialogAnchor
+        )
             .setTitle("Delete Category")
             .setMessage("Delete \"${category.title}\" and all items in it?")
+            .setNegativeButton("Cancel", null)
             .setPositiveButton("Delete") { d, _ ->
                 val catRef = userListRef().collection("categories").document(category.id)
                 catRef.collection("items").get().addOnSuccessListener { snap ->
@@ -281,15 +286,22 @@ class BagChecklistActivity : AppCompatActivity() {
                 }
                 d.dismiss()
             }
-            .setNegativeButton("Cancel", null)
             .show()
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            ?.setTextColor(ContextCompat.getColor(this, R.color.red))
     }
 
 
+
     private fun deleteItem(item: PackingItem) {
-        MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_JourneyFlow_AlertDialogAnchor)
+        val dialog = MaterialAlertDialogBuilder(
+            this,
+            R.style.ThemeOverlay_JourneyFlow_AlertDialogAnchor
+        )
             .setTitle("Delete Item")
             .setMessage("Remove \"${item.name}\" from the checklist?")
+            .setNegativeButton("Cancel", null)
             .setPositiveButton("Delete") { d, _ ->
                 userListRef()
                     .collection("categories").document(item.categoryId)
@@ -297,9 +309,12 @@ class BagChecklistActivity : AppCompatActivity() {
                     .delete()
                 d.dismiss()
             }
-            .setNegativeButton("Cancel", null)
             .show()
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            ?.setTextColor(ContextCompat.getColor(this, R.color.red))
     }
+
 
 
 
