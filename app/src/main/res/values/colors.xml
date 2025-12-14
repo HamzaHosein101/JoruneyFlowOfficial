@@ -6,6 +6,7 @@
     <color name="accentCoral">#FF6B6B</color>
     <color name="bgSoft">#EAF6FB</color>
     <color name="outlineVariant">#E0E0E0</color>
+    <color name="white">#FFFFFF</color>
 
     <!-- Supporting -->
     <color name="textPrimary">#172B4D</color>

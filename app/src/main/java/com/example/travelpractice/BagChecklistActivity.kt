@@ -268,7 +268,7 @@ class BagChecklistActivity : AppCompatActivity() {
 
 
     private fun deleteCategory(category: PackingCategory) {
-        MaterialAlertDialogBuilder(this, R.style.RoundedAlertDialog)
+        MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_JourneyFlow_AlertDialogAnchor)
             .setTitle("Delete Category")
             .setMessage("Delete \"${category.title}\" and all items in it?")
             .setPositiveButton("Delete") { d, _ ->
@@ -286,9 +286,8 @@ class BagChecklistActivity : AppCompatActivity() {
     }
 
 
-
     private fun deleteItem(item: PackingItem) {
-        MaterialAlertDialogBuilder(this, R.style.RoundedAlertDialog)
+        MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_JourneyFlow_AlertDialogAnchor)
             .setTitle("Delete Item")
             .setMessage("Remove \"${item.name}\" from the checklist?")
             .setPositiveButton("Delete") { d, _ ->
