@@ -159,7 +159,6 @@ class ItineraryActivity : AppCompatActivity() {
 
     private fun saveItineraryItem(item: ItineraryItem) {
         val itemData = if (item.id.isEmpty()) {
-            // New item
             item.copy(id = db.collection("itinerary").document().id)
         } else {
             item
@@ -169,21 +168,27 @@ class ItineraryActivity : AppCompatActivity() {
             .document(itemData.id)
             .set(itemData)
             .addOnSuccessListener {
-                // Schedule notification for the new/updated item
+                // Schedule / cancel notifications
                 if (!itemData.isCompleted && itemData.date > 0) {
                     notificationManager.scheduleNotification(itemData, trip)
                 } else if (itemData.isCompleted) {
-                    // Cancel notification if item is marked as completed
                     notificationManager.cancelNotification(itemData)
                 }
-                
-                Snackbar.make(findViewById(android.R.id.content), "Item saved", Snackbar.LENGTH_SHORT).show()
+
+                // ✅ No "Item saved" snackbar
                 loadItineraryItems()
             }
             .addOnFailureListener {
-                Snackbar.make(findViewById(android.R.id.content), "Failed to save item", Snackbar.LENGTH_SHORT).show()
+                // Keep failure message (recommended)
+                Snackbar.make(
+                    findViewById(android.R.id.content),
+                    "Failed to save item",
+                    Snackbar.LENGTH_SHORT
+                ).show()
             }
     }
+
+
 
     private fun loadItineraryItems() {
         db.collection("itinerary")
@@ -233,15 +238,23 @@ class ItineraryActivity : AppCompatActivity() {
     }
 
     private fun showDeleteConfirmationDialog(item: ItineraryItem) {
-        MaterialAlertDialogBuilder(this)
+        val dialog = MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_JourneyFlow_AlertDialogAnchor)
             .setTitle("Delete Item")
-            .setMessage("Are you sure you want to delete \"${item.title}\"? This action cannot be undone.")
+            .setMessage(
+                "Are you sure you want to delete \"${item.title}\"? This action cannot be undone."
+            )
             .setPositiveButton("Delete") { _, _ ->
                 deleteItineraryItem(item)
             }
             .setNegativeButton("Cancel", null)
             .show()
+
+        dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE)
+            .setTextColor(getColor(R.color.delete_red))
     }
+
+
+
 
     private fun deleteItineraryItem(item: ItineraryItem) {
         // Cancel notification before deleting

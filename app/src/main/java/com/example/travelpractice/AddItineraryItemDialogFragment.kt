@@ -178,9 +178,20 @@ class AddItineraryItemDialogFragment : DialogFragment() {
             dismiss()
         }
 
-        val dialog = MaterialAlertDialogBuilder(requireContext())
+        val dialog = MaterialAlertDialogBuilder(
+            requireContext(),
+            R.style.ThemeOverlay_JourneyFlow_AlertDialogAnchor
+        )
             .setView(view)
             .create()
+
+        dialog.setOnShowListener {
+            dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        }
+
+        return dialog
+
+
         
         // Size the dialog to show all content including buttons
         dialog.window?.setLayout(
@@ -194,6 +205,7 @@ class AddItineraryItemDialogFragment : DialogFragment() {
     private fun showDatePicker() {
         val datePickerDialog = DatePickerDialog(
             requireContext(),
+            R.style.ThemeOverlay_JourneyFlow_DatePicker,
             { _, year, month, dayOfMonth ->
                 selectedDate.set(Calendar.YEAR, year)
                 selectedDate.set(Calendar.MONTH, month)
@@ -210,6 +222,7 @@ class AddItineraryItemDialogFragment : DialogFragment() {
     private fun showStartTimePicker() {
         val timePickerDialog = TimePickerDialog(
             requireContext(),
+            R.style.ThemeOverlay_JourneyFlow_TimePicker,
             { _, hourOfDay, minute ->
                 selectedStartHour = hourOfDay
                 selectedStartMinute = minute
@@ -229,6 +242,7 @@ class AddItineraryItemDialogFragment : DialogFragment() {
     private fun showEndTimePicker() {
         val timePickerDialog = TimePickerDialog(
             requireContext(),
+            R.style.ThemeOverlay_JourneyFlow_TimePicker,
             { _, hourOfDay, minute ->
                 selectedEndHour = hourOfDay
                 selectedEndMinute = minute

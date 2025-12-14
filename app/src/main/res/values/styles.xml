@@ -84,6 +84,23 @@
 
 
 
+    <!-- Time Picker Theme -->
+    <style name="ThemeOverlay_JourneyFlow_TimePicker"
+        parent="ThemeOverlay.MaterialComponents.TimePicker">
+
+        <!-- Main brand color (header + selected) -->
+        <item name="colorPrimary">#183371</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+
+        <!-- Dialog surface -->
+        <item name="colorSurface">@android:color/white</item>
+        <item name="colorOnSurface">#1E2A5A</item>
+
+        <!-- Buttons (OK / Cancel) -->
+        <item name="colorSecondary">#183371</item>
+    </style>
+
+
 
 
 </resources>
