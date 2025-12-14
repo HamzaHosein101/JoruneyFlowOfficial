@@ -34,6 +34,8 @@ import kotlinx.coroutines.tasks.await
 
 class ReviewsActivity : AppCompatActivity() {
 
+
+
     private lateinit var binding: ActivityReviewsBinding
     private val vm: ReviewsViewModel by viewModels {
         ReviewsViewModelFactory(ReviewsProvider.repo())

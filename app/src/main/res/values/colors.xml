@@ -19,6 +19,8 @@
     <color name="accentYellow">#FFC107</color>
     <color name="accentRed">#FF6B6B</color>
     <color name="black">#000000</color>
+    <color name="red">#D32F2F</color>
+
 
     <!-- Category colors -->
     <color name="catFood">#00A86B</color>
