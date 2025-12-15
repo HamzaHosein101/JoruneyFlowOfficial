@@ -23,46 +23,79 @@
         android:background="@drawable/rounded_mask"
         android:clipToOutline="true"
         android:scaleType="centerCrop"
-        android:contentDescription="JourneyFlow Logo"/>
+        android:contentDescription="JourneyFlow Logo"
+        android:layout_marginTop="48dp"
+        android:elevation="6dp"
+
+        />
 
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Email"
-        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
-        android:layout_marginTop="8dp"
-        app:boxBackgroundColor="@android:color/white"
-        app:boxStrokeWidth="0dp"
-        app:boxStrokeWidthFocused="0dp">
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginTop="16dp"
 
-        <com.google.android.material.textfield.TextInputEditText
+        app:boxBackgroundMode="filled"
+        app:boxBackgroundColor="@android:color/white"
+
+        app:boxCornerRadiusTopStart="32dp"
+        app:boxCornerRadiusTopEnd="32dp"
+        app:boxCornerRadiusBottomStart="32dp"
+        app:boxCornerRadiusBottomEnd="32dp"
+
+        app:boxStrokeWidth="0dp"
+        app:boxStrokeWidthFocused="0dp"
+        app:hintEnabled="false"
+        app:startIconDrawable="@drawable/ic_email">
+
+
+    <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:hint="Email"
             android:inputType="textEmailAddress"
             android:autofillHints="emailAddress"
-            android:textColor="@android:color/black" />
+            android:textColor="@android:color/black"
+            android:background="@null"/>
     </com.google.android.material.textfield.TextInputLayout>
+
+
+
 
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Password"
-        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
-        android:layout_marginTop="12dp"
-        app:boxBackgroundColor="@android:color/white"
-        app:boxStrokeWidth="0dp"
-        app:boxStrokeWidthFocused="0dp">
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginTop="16dp"
 
-        <com.google.android.material.textfield.TextInputEditText
+        app:boxBackgroundMode="filled"
+        app:boxBackgroundColor="@android:color/white"
+
+        app:boxCornerRadiusTopStart="32dp"
+        app:boxCornerRadiusTopEnd="32dp"
+        app:boxCornerRadiusBottomStart="32dp"
+        app:boxCornerRadiusBottomEnd="32dp"
+
+        app:boxStrokeWidth="0dp"
+        app:boxStrokeWidthFocused="0dp"
+        app:hintEnabled="false"
+        app:startIconDrawable="@drawable/ic_lock"
+        app:endIconMode="password_toggle"
+        >
+
+
+    <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:hint="Password"
             android:inputType="textPassword"
             android:autofillHints="password"
-            android:textColor="@android:color/black" />
+            android:textColor="@android:color/black"
+            android:background="@null"/>
     </com.google.android.material.textfield.TextInputLayout>
 
 
@@ -73,7 +106,10 @@
         android:text="Log In"
         android:layout_marginTop="16dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        />
 
     <com.google.android.gms.common.SignInButton
         android:id="@+id/btnGoogle"
@@ -85,25 +121,30 @@
     <TextView
         android:id="@+id/tvResendVerification"
         android:text="Resend verification email"
-        android:textColor="#0165B4"
+        android:textColor="#1E6FB8"
         android:paddingTop="8dp"
         android:clickable="true"
         android:focusable="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="16dp"
+        android:textSize="14sp"
+
+        />
 
 
 
     <TextView
         android:id="@+id/tvForgotPassword"
         android:text="Forgot password?"
-        android:textColor="#0165B4"
-        android:paddingTop="16dp"
+        android:textColor="#1E6FB8"
+        android:paddingTop="12dp"
         android:clickable="true"
         android:focusable="true"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        />
 
 
 

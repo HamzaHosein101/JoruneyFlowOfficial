@@ -23,17 +23,20 @@ interface NominatimService {
     suspend fun search(
         @Query("q") q: String,
         @Query("format") format: String = "jsonv2",
-        @Query("limit") limit: Int = 1
+        @Query("limit") limit: Int = 5,
+        @Query("addressdetails") addressDetails: Int = 1
     ): NominatimResults
 
-    // ⬇️ New: lat/lon -> human-readable place
-    @Headers("User-Agent: JourneyFlow/1.0 (contact:  journeyflow100@gmail.com)")
+    @Headers("User-Agent: JourneyFlow/1.0 (contact: journeyflow100@gmail.com)")
     @GET("reverse")
     suspend fun reverse(
         @Query("lat") lat: Double,
         @Query("lon") lon: Double,
-        @Query("format") format: String = "jsonv2"
+        @Query("format") format: String = "jsonv2",
+        @Query("addressdetails") addressDetails: Int = 1
+
     ): NominatimReverse
 }
+
 
 

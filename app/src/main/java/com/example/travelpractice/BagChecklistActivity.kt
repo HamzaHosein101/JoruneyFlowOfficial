@@ -1,23 +1,30 @@
 package com.example.travelpractice.ui.checklist
 
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.travelpractice.R
-import com.example.travelpractice.data.defaultSeed
 import com.example.travelpractice.model.PackingCategory
 import com.example.travelpractice.model.PackingItem
 import com.example.travelpractice.model.TodoTask
 import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.android.material.snackbar.Snackbar
+
 
 class BagChecklistActivity : AppCompatActivity() {
 
@@ -41,14 +48,19 @@ class BagChecklistActivity : AppCompatActivity() {
     private val categories = mutableListOf<PackingCategory>()
     private val itemsByCategory = mutableMapOf<String, MutableList<PackingItem>>()
 
-    // keeps the toggle state across config changes if you want (simple var is fine too)
     private var showUncheckedOnly: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_bag_checklist)
 
-        if (uid.isEmpty()) { finish(); return }
+        listenToCategories()
+        backfillCreatedAtForExistingCategories()
+
+        if (uid.isEmpty()) {
+            finish()
+            return
+        }
 
         topBar = findViewById(R.id.topAppBar)
         tvEmpty = findViewById(R.id.emptyState)
@@ -60,13 +72,27 @@ class BagChecklistActivity : AppCompatActivity() {
 
         // ===== Toolbar menu (Add Task, Show Remaining, Show Unchecked / Show All)
         topBar.inflateMenu(R.menu.menu_checklist)
+
+        val menu = topBar.menu
+        for (i in 0 until menu.size()) {
+            val item = menu.getItem(i)
+            item.icon?.setTint(Color.WHITE)
+        }
+
         topBar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
-
                 R.id.action_filter_unchecked -> {
                     showUncheckedOnly = !showUncheckedOnly
                     item.isChecked = showUncheckedOnly
-                    item.title = if (showUncheckedOnly) "Show All" else "Show Unchecked"
+
+                    // Change icon based on state
+                    item.setIcon(
+                        if (showUncheckedOnly)
+                            R.drawable.show_unchecked
+                        else
+                            R.drawable.show_everyting
+                    )
+
                     categoryAdapter.showUncheckedOnly = showUncheckedOnly
                     categoryAdapter.notifyDataSetChanged()
                     true
@@ -95,7 +121,6 @@ class BagChecklistActivity : AppCompatActivity() {
         fabAddCategory.setOnClickListener { showAddCategoryDialog() }
 
         listenToCategories()
-        maybeSeedDefaultsOnce()
     }
 
     /** users/{uid}/checklists/{listId} */
@@ -105,8 +130,15 @@ class BagChecklistActivity : AppCompatActivity() {
 
     private fun listenToCategories() {
         userListRef().collection("categories")
-            .orderBy("title")
-            .addSnapshotListener { snap, _ ->
+            .orderBy("createdAt")
+            .addSnapshotListener { snap, e ->
+                if (e != null) {
+                    e.printStackTrace()
+                    tvEmpty.text = "Error loading categories"
+                    tvEmpty.visibility = TextView.VISIBLE
+                    return@addSnapshotListener
+                }
+
                 val newCats = snap?.documents?.mapNotNull { d ->
                     d.toObject(PackingCategory::class.java)?.copy(id = d.id)
                 }.orEmpty()
@@ -117,6 +149,33 @@ class BagChecklistActivity : AppCompatActivity() {
                 categoryAdapter.notifyDataSetChanged()
 
                 categories.forEach { listenToItems(it.id) }
+            }
+    }
+
+    private fun showSnack(message: String) {
+        Snackbar.make(
+            findViewById(android.R.id.content), // app root view
+            message,
+            Snackbar.LENGTH_SHORT
+        )
+            .setAnchorView(fabAddCategory) // keeps it above the FAB (optional but nice)
+            .show()
+    }
+
+
+    private fun backfillCreatedAtForExistingCategories() {
+        userListRef().collection("categories").get()
+            .addOnSuccessListener { snap ->
+                val batch = db.batch()
+                var i = 0
+                snap.documents.forEach { doc ->
+                    if (!doc.contains("createdAt")) {
+                        // Keep existing relative order by assigning increasing times
+                        val ts = System.currentTimeMillis() + (i++)
+                        batch.update(doc.reference, "createdAt", ts)
+                    }
+                }
+                batch.commit()
             }
     }
 
@@ -133,110 +192,167 @@ class BagChecklistActivity : AppCompatActivity() {
             }
     }
 
-    private fun maybeSeedDefaultsOnce() {
-        userListRef().collection("categories").limit(1).get()
-            .addOnSuccessListener { res ->
-                if (!res.isEmpty) return@addOnSuccessListener
-
-                defaultSeed.forEach { dc ->
-                    val catRef = userListRef().collection("categories").document()
-                    val cat = PackingCategory(
-                        id = catRef.id, title = dc.title, uid = uid, listId = listId, expanded = true
-                    )
-                    catRef.set(cat)
-
-                    dc.items.forEach { name ->
-                        val itemRef = catRef.collection("items").document()
-                        val item = PackingItem(
-                            id = itemRef.id, name = name, checked = false,
-                            uid = uid, listId = listId, categoryId = cat.id
-                        )
-                        itemRef.set(item)
-                    }
-                }
-
-                val taskRef = userListRef().collection("tasks").document()
-                taskRef.set(
-                    TodoTask(id = taskRef.id, name = "Renew passport", checked = false, uid = uid, listId = listId)
-                )
-            }
-    }
-
     private fun showAddCategoryDialog() {
         val view = LayoutInflater.from(this).inflate(R.layout.dialog_add_category, null, false)
         val input = view.findViewById<EditText>(R.id.inputCategoryName)
-        AlertDialog.Builder(this)
-            .setTitle("Add Category")
+
+        val dialog = MaterialAlertDialogBuilder(this, R.style.RoundedAlertDialog)
             .setView(view)
-            .setPositiveButton("Add") { d, _ ->
-                val title = input.text?.toString()?.trim().orEmpty()
-                if (title.isNotEmpty()) {
-                    val catRef = userListRef().collection("categories").document()
-                    val cat = PackingCategory(
-                        id = catRef.id, title = title, uid = uid, listId = listId, expanded = true
-                    )
-                    catRef.set(cat)
-                }
-                d.dismiss()
+            .create()
+
+        dialog.setOnShowListener {
+            dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        }
+
+        view.findViewById<View>(R.id.btnCancelCategory).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        view.findViewById<View>(R.id.btnAddCategory).setOnClickListener {
+            val title = input.text?.toString()?.trim().orEmpty()
+
+            if (title.isBlank()) {
+                input.error = "Required"
+                return@setOnClickListener
             }
-            .setNegativeButton("Cancel", null)
-            .show()
+
+            val catRef = userListRef().collection("categories").document()
+            val cat = PackingCategory(
+                id = catRef.id,
+                title = title,
+                uid = uid,
+                listId = listId,
+                expanded = true,
+                createdAt = System.currentTimeMillis()
+            )
+
+            catRef.set(cat)
+                .addOnSuccessListener {
+                    showSnack("You added \"$title\" to your list")
+                    dialog.dismiss()
+                }
+                .addOnFailureListener {
+                    showSnack("Couldn’t add category. Try again.")
+                }
+
+        }
+
+        dialog.show()
     }
 
     private fun showAddItemDialog(category: PackingCategory) {
         val view = LayoutInflater.from(this).inflate(R.layout.dialog_add_item, null, false)
         val input = view.findViewById<EditText>(R.id.inputItemName)
-        AlertDialog.Builder(this)
-            .setTitle("Add Item")
+
+        val dialog = MaterialAlertDialogBuilder(this, R.style.RoundedAlertDialog)
             .setView(view)
-            .setPositiveButton("Add") { d, _ ->
-                val name = input.text?.toString()?.trim().orEmpty()
-                if (name.isNotEmpty()) {
-                    val itemRef = userListRef()
-                        .collection("categories").document(category.id)
-                        .collection("items").document()
-                    val item = PackingItem(
-                        id = itemRef.id, name = name, checked = false,
-                        uid = uid, listId = listId, categoryId = category.id
-                    )
-                    itemRef.set(item)
-                }
-                d.dismiss()
+            .create()
+
+        dialog.show()
+
+        // Make the window fully transparent + no default insets
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.window?.setLayout(
+            (resources.displayMetrics.widthPixels * 0.92).toInt(),
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+
+        view.findViewById<View>(R.id.btnCancelItem).setOnClickListener { dialog.dismiss() }
+
+        view.findViewById<View>(R.id.btnAddItem).setOnClickListener {
+            val name = input.text?.toString()?.trim().orEmpty()
+            if (name.isBlank()) {
+                input.error = "Required"
+                return@setOnClickListener
             }
-            .setNegativeButton("Cancel", null)
-            .show()
+
+            val itemRef = userListRef()
+                .collection("categories").document(category.id)
+                .collection("items").document()
+
+            itemRef.set(
+                PackingItem(
+                    id = itemRef.id,
+                    name = name,
+                    checked = false,
+                    uid = uid,
+                    listId = listId,
+                    categoryId = category.id
+                )
+            )
+                .addOnSuccessListener {
+                    showSnack("You added \"$name\" to your list")
+                    dialog.dismiss()
+                }
+                .addOnFailureListener {
+                    showSnack("Couldn’t add item. Try again.")
+                }
+
+        }
     }
 
     private fun deleteCategory(category: PackingCategory) {
-        AlertDialog.Builder(this)
+        val dialog = MaterialAlertDialogBuilder(
+            this,
+            R.style.ThemeOverlay_JourneyFlow_AlertDialogAnchor
+        )
             .setTitle("Delete Category")
-            .setMessage("Are you sure you want to delete \"${category.title}\" and all items in it?")
-            .setPositiveButton("Yes") { d, _ ->
+            .setMessage("Delete \"${category.title}\" and all items in it?")
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("Delete") { d, _ ->
+
                 val catRef = userListRef().collection("categories").document(category.id)
+
                 catRef.collection("items").get().addOnSuccessListener { snap ->
                     val batch = db.batch()
                     snap.documents.forEach { batch.delete(it.reference) }
                     batch.delete(catRef)
+
                     batch.commit()
+                        .addOnSuccessListener {
+                            showSnack("Removed \"${category.title}\" from your list")
+                        }
+                        .addOnFailureListener {
+                            showSnack("Failed to remove category. Try again.")
+                        }
                 }
+
                 d.dismiss()
             }
-            .setNegativeButton("No", null)
             .show()
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            ?.setTextColor(ContextCompat.getColor(this, R.color.red))
     }
 
 
     private fun deleteItem(item: PackingItem) {
-        AlertDialog.Builder(this)
+        val dialog = MaterialAlertDialogBuilder(
+            this,
+            R.style.ThemeOverlay_JourneyFlow_AlertDialogAnchor
+        )
             .setTitle("Delete Item")
             .setMessage("Remove \"${item.name}\" from the checklist?")
-            .setPositiveButton("Yes") { d, _ ->
-                userListRef().collection("categories").document(item.categoryId)
-                    .collection("items").document(item.id).delete()
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("Delete") { d, _ ->
+
+                userListRef()
+                    .collection("categories").document(item.categoryId)
+                    .collection("items").document(item.id)
+                    .delete()
+                    .addOnSuccessListener {
+                        showSnack("Removed \"${item.name}\" from your list")
+                    }
+                    .addOnFailureListener {
+                        showSnack("Failed to remove item. Try again.")
+                    }
+
                 d.dismiss()
             }
-            .setNegativeButton("No", null)
             .show()
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            ?.setTextColor(ContextCompat.getColor(this, R.color.red))
     }
 
 
@@ -253,14 +369,22 @@ class BagChecklistActivity : AppCompatActivity() {
 
     private fun showAddTaskDialog() {
         val input = EditText(this).apply { hint = "Task name (e.g., Call car rental)" }
-        AlertDialog.Builder(this)
+        MaterialAlertDialogBuilder(this, R.style.RoundedAlertDialog)
             .setTitle("Add Task")
             .setView(input)
             .setPositiveButton("Add") { d, _ ->
                 val name = input.text?.toString()?.trim().orEmpty()
                 if (name.isNotEmpty()) {
                     val ref = userListRef().collection("tasks").document()
-                    ref.set(TodoTask(id = ref.id, name = name, checked = false, uid = uid, listId = listId))
+                    ref.set(
+                        TodoTask(
+                            id = ref.id,
+                            name = name,
+                            checked = false,
+                            uid = uid,
+                            listId = listId
+                        )
+                    )
                 }
                 d.dismiss()
             }
@@ -285,13 +409,15 @@ class BagChecklistActivity : AppCompatActivity() {
             val items = itemsSnap.documents.mapNotNull { it.getString("name") }
             tasksQuery.addOnSuccessListener { tasksSnap ->
                 val tasks = tasksSnap.documents.mapNotNull { it.getString("name") }
+
                 val msg = buildString {
                     append("Items remaining:\n")
                     if (items.isEmpty()) append("• None ✅\n") else items.forEach { append("• $it\n") }
                     append("\nTasks remaining:\n")
                     if (tasks.isEmpty()) append("• None ✅\n") else tasks.forEach { append("• $it\n") }
                 }
-                AlertDialog.Builder(this)
+
+                MaterialAlertDialogBuilder(this, R.style.RoundedAlertDialog)
                     .setTitle("Still Unchecked")
                     .setMessage(msg)
                     .setPositiveButton("OK", null)

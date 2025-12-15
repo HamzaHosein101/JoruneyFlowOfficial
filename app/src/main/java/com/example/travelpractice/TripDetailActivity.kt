@@ -32,6 +32,53 @@ class TripDetailActivity : AppCompatActivity() {
         95, 96, 99 -> "⛈️"
         else -> "🌡️"
     }
+
+
+    private fun googleLikeDailyEmoji(day: String, wx: OMResponse): String {
+        val h = wx.hourly ?: return "🌡️"
+        val times = h.time.orEmpty()
+        if (times.isEmpty()) return "🌡️"
+
+        var hasThunder = false
+        var hasSnow = false
+        var hasRain = false
+        var maxPop = 0
+        var cloudSum = 0
+        var cloudCount = 0
+
+        for (i in times.indices) {
+            val t = times[i]
+            if (!t.startsWith(day)) continue
+
+            val code = h.weather_code?.getOrNull(i)
+            val pop = h.precipitation_probability?.getOrNull(i) ?: 0
+            val rain = (h.rain?.getOrNull(i) ?: 0.0) + (h.showers?.getOrNull(i) ?: 0.0)
+            val snow = h.snowfall?.getOrNull(i) ?: 0.0
+            val cloud = h.cloud_cover?.getOrNull(i)
+
+            if (pop > maxPop) maxPop = pop
+            if (cloud != null) { cloudSum += cloud; cloudCount++ }
+
+            if (code == 95 || code == 96 || code == 99) hasThunder = true
+            if (snow >= 0.2 || code in listOf(71,73,75,77,85,86)) hasSnow = true
+            if (rain >= 0.2 || pop >= 50 || code in listOf(51,53,55,61,63,65,80,81,82)) hasRain = true
+        }
+
+        if (hasThunder) return "⛈️"
+        if (hasSnow) return "🌨️"
+        if (hasRain) return "🌧️"
+        if (maxPop in 30..49) return "🌦️"
+
+        val avgCloud = if (cloudCount > 0) cloudSum / cloudCount else 50
+        return when {
+            avgCloud < 25 -> "☀️"
+            avgCloud < 60 -> "⛅"
+            else -> "☁️"
+        }
+    }
+
+
+
     private lateinit var openExpenses: ActivityResultLauncher<Intent>
     private var lastTripId: String? = null
     private var lastRemaining: Double? = null
@@ -249,7 +296,6 @@ class TripDetailActivity : AppCompatActivity() {
                 val days  = wx.daily?.time.orEmpty()
                 val maxes = wx.daily?.temperature_2m_max.orEmpty()
                 val mins  = wx.daily?.temperature_2m_min.orEmpty()
-                val codes = wx.daily?.weather_code.orEmpty()
 
                 //Reverse geocode
                 runCatching {
@@ -262,6 +308,7 @@ class TripDetailActivity : AppCompatActivity() {
                 }
 
                 for (i in days.indices) {
+                    val dayStr = days[i]           // "yyyy-MM-dd"
                     val dow = try {
                         val inFmt  = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
                         val outFmt = java.text.SimpleDateFormat("EEE", java.util.Locale.getDefault()) // Mon/Tue/...
@@ -271,7 +318,7 @@ class TripDetailActivity : AppCompatActivity() {
                         days[i].substring(5) // fallback "MM-DD"
                     }
                     val sub  = "${mins.getOrNull(i)?.toInt() ?: "-"}° / ${maxes.getOrNull(i)?.toInt() ?: "-"}°"
-                    val emj  = weatherEmoji(codes.getOrNull(i))
+                    val emj = googleLikeDailyEmoji(dayStr, wx)
                     addDailyChip(stripDaily, dow, sub, emj)
                 }
             } catch (e: Exception) {

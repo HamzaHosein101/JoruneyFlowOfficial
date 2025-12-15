@@ -16,6 +16,8 @@ import com.example.travelpractice.databinding.DialogReportReviewBinding
 import com.example.travelpractice.di.ReviewsProvider
 import com.example.travelpractice.viewmodel.ReviewsViewModel
 import com.example.travelpractice.viewmodel.ReviewsViewModelFactory
+import com.google.android.material.datepicker.CalendarConstraints
+import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -25,14 +27,21 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
+import android.app.AlertDialog
+import androidx.appcompat.view.ContextThemeWrapper
+import androidx.core.content.ContextCompat
 
 class TownReviewsActivity : AppCompatActivity() {
+
 
     private lateinit var binding: ActivityTownReviewsBinding
 
     private val vm: ReviewsViewModel by viewModels {
         ReviewsViewModelFactory(ReviewsProvider.repo())
     }
+
+    private var wasSubmitting = false
 
     private lateinit var adapter: ReviewAdapter
     private val auth by lazy { FirebaseAuth.getInstance() }
@@ -70,8 +79,9 @@ class TownReviewsActivity : AppCompatActivity() {
         adapter = ReviewAdapter(
             currentUserId = auth.currentUser?.uid,
             onReport = { review -> showReportDialog(review) },
-            onDelete = { review -> vm.delete(review.id) }
+            onDelete = { review -> showDeleteReviewDialog(review.id) }
         )
+
         binding.townReviewsRecycler.adapter = adapter
 
         // spacing between cards
@@ -85,23 +95,38 @@ class TownReviewsActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 vm.state.collect { state ->
-                    val target = lockedLocation
 
+                    //Show toast ONLY when a submission just finished successfully
+                    if (wasSubmitting && !state.isSubmitting && state.error == null) {
+                        Snackbar.make(
+                            binding.townReviewsRoot,
+                            "Review posted",
+                            Snackbar.LENGTH_SHORT
+                        ).show()
+                    }
+
+                    //Show error if submission failed
+                    state.error?.let { msg ->
+                        Snackbar.make(
+                            binding.townReviewsRoot,
+                            msg,
+                            Snackbar.LENGTH_LONG
+                        ).show()
+                    }
+                    wasSubmitting = state.isSubmitting
+                    val target = lockedLocation
                     val filtered = if (target.isNullOrBlank()) {
                         state.reviews
                     } else {
-                        state.reviews.filter { review ->
-                            review.locationName.equals(target, ignoreCase = true)
+                        state.reviews.filter {
+                            it.locationName.equals(target, ignoreCase = true)
                         }
                     }
 
                     adapter.submitList(filtered)
                     binding.townReviewsRecycler.isVisible = filtered.isNotEmpty()
-
-                    state.error?.let { msg ->
-                        Snackbar.make(binding.townReviewsRoot, msg, Snackbar.LENGTH_LONG).show()
-                    }
                 }
+
 
             }
         }
@@ -111,6 +136,37 @@ class TownReviewsActivity : AppCompatActivity() {
             showAddDialog(defaultLocation = lockedLocation)
         }
     }
+
+    private fun showDeleteReviewDialog(reviewId: String) {
+        val dialog = MaterialAlertDialogBuilder(
+            ContextThemeWrapper(this, com.example.travelpractice.R.style.ThemeOverlay_JourneyFlow_AlertDialogAnchor)
+        )
+            .setTitle("Delete review?")
+            .setMessage("This action cannot be undone.")
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("Delete") { _, _ ->
+                vm.delete(reviewId)
+
+                // Confirmation AFTER deletion
+                Snackbar.make(
+                    binding.townReviewsRoot,
+                    "Review deleted",
+                    Snackbar.LENGTH_SHORT
+                ).show()
+            }
+            .show()
+
+        // Make Delete red (destructive action)
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            ?.setTextColor(
+                ContextCompat.getColor(
+                    this,
+                    com.example.travelpractice.R.color.red
+                )
+            )
+    }
+
+
 
     // --- Add Review dialog (same logic as your existing screen) -------------------
 
@@ -129,14 +185,27 @@ class TownReviewsActivity : AppCompatActivity() {
 
         var selectedTs: Timestamp? = null
         dlgBinding.btnPickDate.setOnClickListener {
-            val picker = MaterialDatePicker.Builder.datePicker()
-                .setTitleText("Select trip date")
+
+            val constraints = CalendarConstraints.Builder()
+                .setValidator(DateValidatorPointBackward.now()) //blocks future dates
                 .build()
-            picker.addOnPositiveButtonClickListener { millis ->
-                selectedTs = Timestamp(Date(millis))
+
+            val picker = MaterialDatePicker.Builder.datePicker()
+                .setTitleText("Select visit date")
+                .setCalendarConstraints(constraints)
+                .setSelection(MaterialDatePicker.todayInUtcMilliseconds()) // default highlight today
+                .setTheme(com.example.travelpractice.R.style.ThemeOverlay_JourneyFlow_DatePicker)
+                .build()
+
+            picker.addOnPositiveButtonClickListener { utcMillis ->
+                // Convert UTC day millis to a Date in the user's timezone (avoids off-by-one issues)
+                val localMillis = utcMillis + TimeZone.getDefault().getOffset(utcMillis)
+                selectedTs = Timestamp(Date(localMillis))
+
                 dlgBinding.tvSelectedDate.text = formatDate(selectedTs!!)
             }
-            picker.show(supportFragmentManager, "trip_date_picker")
+
+            picker.show(supportFragmentManager, "review_date_picker")
         }
 
         dlgBinding.btnPost.setOnClickListener {
@@ -150,10 +219,15 @@ class TownReviewsActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+          //  vm.submit(loc, date, rating, comment)
+        //    Snackbar.make(binding.townReviewsRoot
+         //       , "Review Posted", Snackbar.LENGTH_SHORT).show()
+          //  dialog.dismiss()
+
             vm.submit(loc, date, rating, comment)
-            Snackbar.make(binding.townReviewsRoot
-                , "Posting review…", Snackbar.LENGTH_SHORT).show()
-            dialog.dismiss()
+            dialog.dismiss() // close immediately OR keep open if you want (optional)
+
+
         }
 
         dialog.show()
