@@ -1,11 +1,17 @@
 package com.example.travelpractice.ui.home
 
 import android.app.Dialog
+import android.graphics.Typeface
+import android.location.Geocoder
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.widget.EditText
+import android.widget.TextView
+import androidx.core.content.ContextCompat
+import androidx.core.util.Pair
 import androidx.fragment.app.DialogFragment
 import com.example.travelpractice.R
 import com.example.travelpractice.model.Trip
@@ -15,18 +21,16 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import java.text.DateFormat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import android.graphics.Typeface
-import android.widget.TextView
-import androidx.core.content.ContextCompat
-import android.view.Gravity
-import java.text.SimpleDateFormat
 import java.util.TimeZone
-import java.util.Calendar
-import androidx.core.util.Pair
-
 
 class AddTripBottomSheetDialogFragment : DialogFragment() {
 
@@ -50,8 +54,28 @@ class AddTripBottomSheetDialogFragment : DialogFragment() {
         return cal.timeInMillis
     }
 
+    private fun geocodeDestination(
+        destination: String,
+        onResult: (lat: Double?, lng: Double?) -> Unit
+    ) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val geocoder = Geocoder(requireContext(), Locale.getDefault())
 
+                @Suppress("DEPRECATION")
+                val results = geocoder.getFromLocationName(destination, 1)
 
+                val loc = results?.firstOrNull()
+                withContext(Dispatchers.Main) {
+                    onResult(loc?.latitude, loc?.longitude)
+                }
+            } catch (e: IOException) {
+                withContext(Dispatchers.Main) { onResult(null, null) }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) { onResult(null, null) }
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,29 +83,31 @@ class AddTripBottomSheetDialogFragment : DialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        // Keep your same layout file
+
         val view = LayoutInflater.from(requireContext())
             .inflate(R.layout.bottomsheet_add_trip, null, false)
 
-        val etTitle       = view.findViewById<EditText>(R.id.etTitle)
+        val etTitle = view.findViewById<EditText>(R.id.etTitle)
         val etDestination = view.findViewById<EditText>(R.id.etDestination)
-        val etBudget      = view.findViewById<EditText>(R.id.etBudget)
-        val etDates       = view.findViewById<EditText>(R.id.etDates)
-        val btnSave       = view.findViewById<MaterialButton>(R.id.btnSave)
+        val etBudget = view.findViewById<EditText>(R.id.etBudget)
+        val etDates = view.findViewById<EditText>(R.id.etDates)
+        val btnSave = view.findViewById<MaterialButton>(R.id.btnSave)
 
         val pickerBuilder = MaterialDatePicker.Builder.dateRangePicker()
             .setTitleText("Select trip dates")
             .setTheme(R.style.ThemeOverlay_JourneyFlow_DatePicker)
 
-// ✅ If editing, pre-select the saved range (normalized to UTC midnight)
+        // If editing, pre-select the saved range (normalized to UTC midnight)
         editingTrip?.let { t ->
-            pickerBuilder.setSelection(Pair(toPickerUtcMidnight(t.startDate), toPickerUtcMidnight(t.endDate)))
-
+            pickerBuilder.setSelection(
+                Pair(
+                    toPickerUtcMidnight(t.startDate),
+                    toPickerUtcMidnight(t.endDate)
+                )
+            )
         }
 
         val picker = pickerBuilder.build()
-
-
 
         etDates.setOnClickListener { picker.show(parentFragmentManager, "date_range") }
 
@@ -93,12 +119,15 @@ class AddTripBottomSheetDialogFragment : DialogFragment() {
             startMillis = toStoreMillis(s)
             endMillis = toStoreMillis(e)
 
-            // Display using the picker-normalized date (so it prints the correct day)
-            etDates.setText(formatRange(toPickerUtcMidnight(startMillis!!), toPickerUtcMidnight(endMillis!!)))
+            etDates.setText(
+                formatRange(
+                    toPickerUtcMidnight(startMillis!!),
+                    toPickerUtcMidnight(endMillis!!)
+                )
+            )
         }
 
-
-
+        // Fill fields when editing
         editingTrip?.let { t ->
             etTitle.setText(t.title)
             etDestination.setText(t.destination)
@@ -110,7 +139,6 @@ class AddTripBottomSheetDialogFragment : DialogFragment() {
 
             btnSave.text = "Update"
         }
-
 
         btnSave.setOnClickListener {
             val uid = FirebaseAuth.getInstance().currentUser?.uid
@@ -133,32 +161,64 @@ class AddTripBottomSheetDialogFragment : DialogFragment() {
 
             // EDIT path
             editingTrip?.let { existing ->
-                val updates = mapOf(
-                    "title" to title,
-                    "destination" to destination,
-                    "budget" to budget,
-                    "startDate" to s,
-                    "endDate" to e
-                )
-                trips.document(existing.id).update(updates)
-                    .addOnSuccessListener { dismiss() }
-                    .addOnFailureListener {
-                        Snackbar.make(view, "Failed to update trip", Snackbar.LENGTH_SHORT).show()
+                val destinationChanged = destination != existing.destination
+
+                val doUpdate: (Double?, Double?) -> Unit = { newLat, newLng ->
+                    val updates = mutableMapOf<String, Any>(
+                        "title" to title,
+                        "destination" to destination,
+                        "budget" to budget,
+                        "startDate" to s,
+                        "endDate" to e
+                    )
+
+                    if (destinationChanged) {
+                        // Store coordinates for the new destination (can be null if geocode fails)
+                        updates["lat"] = newLat as Any
+                        updates["lng"] = newLng as Any
                     }
+
+                    trips.document(existing.id).update(updates)
+                        .addOnSuccessListener { dismiss() }
+                        .addOnFailureListener {
+                            Snackbar.make(view, "Failed to update trip", Snackbar.LENGTH_SHORT).show()
+                        }
+                }
+
+                if (destinationChanged) {
+                    geocodeDestination(destination) { lat, lng ->
+                        // If geocode fails, still update fields; lat/lng stay null
+                        doUpdate(lat, lng)
+                    }
+                } else {
+                    doUpdate(existing.lat, existing.lng)
+                }
+
                 return@setOnClickListener
             }
 
-            // CREATE path
-            val doc = trips.document()
-            val trip = Trip(
-                id = doc.id, userId = uid, title = title,
-                destination = destination, budget = budget,
-                startDate = s, endDate = e, createdAt = System.currentTimeMillis()
-            )
+            // CREATE path (geocode once, then save)
+            geocodeDestination(destination) { lat, lng ->
+                val doc = trips.document()
+                val trip = Trip(
+                    id = doc.id,
+                    userId = uid,
+                    title = title,
+                    destination = destination,
+                    budget = budget,
+                    startDate = s,
+                    endDate = e,
+                    createdAt = System.currentTimeMillis(),
+                    lat = lat,
+                    lng = lng
+                )
 
-            doc.set(trip)
-                .addOnSuccessListener { dismiss() }
-                .addOnFailureListener { Snackbar.make(view, "Failed to save trip", Snackbar.LENGTH_SHORT).show() }
+                doc.set(trip)
+                    .addOnSuccessListener { dismiss() }
+                    .addOnFailureListener {
+                        Snackbar.make(view, "Failed to save trip", Snackbar.LENGTH_SHORT).show()
+                    }
+            }
         }
 
         val titleView = TextView(requireContext()).apply {
@@ -170,23 +230,16 @@ class AddTripBottomSheetDialogFragment : DialogFragment() {
             setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
         }
 
-
-
         val dialog = MaterialAlertDialogBuilder(requireContext())
             .setCustomTitle(titleView)
             .setView(view)
             .create()
 
         dialog.window?.setBackgroundDrawableResource(R.drawable.dialog_rounded_white)
-
-        // Helps keyboard not cover fields
         dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
 
         return dialog
     }
-
-
-
 
     private fun formatRange(start: Long, end: Long): String {
         val fmt = SimpleDateFormat("MMM d, yyyy", Locale.getDefault()).apply {
@@ -198,8 +251,7 @@ class AddTripBottomSheetDialogFragment : DialogFragment() {
     companion object {
         private const val ARG_TRIP = "arg_trip"
 
-        fun newInstance(): AddTripBottomSheetDialogFragment =
-            AddTripBottomSheetDialogFragment()
+        fun newInstance(): AddTripBottomSheetDialogFragment = AddTripBottomSheetDialogFragment()
 
         fun forEdit(trip: Trip): AddTripBottomSheetDialogFragment =
             AddTripBottomSheetDialogFragment().apply {

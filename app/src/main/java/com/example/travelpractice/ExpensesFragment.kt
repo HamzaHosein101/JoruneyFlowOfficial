@@ -27,6 +27,9 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.Date
 import java.util.Currency
+import android.app.AlertDialog
+import androidx.appcompat.view.ContextThemeWrapper
+import androidx.core.content.ContextCompat
 
 class ExpensesFragment : Fragment() {
 
@@ -110,27 +113,23 @@ class ExpensesFragment : Fragment() {
     }
 
     private fun showAddExpenseDialog() {
-        // Create the dialog layout programmatically
         val context = requireContext()
+
         val dialogLayout = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(60, 40, 60, 20)
         }
 
-        // Description input
-        val tilDescription = TextInputLayout(context).apply {
-            hint = "Description"
-        }
+        // Description
+        val tilDescription = TextInputLayout(context).apply { hint = "Description" }
         val etDescription = TextInputEditText(context).apply {
             inputType = android.text.InputType.TYPE_CLASS_TEXT
         }
         tilDescription.addView(etDescription)
         dialogLayout.addView(tilDescription)
 
-        // Amount input
-        val tilAmount = TextInputLayout(context).apply {
-            hint = "Amount"
-        }
+        // Amount
+        val tilAmount = TextInputLayout(context).apply { hint = "Amount" }
         val etAmount = TextInputEditText(context).apply {
             inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
         }
@@ -146,10 +145,13 @@ class ExpensesFragment : Fragment() {
         dialogLayout.addView(tvCategoryLabel)
 
         // Category spinner
-        val spinnerCategory = Spinner(context)
         val categories = arrayOf("Food", "Transportation", "Accommodation", "Entertainment", "Shopping", "Other")
-        val categoryAdapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, categories)
-        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        val spinnerCategory = Spinner(context).apply {
+            background = ContextCompat.getDrawable(context, R.drawable.bg_spinner_grey)
+        }
+        val categoryAdapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, categories).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
         spinnerCategory.adapter = categoryAdapter
         dialogLayout.addView(spinnerCategory)
 
@@ -161,55 +163,68 @@ class ExpensesFragment : Fragment() {
         }
         dialogLayout.addView(tvCurrencyLabel)
 
-        // Currency spinner - NOW HAS ALL 15 CURRENCIES
-        val spinnerCurrency = Spinner(context)
-        val currencyAdapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, currencies)
-        currencyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        // Currency spinner
+        val spinnerCurrency = Spinner(context).apply {
+            background = ContextCompat.getDrawable(context, R.drawable.bg_spinner_grey)
+        }
+        val currencyAdapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, currencies).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
         spinnerCurrency.adapter = currencyAdapter
         dialogLayout.addView(spinnerCurrency)
 
-        MaterialAlertDialogBuilder(context)
+        // Build dialog (IMPORTANT: positive button = null so we can validate without auto-dismiss)
+        val dialog = MaterialAlertDialogBuilder(
+            ContextThemeWrapper(context, R.style.ThemeOverlay_JourneyFlow_AlertDialogAnchor)
+        )
             .setTitle("Add Expense")
             .setView(dialogLayout)
-            .setPositiveButton("Add") { _, _ ->
-                val description = etDescription.text.toString().trim()
-                val amountText = etAmount.text.toString().trim()
+            .setPositiveButton("Add", null)
+            .setNegativeButton("Cancel", null)
+            .create()
+
+        dialog.setOnShowListener {
+            val btnAdd = dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE)
+            btnAdd.setOnClickListener {
+                val description = etDescription.text?.toString()?.trim().orEmpty()
+                val amountText = etAmount.text?.toString()?.trim().orEmpty()
                 val category = categories[spinnerCategory.selectedItemPosition]
                 val selectedCurrency = currencies[spinnerCurrency.selectedItemPosition]
 
-                when {
-                    description.isEmpty() -> {
-                        showMissingFieldDialog("Missing Description", "Please enter a description for your expense.")
-                    }
-                    amountText.isEmpty() -> {
-                        showMissingFieldDialog("Missing Amount", "Please enter the cost of your expense.")
-                    }
-                    else -> {
-                        try {
-                            val amount = amountText.toDouble()
-                            if (amount <= 0) {
-                                showMissingFieldDialog("Invalid Amount", "Amount must be greater than 0.")
-                                return@setPositiveButton
-                            }
-
-                            val amountInUSD = if (selectedCurrency != "USD" && activity.conversionRates.isNotEmpty()) {
-                                val rate = activity.conversionRates[selectedCurrency] ?: 1.0
-                                amount / rate
-                            } else {
-                                amount
-                            }
-
-                            // Show confirmation dialog
-                            showConfirmationDialog(description, amount, selectedCurrency, amountInUSD, category)
-                        } catch (e: NumberFormatException) {
-                            showMissingFieldDialog("Invalid Amount", "Please enter a valid number for the amount.")
-                        }
-                    }
+                if (description.isEmpty()) {
+                    showMissingFieldDialog("Missing Description", "Please enter a description for your expense.")
+                    return@setOnClickListener
                 }
+
+                if (amountText.isEmpty()) {
+                    showMissingFieldDialog("Missing Amount", "Please enter the cost of your expense.")
+                    return@setOnClickListener
+                }
+
+                val amount = amountText.toDoubleOrNull()
+                if (amount == null || amount <= 0) {
+                    showMissingFieldDialog("Invalid Amount", "Amount must be a valid number greater than 0.")
+                    return@setOnClickListener
+                }
+
+                val amountInUSD =
+                    if (selectedCurrency != "USD" && activity.conversionRates.isNotEmpty()) {
+                        val rate = activity.conversionRates[selectedCurrency] ?: 1.0
+                        amount / rate
+                    } else {
+                        amount
+                    }
+
+                // show confirm dialog (your existing function)
+                showConfirmationDialog(description, amount, selectedCurrency, amountInUSD, category)
+
+                dialog.dismiss()
             }
-            .setNegativeButton("Cancel", null)
-            .show()
+        }
+
+        dialog.show()
     }
+
 
     private fun showMissingFieldDialog(title: String, message: String) {
         MaterialAlertDialogBuilder(requireContext())
@@ -601,7 +616,8 @@ class ExpensesFragment : Fragment() {
 
     private fun confirmDeleteExpense(expense: Expense, position: Int) {
         val displayAmount = activity.convertCurrency(expense.amount, activity.currentDisplayCurrency)
-        val locale = when(activity.currentDisplayCurrency) {
+
+        val locale = when (activity.currentDisplayCurrency) {
             "EUR" -> Locale.GERMANY
             "GBP" -> Locale.UK
             "JPY" -> Locale.JAPAN
@@ -612,25 +628,35 @@ class ExpensesFragment : Fragment() {
             "HKD" -> Locale("zh", "HK")
             else -> Locale.US
         }
-        val fmt = NumberFormat.getCurrencyInstance(locale)
-        if (activity.currentDisplayCurrency != "USD") {
-            try {
-                val currency = Currency.getInstance(activity.currentDisplayCurrency)
-                fmt.currency = currency
-            } catch (e: Exception) {
-                Log.w("ExpensesFragment", "Currency not supported: ${activity.currentDisplayCurrency}")
+
+        val fmt = NumberFormat.getCurrencyInstance(locale).apply {
+            if (activity.currentDisplayCurrency != "USD") {
+                try { currency = Currency.getInstance(activity.currentDisplayCurrency) } catch (_: Exception) {}
             }
         }
 
-        MaterialAlertDialogBuilder(requireContext())
+        val themedContext = ContextThemeWrapper(
+            requireContext(),
+            R.style.ThemeOverlay_JourneyFlow_AlertDialogAnchor
+        )
+
+        val dialog = MaterialAlertDialogBuilder(themedContext)
             .setTitle("Delete expense?")
             .setMessage("${expense.description} — ${fmt.format(displayAmount)}")
+            .setNegativeButton("Cancel", null)
             .setPositiveButton("Delete") { _, _ ->
                 deleteExpense(expense, position)
+
+                // optional confirmation like your reviews
+                Snackbar.make(requireView(), "Expense deleted", Snackbar.LENGTH_SHORT).show()
             }
-            .setNegativeButton("Cancel", null)
             .show()
+
+        // Make Delete red (destructive action) AFTER show()
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            ?.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
     }
+
 
     private fun deleteExpense(expense: Expense, position: Int) {
         activity.expenseList.remove(expense)

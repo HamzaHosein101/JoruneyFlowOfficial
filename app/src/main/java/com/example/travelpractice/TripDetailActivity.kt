@@ -16,6 +16,8 @@ import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.*
 import androidx.activity.result.ActivityResultLauncher
+import kotlinx.coroutines.async
+
 
 
 class TripDetailActivity : AppCompatActivity() {
@@ -251,19 +253,31 @@ class TripDetailActivity : AppCompatActivity() {
         val txtTemp   = findViewById<TextView>(R.id.txtCurrentTemp)
         val txtTitle = findViewById<TextView>(R.id.txtWeatherTitle)
 
+        // Replace your entire lifecycleScope.launch block with this version that includes timing:
+
+        // Replace your entire lifecycleScope.launch block with this optimized version:
+
+// Replace your entire lifecycleScope.launch block with this optimized version:
+
         lifecycleScope.launch {
             try {
                 txtStatus.text = "Loading…"
+                val startTime = System.currentTimeMillis()
 
-                // 1) Coordinates: use saved lat/lng, else geocode destination via Nominatim
+                // 1) Get coordinates - PRIORITIZE saved coordinates!
                 val (lat, lon) = when {
-                    trip.lat != null && trip.lng != null -> trip.lat!! to trip.lng!!
+                    trip.lat != null && trip.lng != null -> {
+                        android.util.Log.d("Weather", "✓ Using saved coords: 0ms")
+                        // Show destination immediately since we already have it
+                        txtTitle.text = "Weather • ${trip.destination}"
+                        trip.lat!! to trip.lng!!
+                    }
                     !trip.destination.isNullOrBlank() -> {
+                        val coordStart = System.currentTimeMillis()
                         val res = HttpClients.nominatim.search(trip.destination!!)
+                        android.util.Log.d("Weather", "⏱ Geocoding took: ${System.currentTimeMillis() - coordStart}ms")
                         if (res.isNotEmpty()) {
-                            val la = res.first().lat.toDouble()
-                            val lo = res.first().lon.toDouble()
-                            la to lo
+                            res.first().lat.toDouble() to res.first().lon.toDouble()
                         } else {
                             txtStatus.text = "Place not found"
                             return@launch
@@ -275,52 +289,61 @@ class TripDetailActivity : AppCompatActivity() {
                     }
                 }
 
-                //Weather
+                // 2) Fetch weather ONLY (skip reverse geocoding if we have destination)
+                val weatherStart = System.currentTimeMillis()
                 val wx = HttpClients.openMeteo.forecast(lat, lon, unit = "fahrenheit")
+                android.util.Log.d("Weather", "⏱ Weather API took: ${System.currentTimeMillis() - weatherStart}ms")
 
-                //Bind current
+                // 3) Show weather immediately
                 val t = wx.current?.temperature_2m
                 val c = wx.current?.weather_code
                 txtTemp.text = if (t != null) "${t.toInt()}°" else "--°"
                 txtEmoji.text = weatherEmoji(c)
 
-                //Show updated time
                 val timeStr = android.text.format.DateFormat
                     .getTimeFormat(this@TripDetailActivity)
                     .format(java.util.Date())
                 txtStatus.text = "Updated $timeStr"
                 txtStatus.visibility = android.view.View.VISIBLE
 
-                //Bind 7-day strip
+                // 4) Build 7-day forecast strip
                 stripDaily.removeAllViews()
                 val days  = wx.daily?.time.orEmpty()
                 val maxes = wx.daily?.temperature_2m_max.orEmpty()
                 val mins  = wx.daily?.temperature_2m_min.orEmpty()
 
-                //Reverse geocode
-                runCatching {
-                    HttpClients.nominatim.reverse(lat, lon)
-                }.onSuccess { rev ->
-                    val loc = formatLocation(rev.address) ?: rev.display_name
-                    txtTitle.text = if (!loc.isNullOrBlank()) "Weather • $loc" else "Weather"
-                }.onFailure {
-                    txtTitle.text = "Weather"
-                }
-
                 for (i in days.indices) {
-                    val dayStr = days[i]           // "yyyy-MM-dd"
+                    val dayStr = days[i]
                     val dow = try {
                         val inFmt  = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
-                        val outFmt = java.text.SimpleDateFormat("EEE", java.util.Locale.getDefault()) // Mon/Tue/...
+                        val outFmt = java.text.SimpleDateFormat("EEE", java.util.Locale.getDefault())
                         val date   = inFmt.parse(days[i])
                         outFmt.format(date!!)
                     } catch (_: Exception) {
-                        days[i].substring(5) // fallback "MM-DD"
+                        days[i].substring(5)
                     }
                     val sub  = "${mins.getOrNull(i)?.toInt() ?: "-"}° / ${maxes.getOrNull(i)?.toInt() ?: "-"}°"
                     val emj = googleLikeDailyEmoji(dayStr, wx)
                     addDailyChip(stripDaily, dow, sub, emj)
                 }
+
+                // 5) OPTIONAL: Only do reverse geocoding if we don't have destination name
+                if (trip.destination.isNullOrBlank()) {
+                    val reverseStart = System.currentTimeMillis()
+                    runCatching {
+                        HttpClients.nominatim.reverse(lat, lon)
+                    }.onSuccess { rev ->
+                        android.util.Log.d("Weather", "⏱ Reverse geocoding took: ${System.currentTimeMillis() - reverseStart}ms")
+                        val loc = formatLocation(rev.address) ?: rev.display_name
+                        txtTitle.text = if (!loc.isNullOrBlank()) "Weather • $loc" else "Weather"
+                    }.onFailure {
+                        android.util.Log.d("Weather", "⏱ Reverse geocoding failed: ${System.currentTimeMillis() - reverseStart}ms")
+                        txtTitle.text = "Weather"
+                    }
+                }
+
+                android.util.Log.d("Weather", "✅ TOTAL TIME: ${System.currentTimeMillis() - startTime}ms")
+
             } catch (e: Exception) {
                 android.util.Log.e("TripDetailActivity", "Weather error", e)
                 txtStatus.text = "Unable: ${e::class.simpleName} - ${e.message}"

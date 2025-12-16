@@ -100,6 +100,20 @@
         <item name="colorSecondary">#183371</item>
     </style>
 
+    <style name="BottomNavIndicator">
+        <item name="android:color">#183371</item>
+    </style>
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -3,6 +3,9 @@
     <style name="Base.Theme.TravelPractice" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+
+        <!-- Add this to change the purple ripple to blue -->
+        <item name="colorControlHighlight">#332A4A8F</item>
     </style>
 
     <style name="Theme.TravelPractice" parent="Base.Theme.TravelPractice" />
