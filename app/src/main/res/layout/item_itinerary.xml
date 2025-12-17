@@ -60,7 +60,6 @@
 
         </LinearLayout>
 
-        <!-- Center - Type Text -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -85,7 +84,6 @@
 
         </LinearLayout>
 
-        <!-- Right side - Content -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -137,7 +135,6 @@
 
         </LinearLayout>
 
-        <!-- Right side - Checkbox, Edit and Delete buttons -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

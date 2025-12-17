@@ -6,10 +6,12 @@ import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.travelpractice.model.ItineraryItem
+import com.google.android.material.card.MaterialCardView
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -30,6 +32,7 @@ class ItineraryAdapter(
     }
 
     inner class ItineraryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val cardView: MaterialCardView = itemView as MaterialCardView
         private val txtDate: TextView = itemView.findViewById(R.id.txtDate)
         private val txtTime: TextView = itemView.findViewById(R.id.txtTime)
         private val txtDuration: TextView = itemView.findViewById(R.id.txtDuration)
@@ -44,13 +47,12 @@ class ItineraryAdapter(
         private val dateFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
 
         fun bind(item: ItineraryItem) {
-            // Format and display date
             txtDate.text = if (item.date > 0) {
                 dateFormat.format(Date(item.date))
             } else {
                 "No date"
             }
-            
+
             txtTime.text = item.startTime
             txtDuration.text = item.endTime
             txtTitle.text = item.title
@@ -59,44 +61,58 @@ class ItineraryAdapter(
             txtCost.text = if (item.cost > 0) "$${String.format("%.2f", item.cost)}" else ""
             checkBoxCompleted.isChecked = item.isCompleted
 
-            // Set type text based on item type
             typeText.text = item.type
 
-            // Hide description if empty
+            applyCompletedStyle(item.isCompleted)
+
             txtDescription.visibility = if (item.description.isBlank()) {
                 View.GONE
             } else {
                 View.VISIBLE
             }
 
-            // Hide cost if 0
             txtCost.visibility = if (item.cost > 0) {
                 View.VISIBLE
             } else {
                 View.GONE
             }
 
-
-            // Set up checkbox click
             checkBoxCompleted.setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked != item.isCompleted) {
                     onToggleComplete(item.copy(isCompleted = isChecked))
                 }
             }
 
-            // Set up edit button click
             btnEdit.setOnClickListener {
                 onEdit(item)
             }
 
-            // Set up delete button click
             btnDelete.setOnClickListener {
                 onDelete(item)
             }
 
-            // Set up item click to edit
             itemView.setOnClickListener {
                 onEdit(item)
+            }
+        }
+
+        private fun applyCompletedStyle(isCompleted: Boolean) {
+            if (isCompleted) {
+                cardView.setCardBackgroundColor(
+                    ContextCompat.getColor(itemView.context, R.color.completed_green_tint)
+                )
+                txtTitle.alpha = 0.7f
+                txtLocation.alpha = 0.7f
+                txtDescription.alpha = 0.7f
+            } else {
+                // Reset to default white background
+                cardView.setCardBackgroundColor(
+                    ContextCompat.getColor(itemView.context, android.R.color.white)
+                )
+                // Reset text transparency
+                txtTitle.alpha = 1.0f
+                txtLocation.alpha = 1.0f
+                txtDescription.alpha = 1.0f
             }
         }
     }
@@ -111,6 +127,3 @@ class ItineraryAdapter(
         }
     }
 }
-
-
-

@@ -70,7 +70,6 @@ class BagChecklistActivity : AppCompatActivity() {
         val tripTitle = intent.getStringExtra(EXTRA_TRIP_TITLE) ?: "Bag Checklist"
         topBar.title = tripTitle
 
-        // ===== Toolbar menu (Add Task, Show Remaining, Show Unchecked / Show All)
         topBar.inflateMenu(R.menu.menu_checklist)
 
         val menu = topBar.menu
@@ -101,7 +100,6 @@ class BagChecklistActivity : AppCompatActivity() {
                 else -> false
             }
         }
-        // ======================================
 
         categoryAdapter = CategoryAdapter(
             categories,
@@ -250,7 +248,6 @@ class BagChecklistActivity : AppCompatActivity() {
 
         dialog.show()
 
-        // Make the window fully transparent + no default insets
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.window?.setLayout(
             (resources.displayMetrics.widthPixels * 0.92).toInt(),

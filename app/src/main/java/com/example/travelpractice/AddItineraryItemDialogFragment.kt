@@ -68,7 +68,7 @@ class AddItineraryItemDialogFragment : DialogFragment() {
         val editStartTime = view.findViewById<TextInputEditText>(R.id.editStartTime)
         val editEndTime = view.findViewById<TextInputEditText>(R.id.editEndTime)
         val autoCompleteType = view.findViewById<AutoCompleteTextView>(R.id.autoCompleteType)
-        
+
         // Debug: Check if date field is found
         if (editDate == null) {
             android.util.Log.e("AddItineraryItemDialog", "Date field not found!")
@@ -78,10 +78,13 @@ class AddItineraryItemDialogFragment : DialogFragment() {
         val btnCancel = view.findViewById<Button>(R.id.btnCancel)
         val btnSave = view.findViewById<Button>(R.id.btnSave)
 
-        // Setup type selection dropdown
+        // Setup type selection dropdown with WHITE background
         val types = arrayOf("General", "Flight", "Meal", "Sightseeing", "Tour", "Beach/Pool Time", "Adventure", "Shopping")
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, types)
         autoCompleteType.setAdapter(adapter)
+
+        // Set white background for the dropdown popup
+        autoCompleteType.setDropDownBackgroundResource(android.R.color.white)
 
         // Pre-fill fields if editing
         editingItem?.let { item ->
@@ -90,7 +93,7 @@ class AddItineraryItemDialogFragment : DialogFragment() {
             editStartTime.setText(item.startTime)
             editDescription.setText(item.description)
             editCost.setText(if (item.cost > 0) item.cost.toString() else "")
-            autoCompleteType.setText(item.type)
+            autoCompleteType.setText(item.type, false) // false prevents filtering
 
             // Parse existing date if available
             if (item.date > 0) {
@@ -100,7 +103,7 @@ class AddItineraryItemDialogFragment : DialogFragment() {
 
             // Parse existing start time if available
             parseStartTimeFromString(item.startTime)
-            
+
             // Calculate end time from start time + duration
             val endTime = calculateEndTime(item.startTime, item.duration)
             editEndTime.setText(endTime)
@@ -138,7 +141,7 @@ class AddItineraryItemDialogFragment : DialogFragment() {
             val endTime = getFormattedEndTime()
             val description = editDescription.text?.toString()?.trim() ?: ""
             val cost = editCost.text?.toString()?.trim()?.toDoubleOrNull() ?: 0.0
-            
+
             // Calculate duration from start and end times
             val duration = calculateDurationFromTimes(startTime, endTime)
 
@@ -189,16 +192,6 @@ class AddItineraryItemDialogFragment : DialogFragment() {
             dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         }
 
-        return dialog
-
-
-        
-        // Size the dialog to show all content including buttons
-        dialog.window?.setLayout(
-            (resources.displayMetrics.widthPixels * 0.95).toInt(),
-            (resources.displayMetrics.heightPixels * 0.9).toInt()
-        )
-        
         return dialog
     }
 

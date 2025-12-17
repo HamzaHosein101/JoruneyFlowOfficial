@@ -20,9 +20,12 @@
     <color name="accentRed">#FF6B6B</color>
     <color name="black">#000000</color>
     <color name="red">#D32F2F</color>
+    <color name="completed_green_tint">#CCF8CD</color>
 
 
-    <!-- Category colors -->
+
+
+    <!--  colors -->
     <color name="catFood">#00A86B</color>
     <color name="catTransport">#0077CC</color>
     <color name="catAccommodation">#8E44AD</color>
@@ -30,9 +33,9 @@
     <color name="catShopping">#C0392B</color>
     <color name="catOther">#607D8B</color>
 
-    <color name="gold">#FFD700</color>         <!-- Gold for stars -->
-    <color name="approve_green">#4CAF50</color> <!-- Green for "Keep" -->
-    <color name="delete_red">#E53935</color>   <!-- Red for "Delete" -->
+    <color name="gold">#FFD700</color>
+    <color name="approve_green">#4CAF50</color>
+    <color name="delete_red">#E53935</color>
 
     <color name="jf_blue">#2F6BFD</color>
     <color name="jf_blue_dark">#1E4ED8</color>

@@ -9,7 +9,6 @@ import android.util.Patterns
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -18,6 +17,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.example.travelpractice.admin.AdminPanelActivity
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.GoogleAuthProvider
@@ -52,7 +52,7 @@ class LoginActivity : AppCompatActivity() {
                     }
                 }
             } else {
-                Toast.makeText(this, "Please verify your email to continue.", Toast.LENGTH_SHORT).show()
+                showSnackbar("Please verify your email to continue.")
                 FirebaseAuth.getInstance().signOut()
             }
         }
@@ -79,7 +79,7 @@ class LoginActivity : AppCompatActivity() {
         try {
             val account = task.getResult(ApiException::class.java)
             val idToken = account.idToken ?: run {
-                Toast.makeText(this, "No ID token from Google", Toast.LENGTH_LONG).show()
+                showSnackbar("No ID token from Google")
                 return@registerForActivityResult
             }
             val credential = GoogleAuthProvider.getCredential(idToken, null)
@@ -104,11 +104,11 @@ class LoginActivity : AppCompatActivity() {
                 }
                 .addOnFailureListener { e ->
                     Log.e("GFirebase", "signInWithCredential failed", e)
-                    Toast.makeText(this, "Firebase auth failed: ${e.message}", Toast.LENGTH_LONG).show()
+                    showSnackbar("Firebase auth failed: ${e.message}")
                 }
         } catch (e: ApiException) {
             Log.e("GSignIn", "Google sign-in failed, code=${e.statusCode}", e)
-            Toast.makeText(this, "Google sign-in failed (code ${e.statusCode})", Toast.LENGTH_LONG).show()
+            showSnackbar("Google sign-in failed (code ${e.statusCode})")
         }
     }
 
@@ -164,28 +164,20 @@ class LoginActivity : AppCompatActivity() {
                             verifyAdminRole(user.uid) { isAdmin ->
                                 if (isAdmin) {
                                     prefs.edit().putBoolean(KEY_IS_LOGGED_IN, true).apply()
-                                    Toast.makeText(this, "Welcome back, Admin!", Toast.LENGTH_SHORT).show()
+                                    showSnackbar("Welcome back, Admin!")
                                     navigateToAdminPanel()
                                 } else {
-                                    Toast.makeText(this, "Welcome back!", Toast.LENGTH_SHORT).show()
+                                    showSnackbar("Welcome back!")
                                     startActivity(Intent(this, HomeActivity::class.java))
                                     finish()
                                 }
                             }
                         } else {
-                            Toast.makeText(
-                                this,
-                                "Please verify your email before logging in.",
-                                Toast.LENGTH_LONG
-                            ).show()
+                            showSnackbar("Please verify your email before logging in.")
                             auth.signOut()
                         }
                     } else {
-                        Toast.makeText(
-                            this,
-                            task.exception?.localizedMessage ?: "Login failed",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        showSnackbar(task.exception?.localizedMessage ?: "Login failed")
                     }
                 }
         }
@@ -215,15 +207,15 @@ class LoginActivity : AppCompatActivity() {
                         val user = auth.currentUser
                         user?.reload()?.addOnCompleteListener {
                             if (user != null && user.isEmailVerified) {
-                                Toast.makeText(this, "This account is already verified.", Toast.LENGTH_LONG).show()
+                                showSnackbar("This account is already verified.")
                                 auth.signOut()
                                 tvResendVerification.isEnabled = true
                             } else {
                                 user?.sendEmailVerification()?.addOnCompleteListener { sendTask ->
                                     if (sendTask.isSuccessful) {
-                                        Toast.makeText(this, "Verification email sent. Check your inbox (or spam).", Toast.LENGTH_LONG).show()
+                                        showSnackbar("Verification email sent. Check your inbox (or spam).")
                                     } else {
-                                        Toast.makeText(this, sendTask.exception?.localizedMessage ?: "Failed to send verification email.", Toast.LENGTH_LONG).show()
+                                        showSnackbar(sendTask.exception?.localizedMessage ?: "Failed to send verification email.")
                                     }
                                     auth.signOut()
                                     tvResendVerification.isEnabled = true
@@ -231,7 +223,7 @@ class LoginActivity : AppCompatActivity() {
                             }
                         }
                     } else {
-                        Toast.makeText(this, signInTask.exception?.localizedMessage ?: "Couldn't sign in to resend email.", Toast.LENGTH_LONG).show()
+                        showSnackbar(signInTask.exception?.localizedMessage ?: "Couldn't sign in to resend email.")
                         tvResendVerification.isEnabled = true
                     }
                 }
@@ -255,18 +247,14 @@ class LoginActivity : AppCompatActivity() {
                 .addOnCompleteListener { task ->
                     tvForgotPassword.isEnabled = true
                     if (task.isSuccessful) {
-                        Toast.makeText(
-                            this,
-                            "Password reset email sent. Check your inbox (or spam).",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        showSnackbar("Password reset email sent. Check your inbox (or spam).")
                     } else {
                         val msg = when ((task.exception as? FirebaseAuthException)?.errorCode) {
                             "ERROR_INVALID_EMAIL" -> "That email address is invalid."
                             "ERROR_USER_NOT_FOUND" -> "No account found for this email."
                             else -> task.exception?.localizedMessage ?: "Failed to send reset email."
                         }
-                        Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+                        showSnackbar(msg)
                     }
                 }
         }
@@ -276,9 +264,9 @@ class LoginActivity : AppCompatActivity() {
         }
 
         // Google sign-in button
-      //  btnGoogle.setOnClickListener {
-     //       googleSignInLauncher.launch(googleClient.signInIntent)
-      //  }
+        //  btnGoogle.setOnClickListener {
+        //       googleSignInLauncher.launch(googleClient.signInIntent)
+        //  }
     }
 
     private fun verifyAdminRole(uid: String, onComplete: (Boolean) -> Unit) {
@@ -301,5 +289,13 @@ class LoginActivity : AppCompatActivity() {
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         finish()
+    }
+
+    private fun showSnackbar(message: String) {
+        Snackbar.make(
+            findViewById(android.R.id.content),
+            message,
+            Snackbar.LENGTH_LONG
+        ).show()
     }
 }
