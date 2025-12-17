@@ -68,6 +68,14 @@ class ExpensesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        parentFragmentManager.setFragmentResultListener(
+            "open_add_expense",
+            viewLifecycleOwner
+        ) { _, _ ->
+            showAddExpenseDialog()
+        }
+
+
         activity = requireActivity() as ExpenseTrackerActivity
 
         initializeViews(view)

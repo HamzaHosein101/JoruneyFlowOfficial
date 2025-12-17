@@ -57,21 +57,38 @@ class ExpenseTrackerActivity : AppCompatActivity() {
         try {
             setContentView(R.layout.activity_expense_tracker)
 
-            // Setup toolbar
+            // Toolbar
             val toolbar = findViewById<MaterialToolbar>(R.id.topAppBar)
             setSupportActionBar(toolbar)
             supportActionBar?.setDisplayHomeAsUpEnabled(true)
             supportActionBar?.title = "Expense Tracker"
 
-            // Setup bottom navigation
+            // Views
+            val fab = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(
+                R.id.fabAddExpense
+            )
             val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
+
+            fab.setOnClickListener {
+                // Switch to expenses tab (this will show the FAB too)
+                bottomNav.selectedItemId = R.id.nav_expenses
+
+                // Tell ExpensesFragment to open the dialog
+                supportFragmentManager.setFragmentResult(
+                    "open_add_expense",
+                    Bundle.EMPTY
+                )
+            }
+
             bottomNav.setOnItemSelectedListener { item ->
                 when (item.itemId) {
                     R.id.nav_expenses -> {
+                        fab.show()
                         loadFragment(ExpensesFragment())
                         true
                     }
                     R.id.nav_converter -> {
+                        fab.hide()
                         loadFragment(ConverterFragment())
                         true
                     }
@@ -82,12 +99,12 @@ class ExpenseTrackerActivity : AppCompatActivity() {
             // Load exchange rates
             loadExchangeRates()
 
-            // Load initial fragment
+            // Load initial fragment + correct FAB state
             if (savedInstanceState == null) {
-                loadFragment(ExpensesFragment())
+                bottomNav.selectedItemId = R.id.nav_expenses
             }
 
-            // Start listening to expenses for real-time totalSpent calculation
+            // Listener for totals
             startExpenseListener()
 
         } catch (e: Exception) {
@@ -96,6 +113,8 @@ class ExpenseTrackerActivity : AppCompatActivity() {
             finish()
         }
     }
+
+
 
     private fun loadFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction()
