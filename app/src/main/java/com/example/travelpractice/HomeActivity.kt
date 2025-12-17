@@ -37,6 +37,13 @@ class HomeActivity : AppCompatActivity() {
         adapter = TripAdapter(
             onDelete = { trip ->
                 db.collection("trips").document(trip.id).delete()
+                    .addOnSuccessListener {
+                        Snackbar.make(
+                            findViewById(android.R.id.content),
+                            "Trip deleted",
+                            Snackbar.LENGTH_SHORT
+                        ).show()
+                    }
                     .addOnFailureListener {
                         Snackbar.make(findViewById(android.R.id.content), "Delete failed", Snackbar.LENGTH_SHORT).show()
                     }
@@ -75,6 +82,14 @@ class HomeActivity : AppCompatActivity() {
 
         //Bottom "Log out" button
         findViewById<View?>(R.id.btnLogout)?.setOnClickListener { doLogout() }
+    }
+
+    fun showSnackbar(message: String) {
+        Snackbar.make(
+            findViewById(android.R.id.content),
+            message,
+            Snackbar.LENGTH_SHORT
+        ).show()
     }
 
     private fun doLogout() {

@@ -364,6 +364,8 @@ class ExpensesFragment : Fragment() {
         }
     }
 
+
+
     private fun loadExpensesFromFirebase() {
         val userId = activity.auth.currentUser?.uid ?: return
         if (activity.tripId.isBlank()) return
@@ -467,6 +469,7 @@ class ExpensesFragment : Fragment() {
 
             // Show undo snackbar
             showUndoSnackbar(newExpense, description, displayAmount, currency)
+            activity.syncTripRemaining()
 
             if (activity.totalSpent > activity.budgetLimit) {
                 Toast.makeText(requireContext(), "Warning: You're over budget!", Toast.LENGTH_LONG).show()

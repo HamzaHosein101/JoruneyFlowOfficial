@@ -13,6 +13,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.util.Pair
 import androidx.fragment.app.DialogFragment
+import com.example.travelpractice.HomeActivity
 import com.example.travelpractice.R
 import com.example.travelpractice.model.Trip
 import com.google.android.material.button.MaterialButton
@@ -40,7 +41,7 @@ class AddTripBottomSheetDialogFragment : DialogFragment() {
 
     private val HALF_DAY_MS = 12 * 60 * 60 * 1000L
 
-    // Store-safe value (no timezone “previous day” surprises)
+    // Store-safe value (no timezone "previous day" surprises)
     private fun toStoreMillis(utcMidnightMillis: Long): Long = utcMidnightMillis + HALF_DAY_MS
 
     // Convert any stored millis back to the exact UTC midnight for the same UTC date
@@ -179,7 +180,11 @@ class AddTripBottomSheetDialogFragment : DialogFragment() {
                     }
 
                     trips.document(existing.id).update(updates)
-                        .addOnSuccessListener { dismiss() }
+                        .addOnSuccessListener {
+                            dismiss()
+                            // Show success Snackbar in parent activity
+                            (activity as? HomeActivity)?.showSnackbar("Trip updated successfully")
+                        }
                         .addOnFailureListener {
                             Snackbar.make(view, "Failed to update trip", Snackbar.LENGTH_SHORT).show()
                         }
@@ -214,7 +219,11 @@ class AddTripBottomSheetDialogFragment : DialogFragment() {
                 )
 
                 doc.set(trip)
-                    .addOnSuccessListener { dismiss() }
+                    .addOnSuccessListener {
+                        dismiss()
+                        // Show success Snackbar in parent activity
+                        (activity as? HomeActivity)?.showSnackbar("Trip created successfully")
+                    }
                     .addOnFailureListener {
                         Snackbar.make(view, "Failed to save trip", Snackbar.LENGTH_SHORT).show()
                     }

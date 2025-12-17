@@ -11,6 +11,7 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 
 // Data class for expenses
 data class Expense(
@@ -41,6 +42,9 @@ class ExpenseTrackerActivity : AppCompatActivity() {
 
     // Expense list
     val expenseList = mutableListOf<Expense>()
+
+    // Listener for real-time updates
+    private var expenseListener: ListenerRegistration? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,6 +87,9 @@ class ExpenseTrackerActivity : AppCompatActivity() {
                 loadFragment(ExpensesFragment())
             }
 
+            // Start listening to expenses for real-time totalSpent calculation
+            startExpenseListener()
+
         } catch (e: Exception) {
             Log.e("ExpenseTrackerActivity", "Error in onCreate", e)
             Toast.makeText(this, "Error loading expense tracker", Toast.LENGTH_SHORT).show()
@@ -115,16 +122,69 @@ class ExpenseTrackerActivity : AppCompatActivity() {
         })
     }
 
+    /**
+     * Listens to all expenses for this trip in real-time and calculates totalSpent.
+     * This automatically updates whenever expenses are added/deleted.
+     */
+    private fun startExpenseListener() {
+        val userId = auth.currentUser?.uid ?: return
+        if (tripId.isBlank()) return
+
+        expenseListener = db.collection("expenses")
+            .whereEqualTo("userId", userId)
+            .whereEqualTo("tripId", tripId)
+            .addSnapshotListener { snapshots, error ->
+                if (error != null) {
+                    Log.e("ExpenseTracker", "Error listening to expenses", error)
+                    return@addSnapshotListener
+                }
+
+                if (snapshots == null) return@addSnapshotListener
+
+                // Calculate total spent from Firestore
+                var newTotalSpent = 0.0
+                expenseList.clear()
+
+                for (doc in snapshots.documents) {
+                    doc.toObject(Expense::class.java)?.let { expense ->
+                        expense.id = doc.id
+                        expenseList.add(expense)
+                        newTotalSpent += expense.amount
+                    }
+                }
+
+                totalSpent = newTotalSpent
+
+                // Update the trip's remaining field in Firestore
+                syncTripRemaining()
+
+                Log.d("ExpenseTracker", "Real-time update: $totalSpent spent, ${expenseList.size} expenses")
+            }
+    }
+
+    /**
+     * Updates the trip's "remaining" field in Firestore based on current totalSpent.
+     * This is called automatically by the expense listener.
+     */
     fun syncTripRemaining() {
         if (tripId.isBlank()) return
-        val remaining = (budgetLimit - totalSpent).coerceAtLeast(0.0)
-        val update = hashMapOf<String, Any>(
-            "remaining" to remaining,
-            "spent" to totalSpent
-        )
+
+        val newRemaining = (budgetLimit - totalSpent).coerceAtLeast(0.0)
+        val newSpent = totalSpent
+
         db.collection("trips").document(tripId)
-            .update(update)
-            .addOnFailureListener { e -> Log.w("ExpenseTracker", "Failed to update remaining", e) }
+            .update(
+                mapOf(
+                    "remaining" to newRemaining,
+                    "spent" to newSpent
+                )
+            )
+            .addOnSuccessListener {
+                Log.d("ExpenseTracker", "Updated trip: spent=$newSpent, remaining=$newRemaining")
+            }
+            .addOnFailureListener { e ->
+                Log.e("ExpenseTracker", "Failed to update trip", e)
+            }
     }
 
     fun convertCurrency(amountUSD: Double, toCurrency: String): Double {
@@ -138,10 +198,32 @@ class ExpenseTrackerActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
-                onBackPressed()
+                // Return result to TripDetailActivity
+                val resultIntent = android.content.Intent().apply {
+                    putExtra("RESULT_TRIP_ID", tripId)
+                    putExtra("RESULT_REMAINING", (budgetLimit - totalSpent).coerceAtLeast(0.0))
+                }
+                setResult(RESULT_OK, resultIntent)
+                finish()
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        expenseListener?.remove()
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        // Return result to TripDetailActivity
+        val resultIntent = android.content.Intent().apply {
+            putExtra("RESULT_TRIP_ID", tripId)
+            putExtra("RESULT_REMAINING", (budgetLimit - totalSpent).coerceAtLeast(0.0))
+        }
+        setResult(RESULT_OK, resultIntent)
+        super.onBackPressed()
     }
 }

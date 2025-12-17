@@ -158,7 +158,9 @@ class ItineraryActivity : AppCompatActivity() {
     }
 
     private fun saveItineraryItem(item: ItineraryItem) {
-        val itemData = if (item.id.isEmpty()) {
+        val isNew = item.id.isEmpty()
+
+        val itemData = if (isNew) {
             item.copy(id = db.collection("itinerary").document().id)
         } else {
             item
@@ -175,11 +177,16 @@ class ItineraryActivity : AppCompatActivity() {
                     notificationManager.cancelNotification(itemData)
                 }
 
-                // ✅ No "Item saved" snackbar
+                //Snackbar here (only after success)
+                Snackbar.make(
+                    findViewById(android.R.id.content),
+                    if (isNew) "Itinerary item added" else "Itinerary item updated",
+                    Snackbar.LENGTH_SHORT
+                ).show()
+
                 loadItineraryItems()
             }
             .addOnFailureListener {
-                // Keep failure message (recommended)
                 Snackbar.make(
                     findViewById(android.R.id.content),
                     "Failed to save item",
@@ -187,6 +194,7 @@ class ItineraryActivity : AppCompatActivity() {
                 ).show()
             }
     }
+
 
 
 
