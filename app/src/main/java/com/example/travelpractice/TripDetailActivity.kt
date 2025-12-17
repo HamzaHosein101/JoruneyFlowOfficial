@@ -124,8 +124,6 @@ class TripDetailActivity : AppCompatActivity() {
         container.addView(chip)
     }
 
-
-
     private fun formatLocation(address: Map<String, String>?): String? {
         if (address == null) return null
         val city = address["city"] ?: address["town"] ?: address["village"] ?: address["hamlet"] ?: address["suburb"]

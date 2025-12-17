@@ -38,11 +38,7 @@ class HomeActivity : AppCompatActivity() {
             onDelete = { trip ->
                 db.collection("trips").document(trip.id).delete()
                     .addOnSuccessListener {
-                        Snackbar.make(
-                            findViewById(android.R.id.content),
-                            "Trip deleted",
-                            Snackbar.LENGTH_SHORT
-                        ).show()
+                        Snackbar.make(findViewById(android.R.id.content), "Trip Deleted", Snackbar.LENGTH_SHORT).show()
                     }
                     .addOnFailureListener {
                         Snackbar.make(findViewById(android.R.id.content), "Delete failed", Snackbar.LENGTH_SHORT).show()
@@ -91,7 +87,6 @@ class HomeActivity : AppCompatActivity() {
             Snackbar.LENGTH_SHORT
         ).show()
     }
-
     private fun doLogout() {
         auth.signOut()
         val intent = Intent(this, LoginActivity::class.java)
@@ -106,6 +101,7 @@ class HomeActivity : AppCompatActivity() {
 
         val q = db.collection("trips")
             .whereEqualTo("userId", uid)
+
 
         reg = q.addSnapshotListener { snap, err ->
             if (err != null) {
