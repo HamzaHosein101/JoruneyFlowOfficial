@@ -41,6 +41,7 @@
         app:itemIconTint="@color/bottom_nav_item_color"
         app:itemTextColor="@color/bottom_nav_item_color"
         app:itemRippleColor="@color/bottom_nav_ripple_color"
+        app:itemActiveIndicatorStyle="@style/JourneyFlow.BottomNav.ActiveIndicator"
         />
 
 

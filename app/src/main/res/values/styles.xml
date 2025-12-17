@@ -113,6 +113,17 @@
 
 
 
+    <style name="JourneyFlow.BottomNav.ActiveIndicator"
+        parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <!-- This is the pill color -->
+        <item name="android:color">#66183371</item>
+    </style>
+
+
+
+
+
+
 
 
 
