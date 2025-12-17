@@ -105,6 +105,12 @@
     </style>
 
 
+    <style name="ThemeOverlay.JourneyFlow.Spinner" parent="ThemeOverlay.Material3">
+        <item name="android:popupBackground">@android:color/white</item>
+    </style>
+
+
+
 
 
 

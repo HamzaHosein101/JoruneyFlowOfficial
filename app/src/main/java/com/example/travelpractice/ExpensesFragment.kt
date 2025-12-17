@@ -12,6 +12,8 @@ import android.widget.Spinner
 import android.widget.AdapterView
 import android.widget.ProgressBar
 import android.widget.LinearLayout
+import android.widget.ListPopupWindow
+import android.graphics.drawable.ColorDrawable
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -112,6 +114,17 @@ class ExpensesFragment : Fragment() {
         }
     }
 
+    private fun setSpinnerPopupBackground(spinner: Spinner) {
+        try {
+            val popup = Spinner::class.java.getDeclaredField("mPopup")
+            popup.isAccessible = true
+            val popupWindow = popup.get(spinner) as? ListPopupWindow
+            popupWindow?.setBackgroundDrawable(ColorDrawable(android.graphics.Color.WHITE))
+        } catch (e: Exception) {
+            Log.w("ExpensesFragment", "Could not set spinner popup background", e)
+        }
+    }
+
     private fun showAddExpenseDialog() {
         val context = requireContext()
 
@@ -150,9 +163,10 @@ class ExpensesFragment : Fragment() {
             background = ContextCompat.getDrawable(context, R.drawable.bg_spinner_grey)
         }
         val categoryAdapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, categories).apply {
-            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            setDropDownViewResource(R.layout.spinner_dropdown_item)
         }
         spinnerCategory.adapter = categoryAdapter
+        setSpinnerPopupBackground(spinnerCategory)
         dialogLayout.addView(spinnerCategory)
 
         // Currency label
@@ -168,9 +182,10 @@ class ExpensesFragment : Fragment() {
             background = ContextCompat.getDrawable(context, R.drawable.bg_spinner_grey)
         }
         val currencyAdapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, currencies).apply {
-            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            setDropDownViewResource(R.layout.spinner_dropdown_item)
         }
         spinnerCurrency.adapter = currencyAdapter
+        setSpinnerPopupBackground(spinnerCurrency)
         dialogLayout.addView(spinnerCurrency)
 
         // Build dialog (IMPORTANT: positive button = null so we can validate without auto-dismiss)
@@ -227,7 +242,12 @@ class ExpensesFragment : Fragment() {
 
 
     private fun showMissingFieldDialog(title: String, message: String) {
-        MaterialAlertDialogBuilder(requireContext())
+        val themedContext = ContextThemeWrapper(
+            requireContext(),
+            R.style.ThemeOverlay_JourneyFlow_AlertDialogAnchor
+        )
+
+        MaterialAlertDialogBuilder(themedContext)
             .setTitle(title)
             .setMessage(message)
             .setPositiveButton("OK", null)
@@ -241,7 +261,12 @@ class ExpensesFragment : Fragment() {
         amountInUSD: Double,
         category: String
     ) {
-        MaterialAlertDialogBuilder(requireContext())
+        val themedContext = ContextThemeWrapper(
+            requireContext(),
+            R.style.ThemeOverlay_JourneyFlow_AlertDialogAnchor
+        )
+
+        MaterialAlertDialogBuilder(themedContext)
             .setTitle("Confirm Expense")
             .setMessage(
                 "Add expense?\n\n" +
@@ -256,6 +281,7 @@ class ExpensesFragment : Fragment() {
             .show()
     }
 
+
     private fun setupSortSpinner() {
         val spinner = spinnerSortExpenses ?: return
         val sortOptions = arrayOf(
@@ -264,8 +290,9 @@ class ExpensesFragment : Fragment() {
         )
 
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, sortOptions)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         spinner.adapter = adapter
+        setSpinnerPopupBackground(spinner)
 
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -322,8 +349,9 @@ class ExpensesFragment : Fragment() {
         val spinnerDisplayCurrency = view.findViewById<Spinner>(R.id.spinnerDisplayCurrency)
 
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, currencies)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
         spinnerDisplayCurrency.adapter = adapter
+        setSpinnerPopupBackground(spinnerDisplayCurrency)
 
         spinnerDisplayCurrency.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, v: View?, position: Int, id: Long) {
@@ -574,7 +602,7 @@ class ExpensesFragment : Fragment() {
 
         override fun onBindViewHolder(holder: ExpenseViewHolder, position: Int) {
             val expense = expenses[position]
-            val df = SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault())
+            val df = SimpleDateFormat("MMM dd, h:mm a", Locale.getDefault())
 
             holder.txtDescription.text = "${expense.description} (${expense.category})"
 

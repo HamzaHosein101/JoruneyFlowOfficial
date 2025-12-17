@@ -1,6 +1,7 @@
 package com.example.travelpractice
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,8 +10,11 @@ import android.widget.Toast
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.AdapterView
+import android.widget.ListPopupWindow
+import android.graphics.drawable.ColorDrawable
 import androidx.fragment.app.Fragment
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 
 class ConverterFragment : Fragment() {
@@ -34,6 +38,17 @@ class ConverterFragment : Fragment() {
         setupRefreshButton(view)
     }
 
+    private fun setSpinnerPopupBackground(spinner: Spinner) {
+        try {
+            val popup = Spinner::class.java.getDeclaredField("mPopup")
+            popup.isAccessible = true
+            val popupWindow = popup.get(spinner) as? ListPopupWindow
+            popupWindow?.setBackgroundDrawable(ColorDrawable(android.graphics.Color.WHITE))
+        } catch (e: Exception) {
+            Log.w("ConverterFragment", "Could not set spinner popup background", e)
+        }
+    }
+
     private fun setupCurrencyConverter(view: View) {
         val etAmount = view.findViewById<TextInputEditText>(R.id.etAmount)
         val spinnerFromCurrency = view.findViewById<Spinner>(R.id.spinnerFromCurrency)
@@ -49,10 +64,14 @@ class ConverterFragment : Fragment() {
         )
 
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, currencies)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
 
         spinnerFromCurrency.adapter = adapter
         spinnerToCurrency.adapter = adapter
+
+        // Set white background for both spinners
+        setSpinnerPopupBackground(spinnerFromCurrency)
+        setSpinnerPopupBackground(spinnerToCurrency)
 
         spinnerFromCurrency.setSelection(0) // USD
         spinnerToCurrency.setSelection(1) // EUR
@@ -106,7 +125,12 @@ class ConverterFragment : Fragment() {
     private fun setupRefreshButton(view: View) {
         val btnRefreshRates = view.findViewById<MaterialButton>(R.id.btnRefreshRates)
         btnRefreshRates.setOnClickListener {
-            Toast.makeText(requireContext(), "Refreshing exchange rates...", Toast.LENGTH_SHORT).show()
+            Snackbar.make(
+                requireView(),
+                "Exchange rates refreshed",
+                Snackbar.LENGTH_SHORT
+            ).show()
+
             activity.loadExchangeRates()
         }
     }

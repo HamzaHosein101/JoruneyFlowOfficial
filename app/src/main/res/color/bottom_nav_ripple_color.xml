@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Ripple color with transparency for pressed state -->
-    <item android:color="#332A4A8F" android:state_pressed="true"/>
-    <item android:color="#33183371" android:state_selected="true"/>
+    <!-- Ripple effect color when pressed -->
+    <item android:color="#33183371" android:state_pressed="true"/>
     <item android:color="#1A183371"/>
 </selector>
