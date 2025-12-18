@@ -23,53 +23,57 @@ import kotlinx.coroutines.async
 class TripDetailActivity : AppCompatActivity() {
 
 
-    private fun weatherEmoji(code: Int?): String = when (code) {
-        0 -> "☀️"
-        1, 2, 3 -> "⛅"
-        45, 48 -> "🌫️"
-        51, 53, 55, 56, 57 -> "🌦️"
-        61, 63, 65, 66, 67 -> "🌧️"
-        71, 73, 75, 77 -> "🌨️"
-        80, 81, 82 -> "🌦️"
-        95, 96, 99 -> "⛈️"
+    private fun owWeatherEmoji(id: Int?): String = when (id) {
+        in 200..232 -> "⛈️" // Thunderstorm
+        in 300..321 -> "🌦️" // Drizzle
+        in 500..531 -> "🌧️" // Rain
+        in 600..622 -> "🌨️" // Snow
+        in 701..781 -> "🌫️" // Atmosphere (fog, mist, etc.)
+        800 -> "☀️" // Clear
+        801 -> "🌤️" // Few clouds
+        802 -> "⛅" // Scattered clouds
+        803, 804 -> "☁️" // Broken/overcast clouds
         else -> "🌡️"
     }
 
+    private fun groupForecastByDay(items: List<OWForecastItem>): Map<String, List<OWForecastItem>> {
+        return items.groupBy { item ->
+            item.dt_txt?.substring(0, 10) ?: ""
+        }.filterKeys { it.isNotBlank() }
+    }
 
-    private fun googleLikeDailyEmoji(day: String, wx: OMResponse): String {
-        val h = wx.hourly ?: return "🌡️"
-        val times = h.time.orEmpty()
-        if (times.isEmpty()) return "🌡️"
-
+    private fun getDailyEmoji(items: List<OWForecastItem>): String {
         var hasThunder = false
         var hasSnow = false
         var hasRain = false
-        var maxPop = 0
+        var maxPop = 0.0
         var cloudSum = 0
         var cloudCount = 0
 
-        for (i in times.indices) {
-            val t = times[i]
-            if (!t.startsWith(day)) continue
+        for (item in items) {
+            val weatherId = item.weather?.firstOrNull()?.id
+            val pop = ((item.pop ?: 0.0) * 100).toInt()
+            val rain = item.rain?.`3h` ?: 0.0
+            val snow = item.snow?.`3h` ?: 0.0
+            val cloud = item.clouds?.all
 
-            val code = h.weather_code?.getOrNull(i)
-            val pop = h.precipitation_probability?.getOrNull(i) ?: 0
-            val rain = (h.rain?.getOrNull(i) ?: 0.0) + (h.showers?.getOrNull(i) ?: 0.0)
-            val snow = h.snowfall?.getOrNull(i) ?: 0.0
-            val cloud = h.cloud_cover?.getOrNull(i)
-
-            if (pop > maxPop) maxPop = pop
+            if (pop > maxPop) maxPop = pop.toDouble()
             if (cloud != null) { cloudSum += cloud; cloudCount++ }
 
-            if (code == 95 || code == 96 || code == 99) hasThunder = true
-            if (snow >= 0.2 || code in listOf(71,73,75,77,85,86)) hasSnow = true
-            if (rain >= 0.2 || pop >= 50 || code in listOf(51,53,55,61,63,65,80,81,82)) hasRain = true
+            when (weatherId) {
+                in 200..232 -> hasThunder = true
+                in 600..622 -> hasSnow = true
+                in 300..531 -> hasRain = true
+            }
+
+            if (snow > 0.2) hasSnow = true
+            if (rain > 0.2) hasRain = true
         }
 
         if (hasThunder) return "⛈️"
         if (hasSnow) return "🌨️"
         if (hasRain) return "🌧️"
-        if (maxPop in 30..49) return "🌦️"
+        if (maxPop in 30.0..49.0) return "🌦️"
 
         val avgCloud = if (cloudCount > 0) cloudSum / cloudCount else 50
         return when {
@@ -264,11 +268,10 @@ class TripDetailActivity : AppCompatActivity() {
                 txtStatus.text = "Loading…"
                 val startTime = System.currentTimeMillis()
 
-                // 1) Get coordinates - PRIORITIZE saved coordinates!
+                // 1) Get coordinates
                 val (lat, lon) = when {
                     trip.lat != null && trip.lng != null -> {
                         android.util.Log.d("Weather", "✓ Using saved coords: 0ms")
-                        // Show destination immediately since we already have it
                         txtTitle.text = "Weather • ${trip.destination}"
                         trip.lat!! to trip.lng!!
                     }
@@ -289,16 +292,23 @@ class TripDetailActivity : AppCompatActivity() {
                     }
                 }
 
-                // 2) Fetch weather ONLY (skip reverse geocoding if we have destination)
+
+
+                // 2) Fetch weather from OpenWeatherMap
                 val weatherStart = System.currentTimeMillis()
-                val wx = HttpClients.openMeteo.forecast(lat, lon, unit = "fahrenheit")
+                val current = HttpClients.openWeather.current(lat, lon, HttpClients.OPENWEATHER_API_KEY)
+                val forecast = HttpClients.openWeather.forecast(lat, lon, HttpClients.OPENWEATHER_API_KEY)
                 android.util.Log.d("Weather", "⏱ Weather API took: ${System.currentTimeMillis() - weatherStart}ms")
 
-                // 3) Show weather immediately
-                val t = wx.current?.temperature_2m
-                val c = wx.current?.weather_code
+// 3) Show current weather
+                val t = current.main?.temp
+                val weatherId = current.weather?.firstOrNull()?.id
+
+// NOW you can log it here:
+                android.util.Log.d("Weather", "🌡️ OpenWeatherMap says: $t° at $lat, $lon")
+
                 txtTemp.text = if (t != null) "${t.toInt()}°" else "--°"
-                txtEmoji.text = weatherEmoji(c)
+                txtEmoji.text = owWeatherEmoji(weatherId)
 
                 val timeStr = android.text.format.DateFormat
                     .getTimeFormat(this@TripDetailActivity)
@@ -308,26 +318,27 @@ class TripDetailActivity : AppCompatActivity() {
 
                 // 4) Build 7-day forecast strip
                 stripDaily.removeAllViews()
-                val days  = wx.daily?.time.orEmpty()
-                val maxes = wx.daily?.temperature_2m_max.orEmpty()
-                val mins  = wx.daily?.temperature_2m_min.orEmpty()
+                val dailyForecasts = groupForecastByDay(forecast.list.orEmpty())
 
-                for (i in days.indices) {
-                    val dayStr = days[i]
+                for ((day, items) in dailyForecasts.entries.take(7)) {
                     val dow = try {
-                        val inFmt  = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
+                        val inFmt = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
                         val outFmt = java.text.SimpleDateFormat("EEE", java.util.Locale.getDefault())
-                        val date   = inFmt.parse(days[i])
+                        val date = inFmt.parse(day)
                         outFmt.format(date!!)
                     } catch (_: Exception) {
-                        days[i].substring(5)
+                        day.substring(5)
                     }
-                    val sub  = "${mins.getOrNull(i)?.toInt() ?: "-"}° / ${maxes.getOrNull(i)?.toInt() ?: "-"}°"
-                    val emj = googleLikeDailyEmoji(dayStr, wx)
+
+                    val minTemp = items.mapNotNull { it.main?.temp_min }.minOrNull()?.toInt() ?: 0
+                    val maxTemp = items.mapNotNull { it.main?.temp_max }.maxOrNull()?.toInt() ?: 0
+                    val sub = "$minTemp° / $maxTemp°"
+                    val emj = getDailyEmoji(items)
+
                     addDailyChip(stripDaily, dow, sub, emj)
                 }
 
-                // 5) OPTIONAL: Only do reverse geocoding if we don't have destination name
+                // 5) Reverse geocoding if needed
                 if (trip.destination.isNullOrBlank()) {
                     val reverseStart = System.currentTimeMillis()
                     runCatching {
@@ -337,12 +348,12 @@ class TripDetailActivity : AppCompatActivity() {
                         val loc = formatLocation(rev.address) ?: rev.display_name
                         txtTitle.text = if (!loc.isNullOrBlank()) "Weather • $loc" else "Weather"
                     }.onFailure {
-                        android.util.Log.d("Weather", "⏱ Reverse geocoding failed: ${System.currentTimeMillis() - reverseStart}ms")
+                        android.util.Log.d("Weather", "Reverse geocoding failed: ${System.currentTimeMillis() - reverseStart}ms")
                         txtTitle.text = "Weather"
                     }
                 }
 
-                android.util.Log.d("Weather", "✅ TOTAL TIME: ${System.currentTimeMillis() - startTime}ms")
+                android.util.Log.d("Weather", " TOTAL TIME: ${System.currentTimeMillis() - startTime}ms")
 
             } catch (e: Exception) {
                 android.util.Log.e("TripDetailActivity", "Weather error", e)
