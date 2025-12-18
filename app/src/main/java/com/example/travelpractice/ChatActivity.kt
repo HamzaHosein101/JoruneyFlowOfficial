@@ -30,7 +30,7 @@ class ChatActivity : AppCompatActivity() {
         binding = ActivityChatBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val geminiApiKey = "AIzaSyAA8p-9H-qw8P5ZdFAr_DgM95j-kQZq0LA"
+        val geminiApiKey = "AIzaSyDglHD1fXogQvKkdaqcTsTU6HSQQSFqVVQ"
 
         // Initialize chat action handler
         chatActionHandler = ChatActionHandler(this)
