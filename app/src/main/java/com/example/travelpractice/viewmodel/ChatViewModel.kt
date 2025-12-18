@@ -31,8 +31,8 @@ class ChatViewModel(
 
     // ✅ Initialize Flight Search Helper (Amadeus for both Flights and Hotels)
     private val flightHelper = FlightSearchHelper(
-        clientId = "GDTCMv1ZYSmrGAnKGmRWbjSnmnTApCGU",
-        clientSecret = "osVexYol1l1Ggazc"
+        clientId = "F89gSTzjGAmDYL2bLu3aYs6NRjyYL0b1",
+        clientSecret = "sBZVENdviUxICZTQ"
     )
 
     // Track current trip context
