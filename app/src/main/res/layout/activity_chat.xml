@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F5F7FA">
@@ -27,7 +28,8 @@
         android:padding="12dp"
         android:clipToPadding="false"
         app:layout_constraintTop_toBottomOf="@id/toolbar"
-        app:layout_constraintBottom_toTopOf="@id/typingIndicator" />
+        app:layout_constraintBottom_toTopOf="@id/typingIndicator"
+        tools:listitem="@layout/item_message_user" />
 
     <!-- Typing indicator (shows when AI is thinking) -->
     <LinearLayout
@@ -42,7 +44,8 @@
         android:gravity="center"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/inputContainer">
+        app:layout_constraintBottom_toTopOf="@id/quickActionsScrollView"
+        tools:visibility="visible">
 
         <TextView
             android:layout_width="wrap_content"
@@ -51,6 +54,97 @@
             android:textSize="12sp"
             android:textColor="#757575" />
     </LinearLayout>
+
+    <!-- ✅ Quick Actions Row -->
+    <HorizontalScrollView
+        android:id="@+id/quickActionsScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:scrollbars="none"
+        android:background="@android:color/white"
+        android:elevation="2dp"
+        app:layout_constraintBottom_toTopOf="@id/inputContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/quickActionsChipGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:singleLine="true"
+            app:chipSpacing="8dp">
+
+            <!-- Flight Search -->
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipFlights"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✈️ Find Flights"
+                android:textColor="#333333"
+                app:chipBackgroundColor="@color/chip_background"
+                app:chipStrokeColor="@color/chip_stroke"
+                app:chipStrokeWidth="1dp"
+                app:chipCornerRadius="20dp"
+                style="@style/Widget.MaterialComponents.Chip.Action" />
+
+            <!-- Hotel Search -->
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipHotels"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🏨 Find Hotels"
+                android:textColor="#333333"
+                app:chipBackgroundColor="@color/chip_background"
+                app:chipStrokeColor="@color/chip_stroke"
+                app:chipStrokeWidth="1dp"
+                app:chipCornerRadius="20dp"
+                style="@style/Widget.MaterialComponents.Chip.Action" />
+
+            <!-- Expenses -->
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipExpenses"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="💰 My Expenses"
+                android:textColor="#333333"
+                app:chipBackgroundColor="@color/chip_background"
+                app:chipStrokeColor="@color/chip_stroke"
+                app:chipStrokeWidth="1dp"
+                app:chipCornerRadius="20dp"
+                style="@style/Widget.MaterialComponents.Chip.Action" />
+
+            <!-- Itinerary -->
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipItinerary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📅 My Itinerary"
+                android:textColor="#333333"
+                app:chipBackgroundColor="@color/chip_background"
+                app:chipStrokeColor="@color/chip_stroke"
+                app:chipStrokeWidth="1dp"
+                app:chipCornerRadius="20dp"
+                style="@style/Widget.MaterialComponents.Chip.Action" />
+
+            <!-- Checklist -->
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipChecklist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📋 Packing List"
+                android:textColor="#333333"
+                app:chipBackgroundColor="@color/chip_background"
+                app:chipStrokeColor="@color/chip_stroke"
+                app:chipStrokeWidth="1dp"
+                app:chipCornerRadius="20dp"
+                style="@style/Widget.MaterialComponents.Chip.Action" />
+
+        </com.google.android.material.chip.ChipGroup>
+    </HorizontalScrollView>
 
     <!-- Bottom input area -->
     <LinearLayout
@@ -80,6 +174,7 @@
                 android:padding="12dp"
                 android:maxLines="4"
                 android:inputType="textMultiLine|textCapSentences"
+                android:imeOptions="actionSend"
                 android:importantForAutofill="no" />
 
             <!-- Send button -->
