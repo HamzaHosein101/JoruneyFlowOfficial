@@ -83,7 +83,7 @@ class ExpensesFragment : Fragment() {
         setupDisplayCurrencySpinner(view)
         setupFAB()
 
-        // Setup search/sort if views exist
+
         etSearchExpenses = view.findViewById(R.id.etSearchExpenses)
         spinnerSortExpenses = view.findViewById(R.id.spinnerSortExpenses)
 
@@ -92,7 +92,7 @@ class ExpensesFragment : Fragment() {
             setupSearchBar()
         }
 
-        // Delay loading to avoid FragmentManager transaction conflict
+
         view.post {
             loadExpensesFromFirebase()
         }

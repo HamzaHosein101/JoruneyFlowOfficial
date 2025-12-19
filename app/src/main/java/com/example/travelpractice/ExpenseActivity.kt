@@ -63,17 +63,17 @@ class ExpenseTrackerActivity : AppCompatActivity() {
             supportActionBar?.setDisplayHomeAsUpEnabled(true)
             supportActionBar?.title = "Expense Tracker"
 
-            // Views
+
             val fab = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(
                 R.id.fabAddExpense
             )
             val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
 
             fab.setOnClickListener {
-                // Switch to expenses tab (this will show the FAB too)
+
                 bottomNav.selectedItemId = R.id.nav_expenses
 
-                // Tell ExpensesFragment to open the dialog
+
                 supportFragmentManager.setFragmentResult(
                     "open_add_expense",
                     Bundle.EMPTY
@@ -96,15 +96,15 @@ class ExpenseTrackerActivity : AppCompatActivity() {
                 }
             }
 
-            // Load exchange rates
+
             loadExchangeRates()
 
-            // Load initial fragment + correct FAB state
+
             if (savedInstanceState == null) {
                 bottomNav.selectedItemId = R.id.nav_expenses
             }
 
-            // Listener for totals
+
             startExpenseListener()
 
         } catch (e: Exception) {
@@ -141,10 +141,7 @@ class ExpenseTrackerActivity : AppCompatActivity() {
         })
     }
 
-    /**
-     * Listens to all expenses for this trip in real-time and calculates totalSpent.
-     * This automatically updates whenever expenses are added/deleted.
-     */
+
     private fun startExpenseListener() {
         val userId = auth.currentUser?.uid ?: return
         if (tripId.isBlank()) return
@@ -181,10 +178,7 @@ class ExpenseTrackerActivity : AppCompatActivity() {
             }
     }
 
-    /**
-     * Updates the trip's "remaining" field in Firestore based on current totalSpent.
-     * This is called automatically by the expense listener.
-     */
+
     fun syncTripRemaining() {
         if (tripId.isBlank()) return
 
