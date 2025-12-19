@@ -33,7 +33,6 @@ class ChatActivity : AppCompatActivity() {
 
         val geminiApiKey = "AIzaSyCA8riiN_fHO2TT9j8zlCf2hpPAjZyZwQI"
 
-        // Initialize chat action handler
         chatActionHandler = ChatActionHandler(this)
 
         setupToolbar()
@@ -44,9 +43,7 @@ class ChatActivity : AppCompatActivity() {
         observeViewModel()
     }
 
-    /**
-     * Setup toolbar with navigation
-     */
+
     private fun setupToolbar() {
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -68,17 +65,12 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Setup ViewModel with factory
-     */
     private fun setupViewModel(apiKey: String) {
         val factory = ChatViewModelFactory(apiKey, applicationContext)
         viewModel = ViewModelProvider(this, factory)[ChatViewModel::class.java]
     }
 
-    /**
-     * Setup RecyclerView for messages
-     */
+
     private fun setupRecyclerView() {
         messagesAdapter = MessagesAdapter { actionOption ->
             handleActionClick(actionOption)
@@ -93,9 +85,6 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Setup input field listeners
-     */
     private fun setupInputListeners() {
         // Send button click
         binding.sendButton.setOnClickListener {
@@ -113,9 +102,6 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Setup quick action chips with dialogs
-     */
     private fun setupQuickActions() {
         // Flight Search - Show Dialog
         binding.chipFlights.setOnClickListener {
@@ -129,52 +115,70 @@ class ChatActivity : AppCompatActivity() {
 
     }
 
-    /**
-     * Show flight search dialog
-     */
     private fun showFlightSearchDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_flight_search, null)
         val originInput = dialogView.findViewById<EditText>(R.id.originInput)
         val destinationInput = dialogView.findViewById<EditText>(R.id.destinationInput)
 
-        AlertDialog.Builder(this)
+        val dialog = AlertDialog.Builder(this, R.style.ThemeOverlay_JourneyFlow_AlertDialogAnchor)
             .setView(dialogView)
-            .setPositiveButton("Search") { _, _ ->
+            .setPositiveButton("Search", null)
+            .setNegativeButton("Cancel", null)
+            .create()
+
+        dialog.setOnShowListener {
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+                .setTextColor(android.graphics.Color.RED)
+
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 val origin = originInput.text.toString().trim()
                 val destination = destinationInput.text.toString().trim()
 
                 if (origin.isEmpty() || destination.isEmpty()) {
-                    Toast.makeText(this, "Please enter both origin and destination", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "Please enter both origin and destination",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 } else {
                     fillAndSendMessage("Find flights from $origin to $destination")
+                    dialog.dismiss()
                 }
             }
-            .setNegativeButton("Cancel", null)
-            .show()
+        }
+
+        dialog.show()
     }
 
-    /**
-     * ✅ UPDATED: Show hotel search dialog (simplified - no guests field)
-     */
     private fun showHotelSearchDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_hotel_search, null)
         val cityInput = dialogView.findViewById<EditText>(R.id.cityInput)
 
-        AlertDialog.Builder(this)
+        val dialog = AlertDialog.Builder(this,R.style.ThemeOverlay_JourneyFlow_AlertDialogAnchor)
             .setView(dialogView)
-            .setPositiveButton("Search") { _, _ ->
+            .setPositiveButton("Search", null)
+            .setNegativeButton("Cancel", null)
+            .create()
+
+        dialog.setOnShowListener {
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+                .setTextColor(android.graphics.Color.RED)
+
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 val city = cityInput.text.toString().trim()
 
                 if (city.isEmpty()) {
                     Toast.makeText(this, "Please enter a city", Toast.LENGTH_SHORT).show()
                 } else {
-                    // Simple query format that the bot understands
                     fillAndSendMessage("Find hotels in $city")
+                    dialog.dismiss()
                 }
             }
-            .setNegativeButton("Cancel", null)
-            .show()
+        }
+
+        dialog.show()
     }
+
 
     /**
      * Fill message input and send automatically
@@ -264,20 +268,32 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Show confirmation dialog for clearing chat history
-     */
+
     private fun showClearHistoryDialog() {
-        AlertDialog.Builder(this)
+        val dialog = AlertDialog.Builder(
+            this,
+            R.style.ThemeOverlay_JourneyFlow_AlertDialogAnchor
+        )
             .setTitle("Clear Chat History")
             .setMessage("Are you sure you want to delete all chat messages? This cannot be undone.")
-            .setPositiveButton("Clear") { _, _ ->
+            .setPositiveButton("Clear", null)
+            .setNegativeButton("Cancel", null)
+            .create()
+
+        dialog.setOnShowListener {
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+                .setTextColor(android.graphics.Color.RED)
+
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 viewModel.clearChat()
                 Toast.makeText(this, "Chat history cleared", Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
             }
-            .setNegativeButton("Cancel", null)
-            .show()
+        }
+
+        dialog.show()
     }
+
 
     /**
      * Clean up when activity is destroyed
