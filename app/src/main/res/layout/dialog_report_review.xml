@@ -8,7 +8,6 @@
     android:padding="20dp"
     android:background="@android:color/white">
 
-    <!-- Title -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -18,7 +17,6 @@
         android:textColor="@android:color/black"
         android:layout_marginBottom="4dp" />
 
-    <!-- Subtitle -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -27,7 +25,6 @@
         android:textColor="#666666"
         android:layout_marginBottom="16dp" />
 
-    <!-- Reason label -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -36,7 +33,6 @@
         android:textColor="@android:color/black"
         android:layout_marginBottom="4dp" />
 
-    <!-- Reason dropdown -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -58,7 +54,6 @@
             android:textSize="20dp"/>
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Details label -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -67,7 +62,6 @@
         android:textColor="@android:color/black"
         android:layout_marginBottom="4dp" />
 
-    <!-- Description field -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputDescription"
         android:layout_width="match_parent"
@@ -89,7 +83,6 @@
             android:textColor="@android:color/black" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Buttons row -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

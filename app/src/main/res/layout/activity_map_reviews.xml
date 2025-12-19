@@ -7,7 +7,6 @@
     android:layout_height="match_parent"
     android:background="#CCDCF4">
 
-    <!-- Top blue bar -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBar"
         android:layout_width="match_parent"
@@ -27,14 +26,12 @@
             app:navigationIconTint="@android:color/white" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Map container -->
     <FrameLayout
         android:id="@+id/map_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="?attr/actionBarSize" />
 
-    <!-- Search town bar overlay -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilSearchTown"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
@@ -66,7 +63,6 @@
     </com.google.android.material.textfield.TextInputLayout>
 
 
-    <!-- Floating bottom card for selected town info + actions -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardSelectedTown"
         android:layout_width="269dp"
@@ -83,7 +79,6 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Selected town name -->
             <TextView
                 android:id="@+id/tvTownName"
                 android:layout_width="match_parent"
@@ -93,7 +88,6 @@
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
-            <!-- Optional subtitle (country / region) -->
             <TextView
                 android:id="@+id/tvTownSubtitle"
                 android:layout_width="match_parent"
@@ -103,7 +97,6 @@
                 android:textColor="#666666"
                 android:textSize="13sp" />
 
-            <!-- Single action button -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

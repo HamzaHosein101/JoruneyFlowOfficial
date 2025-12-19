@@ -48,6 +48,6 @@
             android:src="@android:drawable/ic_menu_delete"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Delete expense"
-            android:tint="#FF6B6B" />
+            app:tint="#FF6B6B" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

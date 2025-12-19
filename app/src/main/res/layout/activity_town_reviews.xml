@@ -7,7 +7,6 @@
     android:layout_height="match_parent"
     android:background="#CCDCF4">
 
-    <!-- Top blue bar -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarTown"
         android:layout_width="match_parent"
@@ -27,7 +26,6 @@
             app:navigationIconTint="@android:color/white" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Content area -->
     <LinearLayout
         android:id="@+id/contentContainerTown"
         android:layout_width="match_parent"
@@ -35,7 +33,6 @@
         android:orientation="vertical"
         android:layout_marginTop="?attr/actionBarSize">
 
-        <!-- Town label (we’ll set text in Kotlin) -->
         <TextView
             android:id="@+id/tvTownHeader"
             android:layout_width="match_parent"
@@ -59,7 +56,6 @@
             android:textSize="14sp"
             android:textColor="#555555" />
 
-        <!-- Reviews list -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/townReviewsRecycler"
             android:layout_width="match_parent"
@@ -71,7 +67,6 @@
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
     </LinearLayout>
 
-    <!-- Floating Add Review button -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAddTownReview"
         android:layout_width="wrap_content"

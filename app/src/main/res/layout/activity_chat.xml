@@ -7,7 +7,6 @@
     android:layout_height="match_parent"
     android:background="#E3F2FD">
 
-    <!-- Top toolbar with solid blue matching My Trips -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -20,7 +19,6 @@
         app:titleTextColor="@android:color/white"
         app:menu="@menu/menu_chat" />
 
-    <!-- Scrolling list of messages -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/messagesRecyclerView"
         android:layout_width="match_parent"
@@ -31,7 +29,6 @@
         app:layout_constraintBottom_toTopOf="@id/typingIndicator"
         tools:listitem="@layout/item_message_user" />
 
-    <!-- Typing indicator (shows when AI is thinking) -->
     <LinearLayout
         android:id="@+id/typingIndicator"
         android:layout_width="wrap_content"
@@ -55,7 +52,6 @@
             android:textColor="#757575" />
     </LinearLayout>
 
-    <!-- Quick Actions Row -->
     <HorizontalScrollView
         android:id="@+id/quickActionsScrollView"
         android:layout_width="match_parent"
@@ -78,7 +74,6 @@
             app:singleLine="true"
             app:chipSpacing="8dp">
 
-            <!-- Flight Search -->
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipFlights"
                 android:layout_width="wrap_content"
@@ -91,7 +86,6 @@
                 app:chipCornerRadius="20dp"
                 style="@style/Widget.MaterialComponents.Chip.Action" />
 
-            <!-- Hotel Search -->
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipHotels"
                 android:layout_width="wrap_content"
@@ -107,7 +101,6 @@
         </com.google.android.material.chip.ChipGroup>
     </HorizontalScrollView>
 
-    <!-- Bottom input area with blue theme -->
     <LinearLayout
         android:id="@+id/inputContainer"
         android:layout_width="match_parent"
@@ -124,7 +117,6 @@
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
-            <!-- Text input box -->
             <EditText
                 android:id="@+id/messageInput"
                 android:layout_width="0dp"
@@ -140,7 +132,6 @@
                 android:imeOptions="actionSend"
                 android:importantForAutofill="no" />
 
-            <!-- Send button -->
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/sendButton"
                 android:layout_width="wrap_content"
@@ -153,7 +144,6 @@
                 app:tint="#3F51B5" />
         </LinearLayout>
 
-        <!-- Powered by text -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

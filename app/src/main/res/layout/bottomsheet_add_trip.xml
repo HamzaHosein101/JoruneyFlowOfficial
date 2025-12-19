@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <!-- Trip name -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -17,7 +16,6 @@
             android:importantForAutofill="no"/>
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Destination -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -29,7 +27,6 @@
             android:importantForAutofill="no"/>
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Budget -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -42,7 +39,6 @@
             android:importantForAutofill="no"/>
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Date range -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

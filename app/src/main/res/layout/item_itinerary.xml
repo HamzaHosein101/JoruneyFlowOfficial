@@ -22,7 +22,6 @@
         android:padding="16dp"
         android:gravity="center_vertical">
 
-        <!-- Left side - Date, Time and Duration -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

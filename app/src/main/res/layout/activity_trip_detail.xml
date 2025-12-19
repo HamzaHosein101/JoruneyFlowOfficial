@@ -34,7 +34,6 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Header card (destination/dates/budget) -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -89,7 +88,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Feature grid -->
             <androidx.gridlayout.widget.GridLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -97,8 +95,6 @@
                 app:rowCount="3"
                 app:columnCount="2">
 
-                <!-- Card template: icon + label, center aligned -->
-                <!-- AI Chatbot -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardChatbot"
                     android:layout_width="0dp"
@@ -137,7 +133,6 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Itinerary -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardItinerary"
                     android:layout_width="0dp"
@@ -175,7 +170,6 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Checklist -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardChecklist"
                     android:layout_width="0dp"
@@ -213,7 +207,6 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Expense tracker -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardExpenses"
                     android:layout_width="0dp"
@@ -251,7 +244,6 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Reviews (full width) -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardReviews"
                     android:layout_width="0dp"
@@ -292,7 +284,6 @@
 
             </androidx.gridlayout.widget.GridLayout>
 
-            <!-- Weather -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardWeather"
                 android:layout_width="match_parent"
@@ -310,7 +301,6 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <!-- Header row -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -337,7 +327,6 @@
                     </LinearLayout>
 
 
-                    <!-- Current conditions -->
                     <LinearLayout
                         android:id="@+id/rowCurrent"
                         android:layout_width="match_parent"
@@ -371,7 +360,6 @@
                             android:paddingStart="6dp"/>
                     </LinearLayout>
 
-                    <!-- Daily forecast -->
                     <HorizontalScrollView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -386,7 +374,6 @@
                             android:orientation="horizontal" />
                     </HorizontalScrollView>
 
-                    <!-- Hourly forecast (hidden until we have data) -->
                     <HorizontalScrollView
                         android:id="@+id/hourlyScroll"
                         android:layout_width="match_parent"

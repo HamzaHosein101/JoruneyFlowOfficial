@@ -13,7 +13,6 @@
         android:padding="16dp"
         android:paddingBottom="80dp">
 
-        <!-- Budget Overview Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -106,7 +105,6 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Recent Expenses Card with Search and Sort -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -146,7 +144,6 @@
                         android:textStyle="bold" />
                 </LinearLayout>
 
-                <!-- Search Bar with border -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -178,7 +175,6 @@
                         android:maxLines="1" />
                 </LinearLayout>
 
-                <!-- Sort by Section -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -203,14 +199,12 @@
                         android:paddingEnd="12dp" />
                 </LinearLayout>
 
-                <!-- Divider -->
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="#E0E0E0"
                     android:layout_marginBottom="12dp" />
 
-                <!-- Expenses RecyclerView - FIXED FOR NESTED SCROLLING -->
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recyclerViewExpenses"
                     android:layout_width="match_parent"

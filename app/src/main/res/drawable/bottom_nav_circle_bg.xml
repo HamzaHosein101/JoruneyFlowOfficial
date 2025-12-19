@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Selected: small centered circle -->
     <item android:state_checked="true">
         <layer-list>
             <item
@@ -14,7 +13,6 @@
         </layer-list>
     </item>
 
-    <!-- Unselected: transparent -->
     <item>
         <shape android:shape="rectangle">
             <solid android:color="@android:color/transparent"/>

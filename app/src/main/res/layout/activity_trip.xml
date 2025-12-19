@@ -15,7 +15,6 @@
         android:layout_height="match_parent"
         android:padding="12dp">
 
-        <!-- Trip title -->
         <TextView
             android:id="@+id/txtTitle"
             android:layout_width="0dp"
@@ -27,7 +26,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toStartOf="@id/btnOverflow" />
 
-        <!-- 3-dot overflow button -->
         <ImageButton
             android:id="@+id/btnOverflow"
             android:layout_width="32dp"
@@ -39,7 +37,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Trip dates -->
         <TextView
             android:id="@+id/txtDates"
             android:layout_width="0dp"
