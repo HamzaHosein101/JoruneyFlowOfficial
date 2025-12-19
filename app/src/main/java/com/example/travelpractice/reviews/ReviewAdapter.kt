@@ -34,24 +34,24 @@ class ReviewAdapter(
         val item = getItem(position)
         val b = holder.binding
 
-        // Title + comment
+
         b.tvLocation.text = item.locationName
         b.tvComment.text = item.comment
 
-        // Username chip
+
         b.tvUserChip.text = item.username
 
-        // Rating (indicator)
+
         b.ratingBarStatic.rating = item.rating.toFloat()
 
-        // Date pill (month/day)
+
         val date = item.tripDate.toDate()
         val month = java.text.SimpleDateFormat("MMM", java.util.Locale.getDefault()).format(date)
         val day = java.text.SimpleDateFormat("dd", java.util.Locale.getDefault()).format(date)
         b.tvMonth.text = month
         b.tvDay.text = day
 
-        // Actions
+
         val isOwner = item.userId == currentUserId
         b.btnDelete.visibility = if (isOwner) View.VISIBLE else View.GONE
         b.btnReport.visibility = if (isOwner) View.GONE else View.VISIBLE

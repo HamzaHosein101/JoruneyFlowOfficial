@@ -10,14 +10,14 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-// Data model for API response
+
 data class CurrencyApiResponse(
     val result: String,
     val base_code: String,
     val conversion_rates: Map<String, Double>
 )
 
-// Retrofit interface for the API
+
 interface CurrencyApiService {
     @GET("latest/{apiKey}")
     fun getExchangeRates(
@@ -26,10 +26,10 @@ interface CurrencyApiService {
     ): Call<CurrencyApiResponse>
 }
 
-// Currency API manager
+
 class CurrencyApiManager {
 
-    // This interface is OUTSIDE the companion object so it’s accessible from anywhere
+
     interface ExchangeRateCallback {
         fun onSuccess(rates: Map<String, Double>)
         fun onFailure(error: String)
@@ -46,7 +46,7 @@ class CurrencyApiManager {
 
         private val apiService = retrofit.create(CurrencyApiService::class.java)
 
-        // Fetch exchange rates from the API
+
         fun fetchExchangeRates(callback: ExchangeRateCallback) {
             val call = apiService.getExchangeRates(API_KEY)
 

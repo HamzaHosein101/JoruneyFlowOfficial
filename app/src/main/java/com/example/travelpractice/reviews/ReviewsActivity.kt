@@ -53,11 +53,11 @@ class ReviewsActivity : AppCompatActivity() {
         binding = ActivityReviewsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Toolbar
+
         setSupportActionBar(binding.topAppBar)
         binding.topAppBar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
-        // Recycler
+
         adapter = ReviewAdapter(
             currentUserId = auth.currentUser?.uid,
             onReport = { review -> showReportDialog(review) },
@@ -65,23 +65,22 @@ class ReviewsActivity : AppCompatActivity() {
         )
         binding.reviewsRecycler.adapter = adapter
 
-        // Tight item spacing
+
         val space = (6 * resources.displayMetrics.density).toInt()
         binding.reviewsRecycler.addItemDecoration(SpacesItemDecoration(space))
 
-        // Initial feed (no filter to start; search handles filtering live)
+
         vm.observe(locationFilter = null)
 
-        // Collect state and render
+
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 vm.state.collect { state ->
                     adapter.submitList(state.reviews)
                     binding.reviewsRecycler.isVisible = state.reviews.isNotEmpty()
-                    // simple empty-state snackbar (optional)
+
                     if (state.reviews.isEmpty()) {
-                        // You could show a dedicated empty view instead
-                        // Snackbar.make(binding.reviewsRoot, "No reviews yet", Snackbar.LENGTH_SHORT).show()
+
                     }
                     state.error?.let { msg ->
                         Snackbar.make(binding.reviewsRoot, msg, Snackbar.LENGTH_LONG).show()
@@ -90,21 +89,20 @@ class ReviewsActivity : AppCompatActivity() {
             }
         }
 
-        // Add review
+
         binding.fabAddReview.setOnClickListener { showAddDialog(defaultLocation = null) }
     }
 
-    // -- Search menu ----------------------------------------------------------
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-// Put the menu on the toolbar itself
+
         binding.topAppBar.inflateMenu(R.menu.menu_reviews)
 
         val searchItem = binding.topAppBar.menu.findItem(R.id.action_search)
         val searchView = searchItem.actionView as androidx.appcompat.widget.SearchView
         searchView.queryHint = "Search by location"
 
-// listeners
+
         searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 vm.searchByLocation(query)
@@ -141,7 +139,7 @@ class ReviewsActivity : AppCompatActivity() {
         return true
     }
 
-    // -- Add Review dialog ----------------------------------------------------
+
 
     private fun showAddDialog(defaultLocation: String?) {
         val dlgBinding = DialogAddReviewBinding.inflate(LayoutInflater.from(this))
@@ -149,11 +147,11 @@ class ReviewsActivity : AppCompatActivity() {
             .setView(dlgBinding.root)
             .create()
 
-        // Prefill & (optionally) lock location if you pass one
+
         dlgBinding.etLocation.setText(defaultLocation ?: "")
         dlgBinding.etLocation.isEnabled = defaultLocation == null
 
-        // Default rating so it's never 0
+
         dlgBinding.ratingBar.rating = 5f
 
         var selectedTs: Timestamp? = null
@@ -192,7 +190,7 @@ class ReviewsActivity : AppCompatActivity() {
         return sdf.format(ts.toDate())
     }
 
-    // -- Report Review dialog ----------------------------------------------------
+
 
     private fun showReportDialog(review: com.example.travelpractice.data.Review) {
         val dlgBinding = DialogReportReviewBinding.inflate(LayoutInflater.from(this))
@@ -200,7 +198,7 @@ class ReviewsActivity : AppCompatActivity() {
             .setView(dlgBinding.root)
             .create()
 
-        // Setup reason dropdown
+
         val reasons = listOf(
             "Spam or misleading",
             "Inappropriate",
@@ -211,9 +209,9 @@ class ReviewsActivity : AppCompatActivity() {
         val adapter = android.widget.ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, reasons)
         dlgBinding.spinnerReason.setAdapter(adapter)
         dlgBinding.spinnerReason.setText(reasons[0], false)
-        dlgBinding.spinnerReason.threshold = 1 // Show dropdown after 1 character (always show on click)
+        dlgBinding.spinnerReason.threshold = 1
         
-        // Make it show dropdown when clicked or touched
+
         dlgBinding.spinnerReason.setOnClickListener {
             dlgBinding.spinnerReason.showDropDown()
         }
@@ -229,7 +227,7 @@ class ReviewsActivity : AppCompatActivity() {
             dlgBinding.spinnerReason.dismissDropDown()
         }
 
-        // Setup description text watcher for word count validation
+
         dlgBinding.etDescription.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -238,7 +236,7 @@ class ReviewsActivity : AppCompatActivity() {
                 val words = text.trim().split(Regex("\\s+")).filter { it.isNotBlank() }
                 val wordCount = if (text.isBlank()) 0 else words.size
                 
-                // Show error if over 500 words
+
                 if (wordCount > 500) {
                     dlgBinding.textInputDescription.error = "Maximum 500 words allowed ($wordCount words)"
                 } else {
@@ -266,7 +264,7 @@ class ReviewsActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             
-            // Submit report
+
             lifecycleScope.launch {
                 val result = vm.reportWithDetailsAsync(review.id, reason, description.takeIf { it.isNotBlank() })
                 if (result.isSuccess) {

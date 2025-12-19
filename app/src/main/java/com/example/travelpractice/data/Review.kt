@@ -7,12 +7,12 @@ data class Review(
     val username: String = "",
     val locationName: String = "",
     val tripDate: Timestamp = Timestamp.now(),
-    val rating: Int = 0,               // 1..5
+    val rating: Int = 0,
     val comment: String = "",
     val photoUrl: String? = null,
     val createdAt: Timestamp = Timestamp.now(),
     val updatedAt: Timestamp = Timestamp.now(),
     val likeCount: Int = 0,
     val reportCount: Int = 0,
-    val adminStatus: String? = null    // "kept", "deleted", or null
+    val adminStatus: String? = null
 )

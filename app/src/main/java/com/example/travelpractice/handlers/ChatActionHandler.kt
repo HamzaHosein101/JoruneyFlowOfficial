@@ -4,14 +4,10 @@ import android.content.Context
 import android.content.Intent
 import com.example.travelpractice.utils.IntentDetector
 
-/**
- * Handles actions triggered from chat messages
- */
+
 class ChatActionHandler(private val context: Context) {
 
-    /**
-     * Process detected intent and generate appropriate response with actions
-     */
+
     fun handleIntent(detectedIntent: IntentDetector.DetectedIntent): ChatAction {
         return when (detectedIntent.intent) {
             IntentDetector.Intent.EXPENSE_TRACKER -> handleExpenseIntent(detectedIntent)
@@ -92,9 +88,7 @@ class ChatActionHandler(private val context: Context) {
         )
     }
 
-    /**
-     * Execute the selected action
-     */
+
     fun executeAction(actionType: ActionType, data: Map<String, String> = emptyMap()) {
         when (actionType) {
             ActionType.OPEN_EXPENSE_TRACKER -> openExpenseTracker()
@@ -119,7 +113,7 @@ class ChatActionHandler(private val context: Context) {
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             context.startActivity(intent)
         } catch (e: ClassNotFoundException) {
-            // Activity not found - handle gracefully
+
         }
     }
 
@@ -131,7 +125,7 @@ class ChatActionHandler(private val context: Context) {
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             context.startActivity(intent)
         } catch (e: ClassNotFoundException) {
-            // Activity not found - handle gracefully
+
         }
     }
 
@@ -143,14 +137,12 @@ class ChatActionHandler(private val context: Context) {
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             context.startActivity(intent)
         } catch (e: ClassNotFoundException) {
-            // Activity not found - handle gracefully
+
         }
     }
 }
 
-/**
- * Sealed class representing different chat actions
- */
+
 sealed class ChatAction {
     object None : ChatAction()
     data class ShowOptions(
@@ -160,29 +152,25 @@ sealed class ChatAction {
     data class Navigate(val destination: String, val extras: Map<String, String>) : ChatAction()
 }
 
-/**
- * Represents an action option that can be presented to the user
- */
+
 data class ActionOption(
     val label: String,
     val actionType: ActionType
 )
 
-/**
- * Types of actions that can be executed
- */
+
 enum class ActionType {
-    // Expense Tracker Actions
+
     OPEN_EXPENSE_TRACKER,
     ADD_EXPENSE,
     VIEW_EXPENSE_SUMMARY,
 
-    // Itinerary Actions
+
     OPEN_ITINERARY,
     ADD_ITINERARY_ITEM,
     VIEW_TODAY_ITINERARY,
 
-    // Checklist Actions
+
     OPEN_CHECKLIST,
     ADD_CHECKLIST_ITEM,
     VIEW_PACKING_PROGRESS

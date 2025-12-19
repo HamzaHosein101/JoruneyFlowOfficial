@@ -2,14 +2,9 @@ package com.example.travelpractice.utils
 
 import android.util.Log
 
-/**
- * Detects user intent from chat messages
- */
 object IntentDetector {
 
-    /**
-     * Intent types that can be detected
-     */
+
     enum class Intent {
         EXPENSE_TRACKER,
         ITINERARY,
@@ -20,16 +15,14 @@ object IntentDetector {
         UNKNOWN
     }
 
-    /**
-     * Result of intent detection
-     */
+
     data class DetectedIntent(
         val intent: Intent,
         val confidence: Float,
         val extractedData: Map<String, String> = emptyMap()
     )
 
-    // Keywords for each intent type
+
     private val expenseKeywords = listOf(
         "expense", "expenses", "spending", "spent", "cost", "costs", "money",
         "budget", "paid", "payment", "price", "bill", "receipt", "transaction",
@@ -48,7 +41,7 @@ object IntentDetector {
         "baggage", "luggage", "suitcase", "bag"
     )
 
-    // ✅ ENHANCED: Added "from" and "to" for better detection
+
     private val flightKeywords = listOf(
         "flight", "flights", "fly", "flying", "airplane", "plane", "airline", "airlines",
         "ticket", "tickets", "book flight", "aviation", "departure", "arrival",
@@ -56,7 +49,7 @@ object IntentDetector {
         "from", "to", "round trip", "roundtrip", "one way", "direct", "nonstop", "non-stop"
     )
 
-    // ✅ Hotel keywords
+
     private val hotelKeywords = listOf(
         "hotel", "hotels", "accommodation", "stay", "lodging", "room", "rooms",
         "booking", "resort", "inn", "motel", "hostel", "book hotel", "find hotel",
@@ -68,9 +61,7 @@ object IntentDetector {
         "go to", "navigate", "take me to"
     )
 
-    /**
-     * Detect intent from user message
-     */
+
     fun detectIntent(message: String): DetectedIntent {
         val lowerMessage = message.lowercase()
 
@@ -125,9 +116,7 @@ object IntentDetector {
         }
     }
 
-    /**
-     * Calculate confidence score based on keyword matching
-     */
+
     private fun calculateScore(message: String, keywords: List<String>): Float {
         var matchedKeywords = 0
         var totalWeight = 0f
@@ -137,14 +126,14 @@ object IntentDetector {
                 matchedKeywords++
                 // Give more weight to longer, more specific keywords
                 totalWeight += when {
-                    keyword.length >= 7 -> 2.0f  // Long keywords like "airplane", "flights"
-                    keyword.length >= 5 -> 1.5f  // Medium keywords like "flight"
-                    else -> 1.0f                  // Short keywords like "fly", "jfk", "from", "to"
+                    keyword.length >= 7 -> 2.0f
+                    keyword.length >= 5 -> 1.5f
+                    else -> 1.0f
                 }
             }
         }
 
-        // Return score based on matched keywords and their weights
+
         return if (matchedKeywords > 0) {
             // Base score from weight
             val baseScore = totalWeight / keywords.size.toFloat()
@@ -157,13 +146,11 @@ object IntentDetector {
         }
     }
 
-    /**
-     * Extract expense-related data from message
-     */
+
     private fun extractExpenseData(message: String): Map<String, String> {
         val data = mutableMapOf<String, String>()
 
-        // Extract amount (e.g., "$50", "50 dollars", "50.99")
+
         val amountRegex = Regex("""\$?(\d+\.?\d*)\s*(dollars?|usd|eur|gbp)?""")
         amountRegex.find(message)?.let {
             data["amount"] = it.groupValues[1]
@@ -188,13 +175,11 @@ object IntentDetector {
         return data
     }
 
-    /**
-     * Extract itinerary-related data from message
-     */
+
     private fun extractItineraryData(message: String): Map<String, String> {
         val data = mutableMapOf<String, String>()
 
-        // Extract time references
+
         val timeKeywords = mapOf(
             "today" to "today",
             "tomorrow" to "tomorrow",
@@ -230,13 +215,11 @@ object IntentDetector {
         return data
     }
 
-    /**
-     * Extract checklist-related data from message
-     */
+
     private fun extractChecklistData(message: String): Map<String, String> {
         val data = mutableMapOf<String, String>()
 
-        // Extract category
+
         val categories = mapOf(
             "clothing" to listOf("clothes", "clothing", "shirt", "pants", "dress", "shoes"),
             "toiletries" to listOf("toiletries", "toothbrush", "shampoo", "soap", "hygiene"),
@@ -254,9 +237,7 @@ object IntentDetector {
         return data
     }
 
-    /**
-     * Check if message is requesting navigation
-     */
+
     fun isNavigationRequest(message: String): Boolean {
         val lowerMessage = message.lowercase()
         return navigationKeywords.any { lowerMessage.contains(it) }

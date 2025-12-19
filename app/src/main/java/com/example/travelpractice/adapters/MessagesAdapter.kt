@@ -87,7 +87,7 @@ class MessagesAdapter(
         private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
 
         fun bind(message: Message) {
-            // ✅ CRITICAL: Make URLs clickable every time view is bound
+
             makeLinksClickable(messageText, message.text)
 
             timestamp.text = timeFormat.format(message.timestamp)
@@ -107,10 +107,7 @@ class MessagesAdapter(
             }
         }
 
-        /**
-         * ✅ Make URLs clickable and open in Chrome Custom Tabs
-         * This method is called every time the view is bound, ensuring URLs persist
-         */
+
         private fun makeLinksClickable(textView: TextView, text: String) {
             val spannableString = SpannableString(text)
             val matcher = Patterns.WEB_URL.matcher(text)
@@ -155,9 +152,7 @@ class MessagesAdapter(
             }
         }
 
-        /**
-         * ✅ Open URL in Chrome Custom Tab with your app theme
-         */
+
         private fun openInCustomTab(context: android.content.Context, url: String) {
             try {
                 Log.d("MessagesAdapter", "Opening URL: $url")

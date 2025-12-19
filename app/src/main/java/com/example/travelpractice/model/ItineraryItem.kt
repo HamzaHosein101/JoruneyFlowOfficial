@@ -6,14 +6,14 @@ data class ItineraryItem(
     var tripId: String = "",
     var title: String = "",
     var description: String = "",
-    var date: Long = 0L, // timestamp for the day
-    var startTime: String = "", // e.g., "09:00 AM"
-    var endTime: String = "", // e.g., "11:00 AM"
-    var duration: Int = 60, // duration in minutes
+    var date: Long = 0L,
+    var startTime: String = "",
+    var endTime: String = "",
+    var duration: Int = 60,
     var location: String = "",
-    var cost: Double = 0.0, // cost in dollars
+    var cost: Double = 0.0,
     var isCompleted: Boolean = false,
     var notes: String = "",
-    var type: String = "General", // Flight, Meal, Sightseeing, Tour, Beach/Pool Time, Adventure, Shopping, General
+    var type: String = "General",
     var createdAt: Long = System.currentTimeMillis()
 ) : Serializable

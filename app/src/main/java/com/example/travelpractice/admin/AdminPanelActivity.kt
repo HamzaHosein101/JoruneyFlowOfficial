@@ -169,7 +169,7 @@ class AdminPanelActivity : AppCompatActivity() {
                 }
             }
             
-            // Setup toolbar back button - wrap in try-catch in case SearchBar fails
+
             try {
                 searchBar.setNavigationOnClickListener {
                     onBackPressedDispatcher.onBackPressed()
@@ -215,7 +215,7 @@ class AdminPanelActivity : AppCompatActivity() {
             recyclerReports.adapter = adapter
         } catch (e: Exception) {
             android.util.Log.e("AdminPanel", "Failed to setup RecyclerView", e)
-            throw e // Re-throw to be caught by onCreate's try-catch
+            throw e
         }
     }
 
@@ -234,7 +234,7 @@ class AdminPanelActivity : AppCompatActivity() {
     
     private fun setupSearch() {
         try {
-            // Try to setup SearchBar and SearchView - if it fails, just hide them
+
             if (::searchBar.isInitialized && ::searchView.isInitialized) {
                 searchView.setupWithSearchBar(searchBar)
                 
@@ -246,7 +246,7 @@ class AdminPanelActivity : AppCompatActivity() {
                     }
                 }
                 
-                // Setup search text listener
+
                 try {
                     searchView.editText.setOnEditorActionListener { _, _, _ ->
                         searchQuery = searchView.text.toString()
@@ -260,14 +260,13 @@ class AdminPanelActivity : AppCompatActivity() {
                     }
                 } catch (e: Exception) {
                     android.util.Log.e("AdminPanel", "Failed to setup search listener", e)
-                    // Hide search if editText not available
+
                     searchBar.visibility = View.GONE
                     searchView.visibility = View.GONE
                 }
             }
         } catch (e: Exception) {
-            // SearchBar/SearchView not available or incompatible version
-            // Just hide them and continue
+
             android.util.Log.e("AdminPanel", "Search setup failed completely", e)
             try {
                 if (::searchBar.isInitialized) searchBar.visibility = View.GONE
@@ -320,7 +319,7 @@ class AdminPanelActivity : AppCompatActivity() {
                 }
             }
             
-            // Also add individual click listeners as backup
+
             findViewById<Chip>(R.id.chipReported)?.setOnClickListener {
                 android.util.Log.d("AdminPanel", "chipReported clicked")
                 if (currentFilter != FilterType.REPORTED) {
@@ -352,7 +351,7 @@ class AdminPanelActivity : AppCompatActivity() {
         } catch (e: Exception) {
             android.util.Log.e("AdminPanel", "Failed to setup filters", e)
             e.printStackTrace()
-            // Continue without filters
+
         }
     }
     
@@ -411,7 +410,7 @@ class AdminPanelActivity : AppCompatActivity() {
     }
     
     private fun loadReviews() {
-        // Remove existing listener
+
         reviewsListener?.remove()
         reviewsListener = null
         
@@ -429,8 +428,7 @@ class AdminPanelActivity : AppCompatActivity() {
         try {
             val db = FirebaseFirestore.getInstance()
             
-            // Use a real-time listener instead of one-time query
-            // This ensures reported reviews show up immediately
+
             reviewsListener = db.collection("reviews")
                 .addSnapshotListener { snapshot, error ->
                     lifecycleScope.launch {
@@ -526,7 +524,7 @@ class AdminPanelActivity : AppCompatActivity() {
                                 }
                             }
                             
-                            // Sort the filtered results
+
                             val sorted = when (currentFilter) {
                                 FilterType.REPORTED -> {
                                     filteredByStatus.sortedByDescending { it.reportCount }
@@ -538,7 +536,7 @@ class AdminPanelActivity : AppCompatActivity() {
                             
                             android.util.Log.d("AdminPanel", "${currentFilter} filter: ${sorted.size} reviews")
                             
-                            // Filter by search query
+
                             val finalReviewList = if (searchQuery.isNotBlank()) {
                                 sorted.filter { 
                                     it.locationName.contains(searchQuery, ignoreCase = true) ||
@@ -553,10 +551,10 @@ class AdminPanelActivity : AppCompatActivity() {
                             
                             android.util.Log.d("AdminPanel", "Final list size: ${finalReviewList.size}")
                             
-                            // Fetch report details for reported reviews
+
                             val reviewsWithReports = finalReviewList.map { review ->
                                 if (review.reportCount > 0) {
-                                    // Fetch the most recent report for this review
+
                                     try {
                                         val reportsSnapshot = db.collection("reviews")
                                             .document(review.id)
@@ -737,7 +735,7 @@ class AdminPanelActivity : AppCompatActivity() {
     }
     
     private fun handleKeepReview(review: Review) {
-        // Check authentication
+
         val auth = FirebaseAuth.getInstance()
         if (auth.currentUser == null) {
             Snackbar.make(findViewById(R.id.root), "Please log in to perform this action", Snackbar.LENGTH_LONG).show()
@@ -780,7 +778,7 @@ class AdminPanelActivity : AppCompatActivity() {
     }
     
     private fun handleDeleteReview(review: Review) {
-        // Check authentication
+
         val auth = FirebaseAuth.getInstance()
         if (auth.currentUser == null) {
             Snackbar.make(findViewById(R.id.root), "Please log in to perform this action", Snackbar.LENGTH_LONG).show()
@@ -824,7 +822,7 @@ class AdminPanelActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        // Remove listener when activity stops to prevent memory leaks
+
         reviewsListener?.remove()
         reviewsListener = null
         usersListener?.remove()
@@ -833,8 +831,6 @@ class AdminPanelActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         super.onBackPressed()
-        // Optionally clear admin session when leaving
-        // Uncomment the line below if you want to require login every time
-        // prefs.edit().putBoolean(KEY_IS_LOGGED_IN, false).apply()
+
     }
 }

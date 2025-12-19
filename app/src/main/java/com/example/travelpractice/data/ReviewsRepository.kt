@@ -18,12 +18,11 @@ class ReviewsRepository(
 ) {
     private val col get() = db.collection("reviews")
 
-    /** Live stream of reviews (optionally filter by location). */
+
     fun streamReviews(locationFilter: String? = null): Flow<List<Review>> = callbackFlow {
         var query: Query = col.orderBy("createdAt", Query.Direction.DESCENDING)
         if (!locationFilter.isNullOrBlank()) {
-            // If you use this filter, be sure to create the composite index:
-            // locationName ASC, createdAt DESC
+
             query = col.whereEqualTo("locationName", locationFilter)
                 .orderBy("createdAt", Query.Direction.DESCENDING)
         }
@@ -36,7 +35,7 @@ class ReviewsRepository(
             }
 
             val items = snap?.documents?.mapNotNull { d ->
-                // Filter out deleted reviews from regular user views
+
                 val adminStatus = d.getString("adminStatus")
                 if (adminStatus == "deleted") {
                     return@mapNotNull null
@@ -70,11 +69,11 @@ class ReviewsRepository(
         val query = if (q.isNullOrEmpty()) {
             col.orderBy("createdAt", Query.Direction.DESCENDING)
         } else {
-            // Prefix search on folded field: startAt..endAt(\uf8ff)
+
             col.orderBy("locationNameFold")
                 .startAt(q)
                 .endAt(q + "\uf8ff")
-            // (no secondary order here -> simplest index requirements)
+
         }
 
         val reg = query.addSnapshotListener { snap, err ->
@@ -83,7 +82,7 @@ class ReviewsRepository(
                 trySend(emptyList()); return@addSnapshotListener
             }
             val items = snap?.documents?.mapNotNull { d ->
-                // Filter out deleted reviews from regular user views
+
                 val adminStatus = d.getString("adminStatus")
                 if (adminStatus == "deleted") {
                     return@mapNotNull null
@@ -111,7 +110,7 @@ class ReviewsRepository(
     }
 
 
-    /** Add a new review as the signed-in user. */
+
     suspend fun addReview(
         locationName: String,
         tripDate: Timestamp,
@@ -141,7 +140,7 @@ class ReviewsRepository(
         }
     }
 
-    /** Allow users to delete only their own reviews. */
+
     suspend fun deleteOwnReview(reviewId: String): Result<Unit> {
         val user = auth.currentUser ?: return Result.failure(IllegalStateException("Not signed in"))
         return try {
@@ -157,7 +156,7 @@ class ReviewsRepository(
         }
     }
 
-    /** Simple report mechanism (increments a counter). */
+
     suspend fun reportReview(reviewId: String): Result<Unit> = try {
         db.runTransaction { tr ->
             val ref = col.document(reviewId)
@@ -170,13 +169,13 @@ class ReviewsRepository(
         Result.failure(e)
     }
 
-    /** Report review with reason and optional description. */
+
     suspend fun reportReviewWithDetails(reviewId: String, reason: String, description: String?): Result<Unit> = try {
         val user = auth.currentUser ?: return Result.failure(IllegalStateException("Not signed in"))
         
         android.util.Log.d("ReviewsRepo", "Reporting review $reviewId with reason: $reason")
         
-        // Increment report count
+
         val newReportCount = db.runTransaction { tr ->
             val ref = col.document(reviewId)
             val snap = tr.get(ref)
@@ -189,7 +188,7 @@ class ReviewsRepository(
         
         android.util.Log.d("ReviewsRepo", "Report count updated to $newReportCount for review $reviewId")
         
-        // Store report details in a subcollection
+
         val reportData = hashMapOf(
             "reviewId" to reviewId,
             "userId" to user.uid,
@@ -214,17 +213,17 @@ class ReviewsRepository(
     }
 }
 
-/** Defensive conversion of various types to Firestore Timestamp. */
+
 private fun toTimestamp(v: Any): Timestamp = when (v) {
     is Timestamp -> v
     is Date      -> Timestamp(v)
     is Long      -> {
-        // Assume epoch millis; if your old data was seconds, switch to (v * 1000)
+
         Timestamp(Date(v))
     }
     is Double    -> Timestamp(Date(v.toLong()))
     is String    -> {
-        // Try ISO-8601 like "2025-10-29T13:31:00Z"
+
         val iso = runCatching {
             SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.US).parse(v)
         }.getOrNull()

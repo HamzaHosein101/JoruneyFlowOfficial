@@ -29,13 +29,13 @@ class ChatViewModel(
     private val intentDetector = IntentDetector
     private val dataFetcher = AppDataFetcher()
 
-    // ✅ Initialize Flight Search Helper (Amadeus for both Flights and Hotels)
+
     private val flightHelper = FlightSearchHelper(
         clientId = "F89gSTzjGAmDYL2bLu3aYs6NRjyYL0b1",
         clientSecret = "sBZVENdviUxICZTQ"
     )
 
-    // Track current trip context
+
     private var currentTripId: String? = null
 
     private val _messages = MutableLiveData<List<Message>>(emptyList())
@@ -52,9 +52,7 @@ class ChatViewModel(
         loadMostRecentTrip()
     }
 
-    /**
-     * Load the most recent trip automatically
-     */
+
     private fun loadMostRecentTrip() {
         viewModelScope.launch {
             currentTripId = dataFetcher.getMostRecentTripId()
@@ -62,9 +60,7 @@ class ChatViewModel(
         }
     }
 
-    /**
-     * Load chat history from Firebase
-     */
+
     private fun loadChatHistory() {
         _isLoading.value = true
         viewModelScope.launch {
@@ -88,9 +84,7 @@ class ChatViewModel(
         }
     }
 
-    /**
-     * Add welcome message
-     */
+
     private fun addWelcomeMessage() {
         val welcomeMessage = Message(
             id = System.currentTimeMillis(),
@@ -106,9 +100,7 @@ class ChatViewModel(
         }
     }
 
-    /**
-     * Send a user message
-     */
+
     fun sendMessage(text: String) {
         if (text.isBlank()) return
 
@@ -163,9 +155,7 @@ class ChatViewModel(
         }
     }
 
-    /**
-     * Handle expense-related requests
-     */
+
     private fun handleExpenseRequest(detectedIntent: IntentDetector.DetectedIntent) {
         _isTyping.value = true
 
@@ -208,9 +198,7 @@ class ChatViewModel(
         }
     }
 
-    /**
-     * Handle itinerary-related requests
-     */
+
     private fun handleItineraryRequest(detectedIntent: IntentDetector.DetectedIntent) {
         _isTyping.value = true
 
@@ -253,9 +241,7 @@ class ChatViewModel(
         }
     }
 
-    /**
-     * Handle checklist-related requests
-     */
+
     private fun handleChecklistRequest(detectedIntent: IntentDetector.DetectedIntent) {
         _isTyping.value = true
 
@@ -298,9 +284,7 @@ class ChatViewModel(
         }
     }
 
-    /**
-     * ✅ Handle flight search requests (DYNAMIC - supports city names!)
-     */
+
     private fun handleFlightSearch(detectedIntent: IntentDetector.DetectedIntent, query: String) {
         Log.d("ChatViewModel", "handleFlightSearch called with query: $query")
         _isTyping.value = true
@@ -329,9 +313,7 @@ class ChatViewModel(
         }
     }
 
-    /**
-     * ✅ Handle hotel search requests (DYNAMIC - supports ANY city!)
-     */
+
     private fun handleHotelSearch(detectedIntent: IntentDetector.DetectedIntent, query: String) {
         Log.d("ChatViewModel", "handleHotelSearch called with query: $query")
         _isTyping.value = true
@@ -360,9 +342,7 @@ class ChatViewModel(
         }
     }
 
-    /**
-     * ✅ DYNAMIC: Parse flight query and search (supports city names OR airport codes!)
-     */
+
     private suspend fun parseAndSearchFlights(query: String): String {
         val lowerQuery = query.lowercase()
         Log.d("ChatViewModel", "Parsing flight query: $lowerQuery")
@@ -449,14 +429,12 @@ class ChatViewModel(
         )
     }
 
-    /**
-     * ✅ Parse hotel query for Amadeus API (DYNAMIC - NO HARDCODING!)
-     */
+
     private suspend fun parseAndSearchHotelsAmadeus(query: String): String {
         val lowerQuery = query.lowercase()
         Log.d("ChatViewModel", "Parsing hotel query for Amadeus: $lowerQuery")
 
-        // Extract city CODE dynamically using API
+
         val cityCode = extractCityCode(lowerQuery)
 
         if (cityCode == null) {
@@ -497,9 +475,7 @@ class ChatViewModel(
         )
     }
 
-    /**
-     * ✅ Extract airline from query
-     */
+
     private fun extractAirline(query: String): String? {
         val airlines = mapOf(
             "delta" to "DL",
@@ -532,9 +508,7 @@ class ChatViewModel(
         return null
     }
 
-    /**
-     * ✅ NEW: Extract origin and destination from flight query
-     */
+
     private fun extractFlightLocations(query: String): Pair<String?, String?> {
         // Pattern 1: "from X to Y" (most common)
         val fromToPattern = Regex("from\\s+([a-zA-Z][a-zA-Z\\s]{2,})\\s+to\\s+([a-zA-Z][a-zA-Z\\s]{2,})(?:\\s|$)")
@@ -575,9 +549,7 @@ class ChatViewModel(
         return Pair(null, null)
     }
 
-    /**
-     * ✅ IMPROVED: Get airport code (with fallback mapping - handles 500+ airports)
-     */
+
     private suspend fun getAirportCode(location: String): String? {
         val cleanLocation = location.trim()
 
@@ -615,9 +587,7 @@ class ChatViewModel(
         return null
     }
 
-    /**
-     * ✅ COMPREHENSIVE: Global airport mapping (500+ airports worldwide)
-     */
+
     private fun getFallbackAirportCode(location: String): String? {
         val cleanLocation = location.trim().lowercase()
 
@@ -877,7 +847,7 @@ class ChatViewModel(
 
 
     private suspend fun extractCityCode(query: String): String? {
-        // Extract city name from query
+
         val cityName = extractCityName(query)
 
         if (cityName == null) {
@@ -887,7 +857,7 @@ class ChatViewModel(
 
         Log.d("ChatViewModel", "Extracted city name: $cityName")
 
-        // Try fallback first
+
         val fallbackCode = getFallbackAirportCode(cityName)
         if (fallbackCode != null) {
             Log.d("ChatViewModel", "Found city code via fallback: $fallbackCode for $cityName")
@@ -907,7 +877,7 @@ class ChatViewModel(
 
 
     private fun extractCityName(query: String): String? {
-        // Common patterns for city extraction
+
         val patterns = listOf(
             // "in [city]"
             Regex("(?:in|at)\\s+([a-zA-Z][a-zA-Z\\s]{2,})(?:\\s+(?:on|from|for|to|december|january|february|march|april|may|june|july|august|september|october|november|\\d+|$))"),
@@ -939,7 +909,7 @@ class ChatViewModel(
 
 
     private fun extractGuestCount(query: String): Int {
-        // Look for patterns like "2 adults", "3 people", "4 guests"
+
         val patterns = listOf(
             Regex("(\\d+)\\s+(adult|adults|people|person|guest|guests)"),
             Regex("for\\s+(\\d+)")
@@ -956,11 +926,11 @@ class ChatViewModel(
             }
         }
 
-        return 2 // Default to 2 adults
+        return 2
     }
 
     private fun extractDate(query: String, context: String = "departure"): String? {
-        // Look for explicit date format: YYYY-MM-DD
+
         val datePattern = Regex("(\\d{4})-(\\d{2})-(\\d{2})")
         val match = datePattern.find(query)
         if (match != null) {
@@ -968,7 +938,7 @@ class ChatViewModel(
             return match.value
         }
 
-        // Look for relative dates
+
         val calendar = Calendar.getInstance()
 
         when {
@@ -1014,7 +984,7 @@ class ChatViewModel(
             calendar.set(Calendar.MONTH, monthNum)
             calendar.set(Calendar.DAY_OF_MONTH, day)
 
-            // If date is in the past, assume next year
+
             if (calendar.before(Calendar.getInstance())) {
                 calendar.add(Calendar.YEAR, 1)
             }

@@ -69,7 +69,7 @@ class AddItineraryItemDialogFragment : DialogFragment() {
         val editEndTime = view.findViewById<TextInputEditText>(R.id.editEndTime)
         val autoCompleteType = view.findViewById<AutoCompleteTextView>(R.id.autoCompleteType)
 
-        // Debug: Check if date field is found
+
         if (editDate == null) {
             android.util.Log.e("AddItineraryItemDialog", "Date field not found!")
         }
@@ -78,15 +78,15 @@ class AddItineraryItemDialogFragment : DialogFragment() {
         val btnCancel = view.findViewById<Button>(R.id.btnCancel)
         val btnSave = view.findViewById<Button>(R.id.btnSave)
 
-        // Setup type selection dropdown with WHITE background
+
         val types = arrayOf("General", "Flight", "Meal", "Sightseeing", "Tour", "Beach/Pool Time", "Adventure", "Shopping")
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, types)
         autoCompleteType.setAdapter(adapter)
 
-        // Set white background for the dropdown popup
+
         autoCompleteType.setDropDownBackgroundResource(android.R.color.white)
 
-        // Pre-fill fields if editing
+
         editingItem?.let { item ->
             editTitle.setText(item.title)
             editLocation.setText(item.location)
@@ -95,37 +95,37 @@ class AddItineraryItemDialogFragment : DialogFragment() {
             editCost.setText(if (item.cost > 0) item.cost.toString() else "")
             autoCompleteType.setText(item.type, false) // false prevents filtering
 
-            // Parse existing date if available
+
             if (item.date > 0) {
                 selectedDate.timeInMillis = item.date
                 editDate.setText(dateFormat.format(selectedDate.time))
             }
 
-            // Parse existing start time if available
+
             parseStartTimeFromString(item.startTime)
 
-            // Calculate end time from start time + duration
+
             val endTime = calculateEndTime(item.startTime, item.duration)
             editEndTime.setText(endTime)
             parseEndTimeFromString(endTime)
         }
 
-        // Set initial date display if not editing
+
         if (editingItem == null) {
             editDate.setText(dateFormat.format(selectedDate.time))
         }
 
-        // Set up date picker click listener
+
         editDate.setOnClickListener {
             showDatePicker()
         }
 
-        // Set up start time picker click listener
+
         editStartTime.setOnClickListener {
             showStartTimePicker()
         }
 
-        // Set up end time picker click listener
+
         editEndTime.setOnClickListener {
             showEndTimePicker()
         }
@@ -309,11 +309,11 @@ class AddItineraryItemDialogFragment : DialogFragment() {
                         return
                     }
                 } catch (e: Exception) {
-                    // Continue to next format
+
                 }
             }
         } catch (e: Exception) {
-            // Use default time if parsing fails
+
             selectedStartHour = 12
             selectedStartMinute = 0
         }
@@ -340,11 +340,11 @@ class AddItineraryItemDialogFragment : DialogFragment() {
                         return
                     }
                 } catch (e: Exception) {
-                    // Continue to next format
+
                 }
             }
         } catch (e: Exception) {
-            // Use default time if parsing fails
+
             selectedEndHour = 13
             selectedEndMinute = 0
         }
@@ -367,11 +367,11 @@ class AddItineraryItemDialogFragment : DialogFragment() {
                         return timeFormat.format(calendar.time)
                     }
                 } catch (e: Exception) {
-                    // Continue to next format
+
                 }
             }
         } catch (e: Exception) {
-            // Return default end time
+
         }
         return "1:00 PM"
     }
@@ -392,12 +392,12 @@ class AddItineraryItemDialogFragment : DialogFragment() {
                         return (diff / (1000 * 60)).toInt() // Convert to minutes
                     }
                 } catch (e: Exception) {
-                    // Continue to next format
+
                 }
             }
         } catch (e: Exception) {
-            // Return default duration
+
         }
-        return 60 // Default 1 hour
+        return 60
     }
 }

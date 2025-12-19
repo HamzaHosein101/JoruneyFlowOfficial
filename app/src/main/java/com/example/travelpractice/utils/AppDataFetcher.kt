@@ -10,9 +10,7 @@ class AppDataFetcher {
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
-    /**
-     * Get list of user's trips
-     */
+
     suspend fun getUserTrips(): List<Trip> {
         return try {
             val userId = auth.currentUser?.uid ?: return emptyList()
@@ -37,9 +35,7 @@ class AppDataFetcher {
         }
     }
 
-    /**
-     * Get formatted trip list message
-     */
+
     suspend fun getTripsListMessage(): String {
         val trips = getUserTrips()
 
@@ -59,9 +55,7 @@ class AppDataFetcher {
         }
     }
 
-    /**
-     * Fetch expense summary for a specific trip
-     */
+
     suspend fun getExpenseSummary(tripId: String): String {
         return try {
             val userId = auth.currentUser?.uid ?: return "You're not logged in."
@@ -112,9 +106,7 @@ class AppDataFetcher {
         }
     }
 
-    /**
-     * Fetch itinerary summary for a specific trip
-     */
+
     suspend fun getItinerarySummary(tripId: String): String {
         return try {
             val itineraryItems = firestore.collection("itinerary")
@@ -162,9 +154,7 @@ class AppDataFetcher {
         }
     }
 
-    /**
-     * Fetch checklist summary for a specific trip
-     */
+
     suspend fun getChecklistSummary(tripId: String): String {
         return try {
             val userId = auth.currentUser?.uid ?: return "You're not logged in."
@@ -223,9 +213,7 @@ class AppDataFetcher {
         }
     }
 
-    /**
-     * Get the most recent trip ID
-     */
+
     suspend fun getMostRecentTripId(): String? {
         return try {
             val userId = auth.currentUser?.uid ?: return null
@@ -244,9 +232,7 @@ class AppDataFetcher {
     }
 }
 
-/**
- * Simple Trip data class
- */
+
 data class Trip(
     val id: String,
     val name: String,

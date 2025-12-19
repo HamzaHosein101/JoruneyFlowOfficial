@@ -36,20 +36,20 @@ class ExpenseTrackerActivity : AppCompatActivity() {
     var tripName = "Trip"
     var tripId = ""
 
-    // Currency conversion
+
     var currentDisplayCurrency = "USD"
     var conversionRates = mutableMapOf<String, Double>()
 
-    // Expense list
+
     val expenseList = mutableListOf<Expense>()
 
-    // Listener for real-time updates
+
     private var expenseListener: ListenerRegistration? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Get trip data from intent
+
         tripName = intent.getStringExtra("TRIP_NAME") ?: "Trip"
         budgetLimit = intent.getDoubleExtra("TRIP_BUDGET", 900.0)
         tripId = intent.getStringExtra("TRIP_ID") ?: ""
@@ -57,7 +57,7 @@ class ExpenseTrackerActivity : AppCompatActivity() {
         try {
             setContentView(R.layout.activity_expense_tracker)
 
-            // Toolbar
+
             val toolbar = findViewById<MaterialToolbar>(R.id.topAppBar)
             setSupportActionBar(toolbar)
             supportActionBar?.setDisplayHomeAsUpEnabled(true)

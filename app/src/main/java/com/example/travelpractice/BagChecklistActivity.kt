@@ -121,7 +121,7 @@ class BagChecklistActivity : AppCompatActivity() {
         listenToCategories()
     }
 
-    /** users/{uid}/checklists/{listId} */
+
     private fun userListRef() =
         db.collection("users").document(uid)
             .collection("checklists").document(listId)

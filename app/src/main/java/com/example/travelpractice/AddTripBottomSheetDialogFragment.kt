@@ -41,10 +41,10 @@ class AddTripBottomSheetDialogFragment : DialogFragment() {
 
     private val HALF_DAY_MS = 12 * 60 * 60 * 1000L
 
-    // Store-safe value (no timezone "previous day" surprises)
+
     private fun toStoreMillis(utcMidnightMillis: Long): Long = utcMidnightMillis + HALF_DAY_MS
 
-    // Convert any stored millis back to the exact UTC midnight for the same UTC date
+
     private fun toPickerUtcMidnight(storedMillis: Long): Long {
         val cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
         cal.timeInMillis = storedMillis
@@ -116,7 +116,7 @@ class AddTripBottomSheetDialogFragment : DialogFragment() {
             val s = sel.first ?: return@addOnPositiveButtonClickListener
             val e = sel.second ?: return@addOnPositiveButtonClickListener
 
-            // Picker gives UTC midnight; store as UTC noon
+
             startMillis = toStoreMillis(s)
             endMillis = toStoreMillis(e)
 
@@ -128,7 +128,7 @@ class AddTripBottomSheetDialogFragment : DialogFragment() {
             )
         }
 
-        // Fill fields when editing
+
         editingTrip?.let { t ->
             etTitle.setText(t.title)
             etDestination.setText(t.destination)
@@ -160,7 +160,7 @@ class AddTripBottomSheetDialogFragment : DialogFragment() {
 
             val trips = FirebaseFirestore.getInstance().collection("trips")
 
-            // EDIT path
+
             editingTrip?.let { existing ->
                 val destinationChanged = destination != existing.destination
 
@@ -174,7 +174,7 @@ class AddTripBottomSheetDialogFragment : DialogFragment() {
                     )
 
                     if (destinationChanged) {
-                        // Store coordinates for the new destination (can be null if geocode fails)
+
                         updates["lat"] = newLat as Any
                         updates["lng"] = newLng as Any
                     }
@@ -182,7 +182,7 @@ class AddTripBottomSheetDialogFragment : DialogFragment() {
                     trips.document(existing.id).update(updates)
                         .addOnSuccessListener {
                             dismiss()
-                            // Show success Snackbar in parent activity
+
                             (activity as? HomeActivity)?.showSnackbar("Trip updated successfully")
                         }
                         .addOnFailureListener {
@@ -192,7 +192,7 @@ class AddTripBottomSheetDialogFragment : DialogFragment() {
 
                 if (destinationChanged) {
                     geocodeDestination(destination) { lat, lng ->
-                        // If geocode fails, still update fields; lat/lng stay null
+
                         doUpdate(lat, lng)
                     }
                 } else {
@@ -202,7 +202,7 @@ class AddTripBottomSheetDialogFragment : DialogFragment() {
                 return@setOnClickListener
             }
 
-            // CREATE path (geocode once, then save)
+
             geocodeDestination(destination) { lat, lng ->
                 val doc = trips.document()
                 val trip = Trip(
@@ -221,7 +221,7 @@ class AddTripBottomSheetDialogFragment : DialogFragment() {
                 doc.set(trip)
                     .addOnSuccessListener {
                         dismiss()
-                        // Show success Snackbar in parent activity
+
                         (activity as? HomeActivity)?.showSnackbar("Trip created successfully")
                     }
                     .addOnFailureListener {

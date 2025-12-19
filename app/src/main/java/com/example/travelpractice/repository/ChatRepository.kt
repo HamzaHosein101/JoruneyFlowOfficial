@@ -14,17 +14,12 @@ class ChatRepository {
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
-    /**
-     * Get current user's chat history collection reference
-     */
+
     private fun getUserChatCollection() = firestore
         .collection("chatHistory")
         .document(auth.currentUser?.uid ?: "anonymous")
         .collection("messages")
 
-    /**
-     * Save a message to Firestore
-     */
     suspend fun saveMessage(message: Message): Result<Unit> {
         return try {
             val data = hashMapOf(
@@ -46,9 +41,7 @@ class ChatRepository {
         }
     }
 
-    /**
-     * Load all messages for current user
-     */
+
     suspend fun loadMessages(): Result<List<Message>> {
         return try {
             val snapshot = getUserChatCollection()
@@ -76,9 +69,7 @@ class ChatRepository {
         }
     }
 
-    /**
-     * Clear all chat history for current user
-     */
+
     suspend fun clearHistory(): Result<Unit> {
         return try {
             val snapshot = getUserChatCollection().get().await()
@@ -95,9 +86,7 @@ class ChatRepository {
         }
     }
 
-    /**
-     * Delete a specific message
-     */
+
     suspend fun deleteMessage(messageId: Long): Result<Unit> {
         return try {
             getUserChatCollection()

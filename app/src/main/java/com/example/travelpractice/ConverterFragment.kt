@@ -69,7 +69,7 @@ class ConverterFragment : Fragment() {
         spinnerFromCurrency.adapter = adapter
         spinnerToCurrency.adapter = adapter
 
-        // Set white background for both spinners
+
         setSpinnerPopupBackground(spinnerFromCurrency)
         setSpinnerPopupBackground(spinnerToCurrency)
 

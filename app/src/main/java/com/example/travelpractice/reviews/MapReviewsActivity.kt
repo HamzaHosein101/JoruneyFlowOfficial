@@ -37,7 +37,6 @@ class MapReviewsActivity : AppCompatActivity(), OnMapReadyCallback {
         val etSearch = binding.etSearchTown
         val tilSearch = binding.tilSearchTown
 
-// Pressing Search on keyboard
         etSearch.setOnEditorActionListener { v, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 val query = v.text?.toString()?.trim().orEmpty()
@@ -46,23 +45,23 @@ class MapReviewsActivity : AppCompatActivity(), OnMapReadyCallback {
             } else false
         }
 
-// Tapping the search icon
+
         tilSearch.setEndIconOnClickListener {
             val query = etSearch.text?.toString()?.trim().orEmpty()
             if (query.isNotEmpty()) searchTown(query)
         }
 
 
-        // Toolbar
+
         setSupportActionBar(binding.topAppBarMap)
         binding.topAppBarMap.setNavigationOnClickListener {
             onBackPressedDispatcher.onBackPressed()
         }
 
-        // Disable button until a town is selected
+
         binding.btnAddReviewDirect.isEnabled = false
 
-        // Setup map fragment
+
         val mapFragment = SupportMapFragment.newInstance()
         supportFragmentManager
             .beginTransaction()
@@ -70,7 +69,7 @@ class MapReviewsActivity : AppCompatActivity(), OnMapReadyCallback {
             .commit()
         mapFragment.getMapAsync(this)
 
-        // Single button: open TownReviewsActivity (user can view + add reviews there)
+
         binding.btnAddReviewDirect.setOnClickListener {
             val town = selectedTownName ?: return@setOnClickListener
             val subtitle = selectedTownSubtitle
@@ -90,15 +89,15 @@ class MapReviewsActivity : AppCompatActivity(), OnMapReadyCallback {
         map.uiSettings.isZoomControlsEnabled = true
         map.uiSettings.isZoomGesturesEnabled = true
 
-        // Move map UI (zoom controls, etc.) slightly up so they don't hide behind the bottom card
+
         val bottomPaddingPx = (80 * resources.displayMetrics.density).toInt()
         map.setPadding(0, 0, 0, bottomPaddingPx)
 
-        // Start centered somewhere reasonable (NY as default)
+
         val ny = LatLng(40.7128, -74.0060)
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(ny, 3.5f))
 
-        // When user taps anywhere on the map
+
         map.setOnMapClickListener { latLng ->
             handleMapTap(latLng)
         }
@@ -116,7 +115,7 @@ class MapReviewsActivity : AppCompatActivity(), OnMapReadyCallback {
                     addr.longitude
                 )
 
-                // ✅ Reuse your existing selection logic
+
                 handleMapTap(latLng)
 
             } else {
@@ -138,12 +137,12 @@ class MapReviewsActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun handleMapTap(latLng: LatLng) {
         selectedLatLng = latLng
 
-        // Clear previous markers, add new one
+
         map.clear()
         map.addMarker(MarkerOptions().position(latLng))
         map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 6f))
 
-        // Reverse-geocode to get town/city + country
+
         val geocoder = Geocoder(this, Locale.getDefault())
         var townName = "Selected location"
         var subtitle: String? = null
@@ -171,11 +170,11 @@ class MapReviewsActivity : AppCompatActivity(), OnMapReadyCallback {
         selectedTownName = townName
         selectedTownSubtitle = subtitle
 
-        // Update bottom card UI
+
         binding.tvTownName.text = townName
         binding.tvTownSubtitle.text = subtitle ?: ""
 
-        // Enable the single action button once we have something
+
         binding.btnAddReviewDirect.isEnabled = true
     }
 }

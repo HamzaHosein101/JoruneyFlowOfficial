@@ -48,12 +48,12 @@ class ChatActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        // Handle back button
+
         binding.toolbar.setNavigationOnClickListener {
             finish()
         }
 
-        // Handle menu item clicks for MaterialToolbar
+
         binding.toolbar.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.action_clear_history -> {
@@ -86,12 +86,12 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun setupInputListeners() {
-        // Send button click
+
         binding.sendButton.setOnClickListener {
             sendMessage()
         }
 
-        // Handle "Send" action from keyboard
+
         binding.messageInput.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEND) {
                 sendMessage()
@@ -103,12 +103,12 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun setupQuickActions() {
-        // Flight Search - Show Dialog
+
         binding.chipFlights.setOnClickListener {
             showFlightSearchDialog()
         }
 
-        // Hotel Search - Show Dialog
+
         binding.chipHotels.setOnClickListener {
             showHotelSearchDialog()
         }
@@ -180,24 +180,20 @@ class ChatActivity : AppCompatActivity() {
     }
 
 
-    /**
-     * Fill message input and send automatically
-     */
+
     private fun fillAndSendMessage(message: String) {
         binding.messageInput.setText(message)
         sendMessage()
     }
 
-    /**
-     * Send message from input field
-     */
+
     private fun sendMessage() {
         val message = binding.messageInput.text.toString()
         if (message.isNotBlank()) {
             viewModel.sendMessage(message)
             binding.messageInput.text?.clear()
 
-            // Scroll to bottom after sending
+
             binding.messagesRecyclerView.post {
                 if (messagesAdapter.itemCount > 0) {
                     binding.messagesRecyclerView.smoothScrollToPosition(messagesAdapter.itemCount - 1)
@@ -206,22 +202,18 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Handle action button clicks from messages
-     */
+
     private fun handleActionClick(actionOption: ActionOption) {
         Log.d("ChatActivity", "Action button clicked: ${actionOption.label}")
 
-        // Execute the action
+
         chatActionHandler.executeAction(actionOption.actionType)
 
-        // Show feedback
+
         Toast.makeText(this, "Opening ${actionOption.label}...", Toast.LENGTH_SHORT).show()
     }
 
-    /**
-     * Observe ViewModel data
-     */
+
     private fun observeViewModel() {
         // Observe messages
         viewModel.messages.observe(this) { messages ->
@@ -232,7 +224,7 @@ class ChatActivity : AppCompatActivity() {
             }
         }
 
-        // Observe typing indicator
+
         viewModel.isTyping.observe(this) { isTyping ->
             binding.typingIndicator.visibility = if (isTyping) View.VISIBLE else View.GONE
             if (isTyping) {
@@ -243,17 +235,13 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Inflate menu
-     */
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_chat, menu)
         return true
     }
 
-    /**
-     * Handle menu item selection
-     */
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_clear_history -> {
@@ -295,11 +283,9 @@ class ChatActivity : AppCompatActivity() {
     }
 
 
-    /**
-     * Clean up when activity is destroyed
-     */
+
     override fun onDestroy() {
         super.onDestroy()
-        // Any cleanup if needed
+
     }
 }

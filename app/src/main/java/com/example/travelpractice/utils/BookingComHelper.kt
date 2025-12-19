@@ -20,9 +20,7 @@ class BookingComHelper(
         private const val TAG = "BookingComHelper"
     }
 
-    /**
-     * Search for hotels in a city
-     */
+
     suspend fun searchHotels(
         cityName: String,
         checkInDate: String,
@@ -88,9 +86,7 @@ class BookingComHelper(
         }
     }
 
-    /**
-     * Search for destination ID by city name
-     */
+
     private suspend fun searchDestination(cityName: String): String? = withContext(Dispatchers.IO) {
         try {
             val url = HttpUrl.Builder()
@@ -125,9 +121,7 @@ class BookingComHelper(
         }
     }
 
-    /**
-     * Get detailed hotel information
-     */
+
     suspend fun getHotelDetails(hotelId: String): String = withContext(Dispatchers.IO) {
         try {
             val url = HttpUrl.Builder()
@@ -162,9 +156,7 @@ class BookingComHelper(
         }
     }
 
-    /**
-     * Format hotel search results
-     */
+
     private fun formatHotelResults(
         response: HotelSearchResponse,
         cityName: String,
@@ -281,9 +273,7 @@ class BookingComHelper(
         }
     }
 
-    /**
-     * Format hotel details
-     */
+
     private fun formatHotelDetails(details: HotelDetails): String {
         return buildString {
             append("🏨 ${details.hotel_name}\n\n")
@@ -305,9 +295,7 @@ class BookingComHelper(
         }
     }
 
-    /**
-     * Calculate number of nights
-     */
+
     private fun calculateNights(checkIn: String, checkOut: String): Int {
         return try {
             val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -320,7 +308,7 @@ class BookingComHelper(
         }
     }
 
-    // ==================== DATA CLASSES ====================
+
 
     data class DestinationLocation(
         val dest_id: String,

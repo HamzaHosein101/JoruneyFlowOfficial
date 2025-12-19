@@ -15,7 +15,7 @@ import com.google.android.material.button.MaterialButton
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-// Data class to hold review with report information
+
 data class ReviewWithReports(
     val review: Review,
     val reportReason: String? = null,
@@ -53,22 +53,22 @@ class AdminReportedReviewAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val reviewWithReports = getItem(position)
         val review = reviewWithReports.review
-        
+
         holder.txtUserName.text = review.username
         holder.txtReview.text = review.comment
-        
+
         // Format date
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         holder.txtPlaceAndDate.text = "${review.locationName} • ${dateFormat.format(review.tripDate.toDate())}"
-        
+
         holder.ratingBar.rating = review.rating.toFloat()
-        
-        // Show report details if available
+
+
         if (reviewWithReports.reportReason != null) {
             holder.reportDetailsContainer.visibility = View.VISIBLE
             holder.txtReportReason.text = reviewWithReports.reportReason
-            
-            // Show description if it exists and is not empty
+
+
             val descriptionLabel = holder.itemView.findViewById<TextView>(R.id.txtReportDescriptionLabel)
             if (!reviewWithReports.reportDescription.isNullOrBlank()) {
                 descriptionLabel?.visibility = View.VISIBLE
@@ -81,7 +81,7 @@ class AdminReportedReviewAdapter(
         } else {
             holder.reportDetailsContainer.visibility = View.GONE
         }
-        
+
         holder.btnKeep.setOnClickListener { onKeep(review) }
         holder.btnDelete.setOnClickListener { onDelete(review) }
     }

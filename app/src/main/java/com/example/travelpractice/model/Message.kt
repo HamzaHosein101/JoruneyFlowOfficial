@@ -11,9 +11,7 @@ data class Message(
     val type: MessageType = MessageType.GENERAL,
     val actionOptions: List<ActionOption>? = null
 ) {
-    /**
-     * Check if message has action buttons
-     */
+
     fun hasActions(): Boolean = !actionOptions.isNullOrEmpty()
 }
 
@@ -28,10 +26,10 @@ enum class MessageType {
     BUDGET,
     ITINERARY,
     PACKING,
-    WEATHER,        // Weather-related messages
-    CURRENCY,       // Currency conversion messages
-    DESTINATION,    // Destination info messages
-    ACCOMMODATION,  // Hotel/lodging messages
-    FLIGHTS,        // Flight-related messages
-    DINING          // Restaurant/food messages
+    WEATHER,
+    CURRENCY,
+    DESTINATION,
+    ACCOMMODATION,
+    FLIGHTS,
+    DINING
 }
