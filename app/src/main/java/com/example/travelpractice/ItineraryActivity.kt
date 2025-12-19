@@ -72,7 +72,7 @@ class ItineraryActivity : AppCompatActivity() {
         setupNotificationManager()
         loadItineraryItems()
 
-        // Handle notification tap
+
         handleNotificationIntent()
     }
 
@@ -85,7 +85,7 @@ class ItineraryActivity : AppCompatActivity() {
         }
         setSupportActionBar(toolbar)
 
-        // Enable the back button
+
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
     }
@@ -97,7 +97,7 @@ class ItineraryActivity : AppCompatActivity() {
         totalDuration = findViewById(R.id.totalDuration)
         totalCost = findViewById(R.id.totalCost)
 
-        // Set current date
+
         val now = Date()
         selectedDate.text = dateFormat.format(now)
         selectedDay.text = dayFormat.format(now).uppercase()
@@ -149,7 +149,7 @@ class ItineraryActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             when {
                 ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED -> {
-                    // Permission already granted
+
                 }
                 else -> {
                     notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -175,21 +175,21 @@ class ItineraryActivity : AppCompatActivity() {
         val currentItems = adapter.currentList
         val conflictingItems = mutableListOf<ItineraryItem>()
 
-        // Skip if no date or time is set
+
         if (newItem.date == 0L || newItem.startTime.isBlank()) {
             return conflictingItems
         }
 
         for (existingItem in currentItems) {
-            // Skip checking against itself (when editing)
+
             if (existingItem.id == newItem.id) continue
 
-            // Skip if existing item has no date or time
+
             if (existingItem.date == 0L || existingItem.startTime.isBlank()) continue
 
-            // Check if items are on the same date
+
             if (isSameDate(newItem.date, existingItem.date)) {
-                // Check if times overlap
+
                 if (timesOverlap(newItem, existingItem)) {
                     conflictingItems.add(existingItem)
                 }
@@ -214,27 +214,27 @@ class ItineraryActivity : AppCompatActivity() {
             val end1 = if (item1.endTime.isNotBlank()) {
                 parseTimeToMinutes(item1.endTime)
             } else {
-                start1 + 60 // Default 1 hour duration if no end time
+                start1 + 60
             }
 
             val start2 = parseTimeToMinutes(item2.startTime)
             val end2 = if (item2.endTime.isNotBlank()) {
                 parseTimeToMinutes(item2.endTime)
             } else {
-                start2 + 60 // Default 1 hour duration if no end time
+                start2 + 60
             }
 
             android.util.Log.d("ConflictCheck", "Item1: ${item1.title} (${start1}-${end1} mins)")
             android.util.Log.d("ConflictCheck", "Item2: ${item2.title} (${start2}-${end2} mins)")
 
-            // Check if time ranges overlap
+
             val overlaps = start1 < end2 && start2 < end1
             android.util.Log.d("ConflictCheck", "Overlap result: $overlaps")
 
             return overlaps
         } catch (e: Exception) {
             android.util.Log.e("ConflictCheck", "Error parsing times: ${e.message}")
-            // If we can't parse the times, assume no conflict
+
             return false
         }
     }
@@ -243,7 +243,7 @@ class ItineraryActivity : AppCompatActivity() {
         val cleanTime = timeString.trim()
 
         try {
-            // Try parsing with AM/PM format first (most common in your app)
+
             val amPmFormat = SimpleDateFormat("h:mm a", Locale.US)
             amPmFormat.isLenient = false
             val date = amPmFormat.parse(cleanTime)
@@ -252,7 +252,7 @@ class ItineraryActivity : AppCompatActivity() {
                 return cal.get(Calendar.HOUR_OF_DAY) * 60 + cal.get(Calendar.MINUTE)
             }
         } catch (e: Exception) {
-            // Try 24-hour format as fallback
+
             try {
                 val parts = cleanTime.split(":")
                 if (parts.size >= 2) {
@@ -263,7 +263,7 @@ class ItineraryActivity : AppCompatActivity() {
                     }
                 }
             } catch (e2: Exception) {
-                // Fall through
+
             }
         }
 
@@ -307,7 +307,7 @@ class ItineraryActivity : AppCompatActivity() {
                     notificationManager.cancelNotification(itemData)
                 }
 
-                //Snackbar here (only after success)
+
                 Snackbar.make(
                     findViewById(android.R.id.content),
                     if (isNew) "Itinerary item added" else "Itinerary item updated",
@@ -359,7 +359,7 @@ class ItineraryActivity : AppCompatActivity() {
             val earliestDate = itemsWithDates.minOf { it.date }
             val latestDate = itemsWithDates.maxOf { it.date }
             val daysDiff = (latestDate - earliestDate) / (1000 * 60 * 60 * 24) // Convert milliseconds to days
-            daysDiff + 1 // +1 to include both start and end days
+            daysDiff + 1
         }
         totalDuration.text = "$totalDays"
 
@@ -487,7 +487,7 @@ class ItineraryActivity : AppCompatActivity() {
     }
 
     private fun handleNotificationIntent() {
-        // Check if the activity was opened from a notification
+
         if (intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY == 0) {
             // Show a welcome message if opened from notification
             Snackbar.make(findViewById(android.R.id.content),

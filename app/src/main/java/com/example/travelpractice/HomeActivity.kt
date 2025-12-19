@@ -56,13 +56,13 @@ class HomeActivity : AppCompatActivity() {
         )
         recycler.adapter = adapter
 
-        //Add Trip
+
         findViewById<View>(R.id.fabAddTrip)?.setOnClickListener {
             AddTripBottomSheetDialogFragment.newInstance()
                 .show(supportFragmentManager, "add_trip")
         }
 
-        //Toolbar menu items
+
         findViewById<MaterialToolbar?>(R.id.topAppBar)?.apply {
             inflateMenu(R.menu.menu_home)
             setOnMenuItemClickListener { item ->
@@ -76,7 +76,7 @@ class HomeActivity : AppCompatActivity() {
             }
         }
 
-        //Bottom "Log out" button
+
         findViewById<View?>(R.id.btnLogout)?.setOnClickListener { doLogout() }
     }
 

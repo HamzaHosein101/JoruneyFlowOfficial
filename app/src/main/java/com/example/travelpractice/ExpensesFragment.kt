@@ -53,7 +53,6 @@ class ExpensesFragment : Fragment() {
     private var etSearchExpenses: TextInputEditText? = null
     private var spinnerSortExpenses: Spinner? = null
 
-    // Currency list - MATCHING CONVERTER (15 currencies)
     private val currencies = arrayOf("USD", "EUR", "GBP", "JPY", "CAD", "AUD", "CHF",
         "CNY", "INR", "KRW", "MXN", "BRL", "ZAR", "SGD", "HKD")
 
@@ -141,7 +140,7 @@ class ExpensesFragment : Fragment() {
             setPadding(60, 40, 60, 20)
         }
 
-        // Description
+
         val tilDescription = TextInputLayout(context).apply { hint = "Description" }
         val etDescription = TextInputEditText(context).apply {
             inputType = android.text.InputType.TYPE_CLASS_TEXT
@@ -149,7 +148,7 @@ class ExpensesFragment : Fragment() {
         tilDescription.addView(etDescription)
         dialogLayout.addView(tilDescription)
 
-        // Amount
+
         val tilAmount = TextInputLayout(context).apply { hint = "Amount" }
         val etAmount = TextInputEditText(context).apply {
             inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
@@ -157,7 +156,7 @@ class ExpensesFragment : Fragment() {
         tilAmount.addView(etAmount)
         dialogLayout.addView(tilAmount)
 
-        // Category label
+
         val tvCategoryLabel = TextView(context).apply {
             text = "Category"
             setPadding(0, 40, 0, 20)
@@ -165,7 +164,7 @@ class ExpensesFragment : Fragment() {
         }
         dialogLayout.addView(tvCategoryLabel)
 
-        // Category spinner
+
         val categories = arrayOf("Food", "Transportation", "Accommodation", "Entertainment", "Shopping", "Other")
         val spinnerCategory = Spinner(context).apply {
             background = ContextCompat.getDrawable(context, R.drawable.bg_spinner_grey)
@@ -177,7 +176,7 @@ class ExpensesFragment : Fragment() {
         setSpinnerPopupBackground(spinnerCategory)
         dialogLayout.addView(spinnerCategory)
 
-        // Currency label
+
         val tvCurrencyLabel = TextView(context).apply {
             text = "Currency"
             setPadding(0, 40, 0, 20)
@@ -185,7 +184,7 @@ class ExpensesFragment : Fragment() {
         }
         dialogLayout.addView(tvCurrencyLabel)
 
-        // Currency spinner
+
         val spinnerCurrency = Spinner(context).apply {
             background = ContextCompat.getDrawable(context, R.drawable.bg_spinner_grey)
         }
@@ -196,7 +195,7 @@ class ExpensesFragment : Fragment() {
         setSpinnerPopupBackground(spinnerCurrency)
         dialogLayout.addView(spinnerCurrency)
 
-        // Build dialog (IMPORTANT: positive button = null so we can validate without auto-dismiss)
+
         val dialog = MaterialAlertDialogBuilder(
             ContextThemeWrapper(context, R.style.ThemeOverlay_JourneyFlow_AlertDialogAnchor)
         )
@@ -238,7 +237,7 @@ class ExpensesFragment : Fragment() {
                         amount
                     }
 
-                // show confirm dialog (your existing function)
+
                 showConfirmationDialog(description, amount, selectedCurrency, amountInUSD, category)
 
                 dialog.dismiss()
@@ -475,7 +474,7 @@ class ExpensesFragment : Fragment() {
         ).addOnSuccessListener { docRef ->
             newExpense.id = docRef.id
 
-            // Show undo snackbar
+
             showUndoSnackbar(newExpense, description, displayAmount, currency)
             activity.syncTripRemaining()
 
@@ -686,12 +685,12 @@ class ExpensesFragment : Fragment() {
             .setPositiveButton("Delete") { _, _ ->
                 deleteExpense(expense, position)
 
-                // optional confirmation like your reviews
+
                 Snackbar.make(requireView(), "Expense deleted", Snackbar.LENGTH_SHORT).show()
             }
             .show()
 
-        // Make Delete red (destructive action) AFTER show()
+
         dialog.getButton(AlertDialog.BUTTON_POSITIVE)
             ?.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
     }

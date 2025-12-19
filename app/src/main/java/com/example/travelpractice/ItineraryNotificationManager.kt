@@ -16,8 +16,8 @@ class ItineraryNotificationManager(private val context: Context) {
     private val notificationManager = NotificationManagerCompat.from(context)
 
     companion object {
-        private const val REMINDER_TIME_MINUTES = 30 // Remind 30 minutes before
-        private const val REMINDER_TIME_HOURS = 1 // Or 1 hour before for early morning items
+        private const val REMINDER_TIME_MINUTES = 30
+        private const val REMINDER_TIME_HOURS = 1
     }
 
     fun scheduleNotification(itineraryItem: ItineraryItem, trip: Trip) {
@@ -46,8 +46,7 @@ class ItineraryNotificationManager(private val context: Context) {
                     )
                 }
             } catch (e: SecurityException) {
-                // Handle case where exact alarm permission is not granted
-                // Fall back to inexact alarm
+
                 alarmManager.set(
                     AlarmManager.RTC_WAKEUP,
                     reminderTime,
@@ -69,10 +68,10 @@ class ItineraryNotificationManager(private val context: Context) {
     }
 
     fun scheduleAllNotifications(trip: Trip, itineraryItems: List<ItineraryItem>) {
-        // Cancel all existing notifications for this trip
+
         cancelAllNotificationsForTrip(trip.id)
         
-        // Schedule new notifications
+
         itineraryItems.forEach { item ->
             if (!item.isCompleted && item.date > 0) {
                 scheduleNotification(item, trip)
@@ -81,9 +80,7 @@ class ItineraryNotificationManager(private val context: Context) {
     }
 
     fun cancelAllNotificationsForTrip(tripId: String) {
-        // This is a simplified approach - in a real app, you'd want to track
-        // which notifications are scheduled for each trip
-        // For now, we'll rely on the individual item cancellation
+
     }
 
     private fun calculateReminderTime(itineraryItem: ItineraryItem): Long {
@@ -91,13 +88,13 @@ class ItineraryNotificationManager(private val context: Context) {
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = itemDateTime
         
-        // Determine reminder time based on the time of day
+
         val hour = calendar.get(Calendar.HOUR_OF_DAY)
         val reminderMinutes = if (hour < 8) {
-            // For early morning items (before 8 AM), remind 1 hour before
+
             REMINDER_TIME_HOURS * 60
         } else {
-            // For regular items, remind 15 minutes before
+
             REMINDER_TIME_MINUTES
         }
         
@@ -108,10 +105,10 @@ class ItineraryNotificationManager(private val context: Context) {
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = itineraryItem.date
         
-        // Parse start time (format: "09:00 AM" or "21:30")
+
         val timeParts = itineraryItem.startTime.split(" ")
         val timeStr = if (timeParts.size == 2) {
-            // Format: "09:00 AM"
+
             val time = timeParts[0]
             val ampm = timeParts[1]
             val (hour, minute) = time.split(":").map { it.toInt() }
@@ -120,7 +117,7 @@ class ItineraryNotificationManager(private val context: Context) {
                        else hour
             "$hour24:$minute"
         } else {
-            // Format: "21:30" (24-hour format)
+
             itineraryItem.startTime
         }
         

@@ -70,7 +70,7 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    // Register for Activity Result (Google sign-in) FIX LATER
+
     private val googleSignInLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -258,10 +258,7 @@ class LoginActivity : AppCompatActivity() {
             startActivity(Intent(this, RegisterActivity::class.java))
         }
 
-        // Google sign-in button
-        //  btnGoogle.setOnClickListener {
-        //       googleSignInLauncher.launch(googleClient.signInIntent)
-        //  }
+
     }
 
     private fun verifyAdminRole(uid: String, onComplete: (Boolean) -> Unit) {
