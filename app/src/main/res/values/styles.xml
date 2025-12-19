@@ -9,11 +9,9 @@
 
 
     <style name="ThemeOverlay.JourneyFlow.DatePicker" parent="ThemeOverlay.MaterialComponents.MaterialCalendar">
-        <!-- Make selected date blue -->
         <item name="colorPrimary">#183371</item>
         <item name="colorOnPrimary">#FFFFFF</item>
 
-        <!-- Make the picker background white -->
         <item name="colorSurface">#FFFFFF</item>
         <item name="colorOnSurface">#0D1B3E</item>
 
