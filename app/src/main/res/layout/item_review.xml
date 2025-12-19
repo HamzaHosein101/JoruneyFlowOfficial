@@ -20,7 +20,6 @@
         android:orientation="horizontal"
         android:background="#FFFFFF">
 
-        <!-- Left date pill (trip date) -->
         <LinearLayout
             android:id="@+id/leftDatePill"
             android:layout_width="56dp"
@@ -56,7 +55,6 @@
                 android:textColor="#1A47B8"/>
         </LinearLayout>
 
-        <!-- Right content -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -74,7 +72,6 @@
                 android:textSize="16sp"
                 android:textColor="@android:color/black"/>
 
-            <!-- Meta row: username chip + stars -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -109,7 +106,6 @@
                     android:indeterminateTint="@color/jf_star" />
             </LinearLayout>
 
-            <!-- Comment -->
             <TextView
                 android:id="@+id/tvComment"
                 android:layout_width="match_parent"
@@ -118,7 +114,6 @@
                 android:text="Great food near the river. Avoid rush hour."
                 android:textColor="#444444"/>
 
-            <!-- Actions -->
             <LinearLayout
                 android:id="@+id/actionsRow"
                 android:layout_width="match_parent"

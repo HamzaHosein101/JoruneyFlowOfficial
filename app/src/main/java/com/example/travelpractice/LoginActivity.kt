@@ -58,7 +58,6 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    // Password validation function
     private fun isPasswordSecure(password: String): Pair<Boolean, String> {
         return when {
             password.length < 8 -> Pair(false, "Password must be at least 8 characters")
@@ -71,7 +70,7 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    // Register for Activity Result (Google sign-in)
+    // Register for Activity Result (Google sign-in) FIX LATER
     private val googleSignInLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -119,7 +118,6 @@ class LoginActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         prefs = getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
 
-        // --- Google Sign-In config ---
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
@@ -134,7 +132,6 @@ class LoginActivity : AppCompatActivity() {
         val tvForgotPassword = findViewById<TextView>(R.id.tvForgotPassword)
 
 
-        // Email/password login
         btnLogin.setOnClickListener {
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString()
@@ -145,8 +142,6 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Note: For LOGIN, we don't validate password strength since the user
-            // already created their account. We only validate during REGISTRATION.
             if (password.isEmpty()) {
                 etPassword.error = "Password is required"
                 etPassword.requestFocus()

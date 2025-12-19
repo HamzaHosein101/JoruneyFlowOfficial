@@ -31,7 +31,6 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Shown when no categories (backend will toggle visibility) -->
     <TextView
         android:id="@+id/emptyState"
         android:layout_width="wrap_content"
@@ -42,7 +41,6 @@
         android:visibility="gone"
         android:layout_gravity="center" />
 
-    <!-- Category list -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerCategories"
         android:layout_width="match_parent"
@@ -54,7 +52,6 @@
         tools:listitem="@layout/item_category"
         tools:itemCount="3" />
 
-    <!-- Add Category -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAddCategory"
         android:layout_width="wrap_content"

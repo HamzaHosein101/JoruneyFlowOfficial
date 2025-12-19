@@ -36,7 +36,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Date Selector -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/dateSelector"
                 android:layout_width="wrap_content"
@@ -73,7 +72,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Day Summary Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/daySummaryCard"
                 android:layout_width="match_parent"
@@ -104,7 +102,6 @@
                         android:orientation="horizontal"
                         android:weightSum="3">
 
-                        <!-- Completed -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -140,7 +137,6 @@
 
                         </LinearLayout>
 
-                        <!-- Duration -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -173,7 +169,6 @@
 
                         </LinearLayout>
 
-                        <!-- Total Cost -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -214,7 +209,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Itinerary Items -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerItinerary"
                 android:layout_width="match_parent"

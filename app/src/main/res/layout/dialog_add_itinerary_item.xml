@@ -20,7 +20,6 @@
             android:orientation="vertical"
             android:padding="18dp">
 
-            <!-- Title -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -31,7 +30,6 @@
                 android:gravity="center"
                 android:layout_marginBottom="12dp"/>
 
-            <!-- Title -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/titleLayout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
@@ -53,7 +51,6 @@
                     android:inputType="textCapSentences"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Type -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/typeLayout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
@@ -79,7 +76,6 @@
                     android:clickable="true"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Description -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/descLayout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
@@ -104,7 +100,6 @@
                     android:textColor="@android:color/black"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Location -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/locationLayout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
@@ -126,7 +121,6 @@
                     android:inputType="textCapSentences"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Date -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/dateLayout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
@@ -152,14 +146,12 @@
                     android:textColor="@android:color/black"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Start / End row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:layout_marginBottom="10dp">
 
-                <!-- Start time -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/startLayout"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
@@ -187,7 +179,6 @@
                         android:textColor="@android:color/black"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- End time -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/endLayout"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
@@ -216,7 +207,6 @@
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
 
-            <!-- Cost -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/costLayout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
@@ -238,7 +228,6 @@
                     android:textColor="@android:color/black"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Buttons row (match your review dialog vibe) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

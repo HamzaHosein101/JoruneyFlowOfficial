@@ -6,7 +6,6 @@
     android:gravity="end"
     android:padding="4dp">
 
-    <!-- Blue bubble on right side (your messages) -->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -15,7 +14,6 @@
         android:padding="12dp"
         android:orientation="vertical">
 
-        <!-- Message text -->
         <TextView
             android:id="@+id/messageText"
             android:layout_width="wrap_content"
@@ -24,7 +22,6 @@
             android:textSize="14sp"
             android:lineSpacingExtra="2dp" />
 
-        <!-- Timestamp -->
         <TextView
             android:id="@+id/timestamp"
             android:layout_width="wrap_content"

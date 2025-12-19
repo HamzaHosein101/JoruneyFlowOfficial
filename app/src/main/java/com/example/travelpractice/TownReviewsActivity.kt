@@ -84,14 +84,11 @@ class TownReviewsActivity : AppCompatActivity() {
 
         binding.townReviewsRecycler.adapter = adapter
 
-        // spacing between cards
         val space = (6 * resources.displayMetrics.density).toInt()
         binding.townReviewsRecycler.addItemDecoration(SpacesItemDecoration(space))
 
-        // Observe only this town’s reviews
         vm.observe(locationFilter = null)
 
-        // Collect state
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 vm.state.collect { state ->
@@ -105,7 +102,6 @@ class TownReviewsActivity : AppCompatActivity() {
                         ).show()
                     }
 
-                    //Show error if submission failed
                     state.error?.let { msg ->
                         Snackbar.make(
                             binding.townReviewsRoot,
@@ -131,7 +127,6 @@ class TownReviewsActivity : AppCompatActivity() {
             }
         }
 
-        // Add review for this town
         binding.fabAddTownReview.setOnClickListener {
             showAddDialog(defaultLocation = lockedLocation)
         }
@@ -198,7 +193,6 @@ class TownReviewsActivity : AppCompatActivity() {
                 .build()
 
             picker.addOnPositiveButtonClickListener { utcMillis ->
-                // Convert UTC day millis to a Date in the user's timezone (avoids off-by-one issues)
                 val localMillis = utcMillis + TimeZone.getDefault().getOffset(utcMillis)
                 selectedTs = Timestamp(Date(localMillis))
 
@@ -238,8 +232,6 @@ class TownReviewsActivity : AppCompatActivity() {
         return sdf.format(ts.toDate())
     }
 
-    // --- Report Review dialog (copied from your ReviewsActivity) --------------------
-
     private fun showReportDialog(review: Review) {
         val dlgBinding = DialogReportReviewBinding.inflate(LayoutInflater.from(this))
         val dialog = MaterialAlertDialogBuilder(this)
@@ -276,7 +268,6 @@ class TownReviewsActivity : AppCompatActivity() {
             dlgBinding.spinnerReason.dismissDropDown()
         }
 
-        // Description word-count check
         dlgBinding.etDescription.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -319,7 +310,6 @@ class TownReviewsActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Submit report (this still goes through your ViewModel → admin logic)
             lifecycleScope.launch {
                 val result = vm.reportWithDetailsAsync(
                     review.id,

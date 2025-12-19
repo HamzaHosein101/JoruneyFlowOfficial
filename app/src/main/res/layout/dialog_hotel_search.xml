@@ -22,7 +22,6 @@
         android:textColor="#757575"
         android:layout_marginBottom="16dp" />
 
-    <!-- City Input -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -49,7 +48,6 @@
         android:paddingStart="12dp"
         android:paddingEnd="12dp" />
 
-    <!-- Info Box -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

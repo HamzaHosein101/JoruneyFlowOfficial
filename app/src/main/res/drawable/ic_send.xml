@@ -5,7 +5,6 @@
     android:viewportHeight="24"
     android:tint="@android:color/white">
 
-    <!-- Paper airplane icon pointing right -->
     <path
         android:fillColor="@android:color/white"
         android:pathData="M2.01,21L23,12 2.01,3 2,10l15,2 -15,2z"/>

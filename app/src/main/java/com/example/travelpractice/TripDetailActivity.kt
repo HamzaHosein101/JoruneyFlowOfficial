@@ -186,12 +186,9 @@ class TripDetailActivity : AppCompatActivity() {
             }
         }
 
-        // Expense Tracker - pass trip data to expense tracker
         val budgetView = findViewById<TextView>(R.id.txtHeaderBudget)
 
 
-
-// prefer saved remaining; fall back to computed; else show budget
         val initialRemaining = when {
             trip.remaining > 0.0 && trip.remaining <= trip.budget -> trip.remaining
             trip.spent > 0.0 -> (trip.budget - trip.spent).coerceAtLeast(0.0)
@@ -226,8 +223,6 @@ class TripDetailActivity : AppCompatActivity() {
 
 
 
-
-        // Expense Tracker card, open ExpenseTrackerActivity
         findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardExpenses)
             .setOnClickListener {
                 val i = Intent(this, ExpenseTrackerActivity::class.java).apply {
@@ -251,17 +246,10 @@ class TripDetailActivity : AppCompatActivity() {
             startActivity(i)
         }
 
-        // ---------- WEATHER (Step 2) ----------
         val txtStatus = findViewById<TextView>(R.id.txtWeatherStatus)
         val txtEmoji  = findViewById<TextView>(R.id.txtCurrentEmoji)
         val txtTemp   = findViewById<TextView>(R.id.txtCurrentTemp)
         val txtTitle = findViewById<TextView>(R.id.txtWeatherTitle)
-
-        // Replace your entire lifecycleScope.launch block with this version that includes timing:
-
-        // Replace your entire lifecycleScope.launch block with this optimized version:
-
-// Replace your entire lifecycleScope.launch block with this optimized version:
 
         lifecycleScope.launch {
             try {
@@ -294,17 +282,14 @@ class TripDetailActivity : AppCompatActivity() {
 
 
 
-                // 2) Fetch weather from OpenWeatherMap
                 val weatherStart = System.currentTimeMillis()
                 val current = HttpClients.openWeather.current(lat, lon, HttpClients.OPENWEATHER_API_KEY)
                 val forecast = HttpClients.openWeather.forecast(lat, lon, HttpClients.OPENWEATHER_API_KEY)
                 android.util.Log.d("Weather", "⏱ Weather API took: ${System.currentTimeMillis() - weatherStart}ms")
 
-// 3) Show current weather
                 val t = current.main?.temp
                 val weatherId = current.weather?.firstOrNull()?.id
 
-// NOW you can log it here:
                 android.util.Log.d("Weather", "🌡️ OpenWeatherMap says: $t° at $lat, $lon")
 
                 txtTemp.text = if (t != null) "${t.toInt()}°" else "--°"
@@ -316,7 +301,6 @@ class TripDetailActivity : AppCompatActivity() {
                 txtStatus.text = "Updated $timeStr"
                 txtStatus.visibility = android.view.View.VISIBLE
 
-                // 4) Build 7-day forecast strip
                 stripDaily.removeAllViews()
                 val dailyForecasts = groupForecastByDay(forecast.list.orEmpty())
 
@@ -338,7 +322,6 @@ class TripDetailActivity : AppCompatActivity() {
                     addDailyChip(stripDaily, dow, sub, emj)
                 }
 
-                // 5) Reverse geocoding if needed
                 if (trip.destination.isNullOrBlank()) {
                     val reverseStart = System.currentTimeMillis()
                     runCatching {

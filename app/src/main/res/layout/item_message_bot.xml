@@ -6,7 +6,6 @@
     android:gravity="start"
     android:padding="4dp">
 
-    <!-- White bubble on left side (AI messages) -->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -15,7 +14,6 @@
         android:padding="12dp"
         android:orientation="vertical">
 
-        <!-- Header with robot icon and label -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -23,14 +21,12 @@
             android:gravity="center_vertical"
             android:layout_marginBottom="4dp">
 
-            <!-- Robot emoji -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="🤖 "
                 android:textSize="14sp" />
 
-            <!-- "AI Assistant" label -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -40,7 +36,6 @@
                 android:textColor="#757575" />
         </LinearLayout>
 
-        <!-- AI message text -->
         <TextView
             android:id="@+id/messageText"
             android:layout_width="wrap_content"
@@ -49,7 +44,6 @@
             android:textSize="14sp"
             android:lineSpacingExtra="2dp" />
 
-        <!-- Timestamp -->
         <TextView
             android:id="@+id/timestamp"
             android:layout_width="wrap_content"

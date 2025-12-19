@@ -41,7 +41,6 @@
     <style name="ThemeOverlay.JourneyFlow.AlertDialogAnchor"
         parent="ThemeOverlay.Material3.MaterialAlertDialog">
 
-        <!-- Force dialog background to WHITE (Material3 uses these container colors) -->
         <item name="colorSurface">#FFFFFF</item>
         <item name="colorSurfaceContainer">#FFFFFF</item>
         <item name="colorSurfaceContainerHigh">#FFFFFF</item>
@@ -82,19 +81,15 @@
 
 
 
-    <!-- Time Picker Theme -->
     <style name="ThemeOverlay_JourneyFlow_TimePicker"
         parent="ThemeOverlay.MaterialComponents.TimePicker">
 
-        <!-- Main brand color (header + selected) -->
         <item name="colorPrimary">#183371</item>
         <item name="colorOnPrimary">@android:color/white</item>
 
-        <!-- Dialog surface -->
         <item name="colorSurface">@android:color/white</item>
         <item name="colorOnSurface">#1E2A5A</item>
 
-        <!-- Buttons (OK / Cancel) -->
         <item name="colorSecondary">#183371</item>
     </style>
 
