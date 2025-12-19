@@ -845,28 +845,22 @@ class ChatViewModel(
             "sunshine coast" to "MCY", "ballina" to "BNK", "albury" to "ABX",
             "ayers rock" to "AYQ", "uluru" to "AYQ",
 
-            // New Zealand
             "auckland" to "AKL", "wellington" to "WLG", "christchurch" to "CHC", "queenstown" to "ZQN",
             "dunedin" to "DUD", "rotorua" to "ROT", "hamilton" to "HLZ", "napier" to "NPE",
             "palmerston north" to "PMR", "nelson" to "NSN",
 
-            // Pacific Islands
             "fiji" to "NAN", "suva" to "SUV", "nadi" to "NAN", "port moresby" to "POM",
             "noumea" to "NOU", "papeete" to "PPT", "tahiti" to "PPT", "apia" to "APW",
             "nuku'alofa" to "TBU", "port vila" to "VLI", "rarotonga" to "RAR", "honiara" to "HIR",
             "guam" to "GUM", "saipan" to "SPN", "pohnpei" to "PNI", "majuro" to "MAJ",
             "palau" to "ROR", "koror" to "ROR",
 
-            // ==================== AIRPORT CODES (3-letter codes) ====================
-
-            // Major US Airports
             "jfk" to "JFK", "lga" to "LGA", "ewr" to "EWR", "lax" to "LAX", "ord" to "ORD",
             "dfw" to "DFW", "atl" to "ATL", "mia" to "MIA", "sfo" to "SFO", "phx" to "PHX",
             "iah" to "IAH", "sea" to "SEA", "las" to "LAS", "mco" to "MCO", "bos" to "BOS",
             "dtw" to "DTW", "msp" to "MSP", "phl" to "PHL", "den" to "DEN", "slc" to "SLC",
             "bwi" to "BWI", "dca" to "DCA", "hnl" to "HNL",
 
-            // Major International Airports
             "lhr" to "LHR", "lgw" to "LGW", "cdg" to "CDG", "fra" to "FRA", "ams" to "AMS",
             "mad" to "MAD", "bcn" to "BCN", "fco" to "FCO", "mxp" to "MXP", "muc" to "MUC",
             "dxb" to "DXB", "sin" to "SIN", "hkg" to "HKG", "nrt" to "NRT", "hnd" to "HND",
@@ -881,9 +875,7 @@ class ChatViewModel(
         return fallbackMap[cleanLocation]
     }
 
-    /**
-     * ✅ DYNAMIC: Extract city code using Amadeus API (for hotels)
-     */
+
     private suspend fun extractCityCode(query: String): String? {
         // Extract city name from query
         val cityName = extractCityName(query)
@@ -902,7 +894,6 @@ class ChatViewModel(
             return fallbackCode
         }
 
-        // Use API to search for city code
         val cityCode = flightHelper.searchCityCode(cityName)
 
         if (cityCode != null) {
@@ -914,9 +905,7 @@ class ChatViewModel(
         }
     }
 
-    /**
-     * ✅ Extract city name from query (improved pattern matching)
-     */
+
     private fun extractCityName(query: String): String? {
         // Common patterns for city extraction
         val patterns = listOf(
@@ -948,9 +937,7 @@ class ChatViewModel(
         return null
     }
 
-    /**
-     * ✅ Extract guest count from query
-     */
+
     private fun extractGuestCount(query: String): Int {
         // Look for patterns like "2 adults", "3 people", "4 guests"
         val patterns = listOf(
@@ -972,9 +959,6 @@ class ChatViewModel(
         return 2 // Default to 2 adults
     }
 
-    /**
-     * ✅ ENHANCED: Extract date from query with context
-     */
     private fun extractDate(query: String, context: String = "departure"): String? {
         // Look for explicit date format: YYYY-MM-DD
         val datePattern = Regex("(\\d{4})-(\\d{2})-(\\d{2})")
@@ -1005,7 +989,6 @@ class ChatViewModel(
             }
         }
 
-        // Look for specific month/day (e.g., "December 15")
         val monthDayPattern = Regex("(january|february|march|april|may|june|july|august|september|october|november|december)\\s+(\\d{1,2})", RegexOption.IGNORE_CASE)
         val monthMatch = monthDayPattern.find(query)
         if (monthMatch != null) {
@@ -1045,9 +1028,7 @@ class ChatViewModel(
         return null
     }
 
-    /**
-     * ✅ Get default date (N days from today)
-     */
+
     private fun getDefaultDate(daysFromNow: Int): String {
         val calendar = Calendar.getInstance()
         calendar.add(Calendar.DAY_OF_YEAR, daysFromNow)
@@ -1055,9 +1036,7 @@ class ChatViewModel(
         return dateFormat.format(calendar.time)
     }
 
-    /**
-     * Get AI response for general queries
-     */
+
     private fun getAIResponse(userMessage: String, detectedIntent: IntentDetector.DetectedIntent) {
         _isTyping.value = true
 
@@ -1079,9 +1058,7 @@ class ChatViewModel(
         }
     }
 
-    /**
-     * Build enhanced prompt
-     */
+
     private fun buildEnhancedPrompt(userMessage: String, detectedIntent: IntentDetector.DetectedIntent): String {
         return when (detectedIntent.intent) {
             IntentDetector.Intent.EXPENSE_TRACKER -> {
@@ -1097,9 +1074,7 @@ class ChatViewModel(
         }
     }
 
-    /**
-     * Remove markdown formatting from text
-     */
+
     private fun cleanMarkdownFormatting(text: String): String {
         return text
             .replace("**", "")
@@ -1111,9 +1086,7 @@ class ChatViewModel(
             .trim()
     }
 
-    /**
-     * Handle errors
-     */
+
     private fun handleError(e: Exception) {
         Log.e("ChatViewModel", "Error occurred", e)
         val errorMessage = Message(
@@ -1128,17 +1101,13 @@ class ChatViewModel(
         addBotMessage(errorMessage)
     }
 
-    /**
-     * Add message to local list
-     */
+
     private fun addMessage(message: Message) {
         val currentMessages = _messages.value ?: emptyList()
         _messages.value = currentMessages + message
     }
 
-    /**
-     * Add bot message and save to Firebase
-     */
+
     private fun addBotMessage(message: Message) {
         val currentMessages = _messages.value.orEmpty().toMutableList()
         currentMessages.add(message)
@@ -1150,9 +1119,6 @@ class ChatViewModel(
         }
     }
 
-    /**
-     * Clear chat history
-     */
     fun clearChat() {
         viewModelScope.launch {
             try {
@@ -1166,9 +1132,6 @@ class ChatViewModel(
         }
     }
 
-    /**
-     * Delete specific message
-     */
     fun deleteMessage(messageId: Long) {
         viewModelScope.launch {
             chatRepository.deleteMessage(messageId)

@@ -268,20 +268,32 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Show confirmation dialog for clearing chat history
-     */
+
     private fun showClearHistoryDialog() {
-        AlertDialog.Builder(this)
+        val dialog = AlertDialog.Builder(
+            this,
+            R.style.ThemeOverlay_JourneyFlow_AlertDialogAnchor
+        )
             .setTitle("Clear Chat History")
             .setMessage("Are you sure you want to delete all chat messages? This cannot be undone.")
-            .setPositiveButton("Clear") { _, _ ->
+            .setPositiveButton("Clear", null)
+            .setNegativeButton("Cancel", null)
+            .create()
+
+        dialog.setOnShowListener {
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+                .setTextColor(android.graphics.Color.RED)
+
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 viewModel.clearChat()
                 Toast.makeText(this, "Chat history cleared", Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
             }
-            .setNegativeButton("Cancel", null)
-            .show()
+        }
+
+        dialog.show()
     }
+
 
     /**
      * Clean up when activity is destroyed
