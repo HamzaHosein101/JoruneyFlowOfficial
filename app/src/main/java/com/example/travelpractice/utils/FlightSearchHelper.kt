@@ -222,7 +222,7 @@ class FlightSearchHelper(
     // ==================== FLIGHTS ====================
 
     /**
-     * ✅ UPDATED: Search for flights - WITH NULL SAFETY
+     * ✅ UPDATED: Search for flights - WITH NULL SAFETY & USD CURRENCY
      */
     suspend fun searchFlights(
         origin: String,
@@ -253,6 +253,7 @@ class FlightSearchHelper(
                 .addQueryParameter("departureDate", departureDate)
                 .addQueryParameter("adults", adults.toString())
                 .addQueryParameter("max", maxResults.toString())
+                .addQueryParameter("currencyCode", "USD")  // ✅ FORCE USD CURRENCY
 
             returnDate?.let { urlBuilder.addQueryParameter("returnDate", it) }
             travelClass?.let { urlBuilder.addQueryParameter("travelClass", it.uppercase()) }
@@ -307,6 +308,9 @@ class FlightSearchHelper(
         }
     }
 
+    /**
+     * ✅ UPDATED: Format flight results WITHOUT PRICES
+     */
     private fun formatFlightResults(
         response: FlightSearchResponse,
         origin: String,
@@ -329,9 +333,6 @@ class FlightSearchHelper(
             append(":\n\n")
 
             response.data.take(5).forEachIndexed { index, offer ->
-                val price = offer.price.total
-                val currency = offer.price.currency
-
                 append("━━━━━━━━━━━━━━━━━━━━\n")
                 append("${index + 1}. ")
 
@@ -359,28 +360,33 @@ class FlightSearchHelper(
 
                     append("   🛫 ${formatDateTime(firstSegment.departure.at)}")
                     append(" → 🛬 ${formatDateTime(lastSegment.arrival.at)}\n")
-                    append("   ⏱️ ${formatDuration(itinerary.duration)}\n")
+                    append("   ⏱️ ${formatDuration(itinerary.duration)}")
+
+                    // ✅ REMOVED: Price display
+                    // append("   💰 Total: $currency $price")
+
+                    offer.numberOfBookableSeats?.let {
+                        append(" • 🪑 $it seat${if (it > 1) "s" else ""} left")
+                    }
+                    append("\n")
                 }
 
-                append("   💰 Total: $currency $price")
-                offer.numberOfBookableSeats?.let {
-                    append(" • 🪑 $it seat${if (it > 1) "s" else ""} left")
-                }
-                append("\n\n")
+                append("\n")
 
-                // ✅ FIXED: Proper URL formatting
+                // ✅ URL formatting
                 val googleFlightsUrl = buildGoogleFlightsUrl(origin, destination, departureDate, returnDate)
                 val kayakUrl = buildKayakUrl(origin, destination, departureDate, returnDate)
 
-                append("   🔗 Book this flight:\n")
-                append("   Google Flights: $googleFlightsUrl\n")
-                append("   Kayak: $kayakUrl\n\n")
+                append("🔗 Compare prices:\n")
+                append("$googleFlightsUrl\n\n")
+                append("$kayakUrl\n\n")
             }
 
             append("━━━━━━━━━━━━━━━━━━━━\n\n")
 
-            val cheapest = response.data.minByOrNull { it.price.total.toDoubleOrNull() ?: Double.MAX_VALUE }
-            cheapest?.let { append("💡 Cheapest: ${it.price.currency} ${it.price.total}\n") }
+            // ✅ REMOVED: Cheapest and fastest price summaries
+            // val cheapest = response.data.minByOrNull { it.price.total.toDoubleOrNull() ?: Double.MAX_VALUE }
+            // cheapest?.let { append("💡 Cheapest: ${it.price.currency} ${it.price.total}\n") }
 
             val fastest = response.data.minByOrNull { offer ->
                 offer.itineraries.sumOf { itinerary -> parseDuration(itinerary.duration) }
@@ -390,14 +396,14 @@ class FlightSearchHelper(
                 append("⚡ Fastest: ${formatMinutes(totalDuration)}\n")
             }
 
-            append("\n📌 Tip: Compare prices across all sites for best deals!")
+            append("\n📌 Tap any link above to book your flight!")
         }
     }
 
     // ==================== HOTELS ====================
 
     /**
-     * ✅ UPDATED: Search for hotels - WITH FULL NULL SAFETY
+     * ✅ UPDATED: Search for hotels - WITH FULL NULL SAFETY & USD CURRENCY
      */
     suspend fun searchHotels(
         cityCode: String,
@@ -446,7 +452,7 @@ class FlightSearchHelper(
                     
                     Try searching for:
                     • Major cities (Paris, London, New York)
-                    • Tourist destinations (Bali, Dubai, Barcelona)
+                    • Tourist destinations (Barcelona, Amsterdam)
                 """.trimIndent()
             }
 
@@ -461,13 +467,11 @@ class FlightSearchHelper(
                     This could be because:
                     • The city code might not be recognized
                     • Try a major city nearby
-                    • Check the spelling
                     
                     Popular destinations:
                     • Paris, France
                     • London, England
                     • New York, USA
-                    • Dubai, UAE
                     • Barcelona, Spain
                 """.trimIndent()
             }
@@ -489,6 +493,7 @@ class FlightSearchHelper(
                 .addQueryParameter("checkOutDate", checkOutDate)
                 .addQueryParameter("adults", adults.toString())
                 .addQueryParameter("roomQuantity", "1")
+                .addQueryParameter("currency", "USD")  // ✅ FORCE USD CURRENCY
                 .build()
 
             val offersRequest = Request.Builder()
@@ -521,7 +526,7 @@ class FlightSearchHelper(
     }
 
     /**
-     * ✅ Format hotel search results
+     * ✅ UPDATED: Format hotel results WITHOUT PRICES
      */
     private fun formatHotelResults(
         response: HotelOffersResponse,
@@ -556,15 +561,18 @@ class FlightSearchHelper(
                 }
                 append("\n")
 
-                // Best offer
+                // Best offer - WITHOUT PRICE
                 if (hotel.offers.isNotEmpty()) {
                     val bestOffer = hotel.offers.minByOrNull {
                         it.price.total.toDoubleOrNull() ?: Double.MAX_VALUE
                     }
 
                     bestOffer?.let { offer ->
-                        append("   💰 From ${offer.price.currency} ${offer.price.total}")
-                        append(" ($nights night${if (nights > 1) "s" else ""})\n")
+                        // ✅ REMOVED: Price display
+                        // append("   💰 From ${offer.price.currency} ${offer.price.total}")
+                        // append(" ($nights night${if (nights > 1) "s" else ""})\n")
+
+                        append("   🗓️ $nights night${if (nights > 1) "s" else ""}\n")
 
                         // Room info
                         append("   🛏️ ${offer.room.typeEstimated?.category ?: "Standard Room"}\n")
@@ -586,26 +594,28 @@ class FlightSearchHelper(
                     }
                 }
 
-                append("\n   🔗 Book this hotel:\n")
+                // ✅ URL formatting
                 val hotelName = hotel.hotel.name.replace(" ", "+")
-                append("   • Booking.com:\n     https://www.booking.com/search.html?ss=$hotelName&checkin=$checkInDate&checkout=$checkOutDate\n")
-                append("   • Hotels.com:\n     https://www.hotels.com/search.do?q-destination=$hotelName&q-check-in=$checkInDate&q-check-out=$checkOutDate\n")
+                val bookingUrl = "https://www.booking.com/search.html?ss=$hotelName&checkin=$checkInDate&checkout=$checkOutDate"
+                val hotelsUrl = "https://www.hotels.com/search.do?q-destination=$hotelName&q-check-in=$checkInDate&q-check-out=$checkOutDate"
 
-                append("\n")
+                append("\n🔗 Book this hotel:\n")
+                append("$bookingUrl\n\n")
+                append("$hotelsUrl\n\n")
             }
 
             append("━━━━━━━━━━━━━━━━━━━━\n\n")
 
-            // Find cheapest
-            val cheapest = response.data.mapNotNull { hotel ->
-                hotel.offers.minByOrNull { it.price.total.toDoubleOrNull() ?: Double.MAX_VALUE }
-            }.minByOrNull { it.price.total.toDoubleOrNull() ?: Double.MAX_VALUE }
+            // ✅ REMOVED: Best deal price summary
+            // val cheapest = response.data.mapNotNull { hotel ->
+            //     hotel.offers.minByOrNull { it.price.total.toDoubleOrNull() ?: Double.MAX_VALUE }
+            // }.minByOrNull { it.price.total.toDoubleOrNull() ?: Double.MAX_VALUE }
+            //
+            // cheapest?.let {
+            //     append("💡 Best deal: ${it.price.currency} ${it.price.total} for $nights night${if (nights > 1) "s" else ""}\n")
+            // }
 
-            cheapest?.let {
-                append("💡 Best deal: ${it.price.currency} ${it.price.total} for $nights night${if (nights > 1) "s" else ""}\n")
-            }
-
-            append("\n📌 Tip: Book directly with hotels for potential loyalty benefits!")
+            append("📌 Tap any link above to book your hotel!")
         }
     }
 
@@ -721,7 +731,7 @@ class FlightSearchHelper(
     )
 
     // ✅ City search data classes (for hotels) - NULLABLE
-    data class CitySearchResponse(val data: List<CityData>?)  // ✅ Made nullable
+    data class CitySearchResponse(val data: List<CityData>?)
     data class CityData(
         val name: String,
         val iataCode: String,
@@ -733,7 +743,7 @@ class FlightSearchHelper(
     )
 
     // ✅ Airport search data classes (for flights) - NULLABLE
-    data class AirportSearchResponse(val data: List<AirportData>?)  // ✅ Made nullable
+    data class AirportSearchResponse(val data: List<AirportData>?)
     data class AirportData(
         val name: String,
         val iataCode: String,
@@ -746,7 +756,7 @@ class FlightSearchHelper(
     )
 
     // Flight data classes - NULLABLE
-    data class FlightSearchResponse(val data: List<FlightOffer>?)  // ✅ Made nullable
+    data class FlightSearchResponse(val data: List<FlightOffer>?)
     data class FlightOffer(
         val price: Price,
         val itineraries: List<Itinerary>,
@@ -764,10 +774,10 @@ class FlightSearchHelper(
     data class FlightPoint(val iataCode: String, val at: String)
 
     // Hotel data classes - NULLABLE
-    data class HotelListResponse(val data: List<HotelData>?)  // ✅ Made nullable
+    data class HotelListResponse(val data: List<HotelData>?)
     data class HotelData(val hotelId: String, val name: String)
 
-    data class HotelOffersResponse(val data: List<HotelOffer>?)  // ✅ Made nullable
+    data class HotelOffersResponse(val data: List<HotelOffer>?)
     data class HotelOffer(val hotel: Hotel, val offers: List<Offer>)
 
     data class Hotel(

@@ -1,11 +1,23 @@
 package com.example.travelpractice.adapters
 
+import android.content.Intent
+import android.graphics.Color
+import android.net.Uri
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.TextPaint
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
+import android.util.Log
+import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -38,13 +50,12 @@ class MessagesAdapter(
                     .inflate(R.layout.item_message_user, parent, false)
                 UserMessageViewHolder(view)
             }
-
             else -> {
                 val view = LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_message_bot, parent, false)
                 BotMessageViewHolder(view, onActionClick)
             }
-        } as RecyclerView.ViewHolder
+        }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -76,11 +87,8 @@ class MessagesAdapter(
         private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
 
         fun bind(message: Message) {
-            messageText.text = message.text
-
-            // ✅ MAKE LINKS CLICKABLE
-            messageText.movementMethod = android.text.method.LinkMovementMethod.getInstance()
-            messageText.autoLinkMask = android.text.util.Linkify.WEB_URLS
+            // ✅ CRITICAL: Make URLs clickable every time view is bound
+            makeLinksClickable(messageText, message.text)
 
             timestamp.text = timeFormat.format(message.timestamp)
 
@@ -99,6 +107,100 @@ class MessagesAdapter(
             }
         }
 
+        /**
+         * ✅ Make URLs clickable and open in Chrome Custom Tabs
+         * This method is called every time the view is bound, ensuring URLs persist
+         */
+        private fun makeLinksClickable(textView: TextView, text: String) {
+            val spannableString = SpannableString(text)
+            val matcher = Patterns.WEB_URL.matcher(text)
+
+            var foundAnyUrl = false
+
+            while (matcher.find()) {
+                foundAnyUrl = true
+                val url = matcher.group()
+                val start = matcher.start()
+                val end = matcher.end()
+
+                val clickableSpan = object : ClickableSpan() {
+                    override fun onClick(widget: View) {
+                        openInCustomTab(widget.context, url)
+                    }
+
+                    override fun updateDrawState(ds: TextPaint) {
+                        super.updateDrawState(ds)
+                        ds.color = try {
+                            ContextCompat.getColor(textView.context, R.color.brandPrimary)
+                        } catch (e: Exception) {
+                            Color.parseColor("#2196F3")
+                        }
+                        ds.isUnderlineText = true
+                    }
+                }
+
+                spannableString.setSpan(
+                    clickableSpan,
+                    start,
+                    end,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            }
+
+            textView.text = spannableString
+
+            // Only enable link movement if we found URLs
+            if (foundAnyUrl) {
+                textView.movementMethod = LinkMovementMethod.getInstance()
+            }
+        }
+
+        /**
+         * ✅ Open URL in Chrome Custom Tab with your app theme
+         */
+        private fun openInCustomTab(context: android.content.Context, url: String) {
+            try {
+                Log.d("MessagesAdapter", "Opening URL: $url")
+
+                val builder = CustomTabsIntent.Builder()
+
+                // Use your brand color for the toolbar
+                try {
+                    builder.setToolbarColor(
+                        ContextCompat.getColor(context, R.color.brandPrimary)
+                    )
+                } catch (e: Exception) {
+                    builder.setToolbarColor(Color.parseColor("#183371"))
+                }
+
+                builder.setShowTitle(true)
+                builder.setStartAnimations(
+                    context,
+                    android.R.anim.slide_in_left,
+                    android.R.anim.slide_out_right
+                )
+                builder.setExitAnimations(
+                    context,
+                    android.R.anim.slide_in_left,
+                    android.R.anim.slide_out_right
+                )
+
+                val customTabsIntent = builder.build()
+                customTabsIntent.launchUrl(context, Uri.parse(url))
+
+            } catch (e: Exception) {
+                Log.e("MessagesAdapter", "Error opening Custom Tab", e)
+                // Fallback to regular browser
+                try {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                    context.startActivity(intent)
+                } catch (ex: Exception) {
+                    Log.e("MessagesAdapter", "Error opening browser", ex)
+                    Toast.makeText(context, "Cannot open link", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
         private fun createActionButton(option: ActionOption): Button {
             return Button(itemView.context).apply {
                 text = option.label
@@ -110,9 +212,9 @@ class MessagesAdapter(
                 }
 
                 try {
-                    setBackgroundColor(ContextCompat.getColor(context, R.color.primary))
+                    setBackgroundColor(ContextCompat.getColor(context, R.color.brandPrimary))
                 } catch (e: Exception) {
-                    setBackgroundColor(0xFF4CAF50.toInt())
+                    setBackgroundColor(Color.parseColor("#183371"))
                 }
 
                 setTextColor(ContextCompat.getColor(context, android.R.color.white))
