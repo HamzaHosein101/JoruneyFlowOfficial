@@ -22,14 +22,12 @@ class MainActivity : AppCompatActivity() {
 
 
         val user = FirebaseAuth.getInstance().currentUser
-        // Prefer displayName (username), fall back to email if displayName is null/blank
         val name = user?.displayName?.takeIf { !it.isNullOrBlank() } ?: user?.email ?: "User"
         tvWelcome.text = "Welcome, $name!"
     }
 
     override fun onStart() {
         super.onStart()
-        // Protect this screen: if not logged in, go to Login
         if (FirebaseAuth.getInstance().currentUser == null) {
             startActivity(Intent(this, LoginActivity::class.java))
             finish()

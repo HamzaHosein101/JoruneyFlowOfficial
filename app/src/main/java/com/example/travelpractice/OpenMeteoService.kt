@@ -3,7 +3,6 @@ package com.example.travelpractice
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-// OpenWeatherMap response models
 data class OWMain(
     val temp: Double?,
     val temp_min: Double?,
