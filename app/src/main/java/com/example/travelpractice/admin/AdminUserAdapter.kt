@@ -15,7 +15,8 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 class AdminUserAdapter(
-    private val onResetPassword: (UserProfile) -> Unit
+    private val onResetPassword: (UserProfile) -> Unit,
+    private val onToggleAdmin: (UserProfile) -> Unit
 ) : ListAdapter<UserProfile, AdminUserAdapter.ViewHolder>(DiffCallback) {
 
     object DiffCallback : DiffUtil.ItemCallback<UserProfile>() {
@@ -28,9 +29,11 @@ class AdminUserAdapter(
         val txtUserEmail: TextView = itemView.findViewById(R.id.txtUserEmail)
         val txtEmailVerified: TextView = itemView.findViewById(R.id.txtEmailVerified)
         val txtUserProviders: TextView = itemView.findViewById(R.id.txtUserProviders)
+        val txtUserRole: TextView = itemView.findViewById(R.id.txtUserRole)
         val txtCreatedAt: TextView = itemView.findViewById(R.id.txtCreatedAt)
         val txtLastLoginAt: TextView = itemView.findViewById(R.id.txtLastLoginAt)
         val btnResetPassword: MaterialButton = itemView.findViewById(R.id.btnResetPassword)
+        val btnToggleAdmin: MaterialButton = itemView.findViewById(R.id.btnToggleAdmin)
     }
 
     private val dateFormat = SimpleDateFormat("MMM dd, yyyy • hh:mm a", Locale.getDefault())
@@ -76,6 +79,19 @@ class AdminUserAdapter(
         val providerText = context.getString(R.string.admin_user_providers, providerDisplay)
         holder.txtUserProviders.text = providerText
 
+        val roleText = if (user.role == "admin") {
+            "Role: Admin"
+        } else {
+            "Role: User"
+        }
+        holder.txtUserRole.text = roleText
+        val roleColorRes = if (user.role == "admin") {
+            R.color.approve_green
+        } else {
+            android.R.color.black
+        }
+        holder.txtUserRole.setTextColor(ContextCompat.getColor(context, roleColorRes))
+
         val createdAtText = user.createdAt?.toDate()?.let { date ->
             context.getString(R.string.admin_user_created_at, dateFormat.format(date))
         } ?: context.getString(R.string.admin_user_created_at, context.getString(R.string.admin_user_unknown_value))
@@ -87,6 +103,14 @@ class AdminUserAdapter(
         holder.txtLastLoginAt.text = lastLoginText
 
         holder.btnResetPassword.setOnClickListener { onResetPassword(user) }
+        
+        val toggleButtonText = if (user.role == "admin") {
+            "Remove Admin"
+        } else {
+            "Make Admin"
+        }
+        holder.btnToggleAdmin.text = toggleButtonText
+        holder.btnToggleAdmin.setOnClickListener { onToggleAdmin(user) }
     }
 }
 

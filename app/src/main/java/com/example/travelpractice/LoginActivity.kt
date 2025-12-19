@@ -22,6 +22,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.FieldValue
 
 class LoginActivity : AppCompatActivity() {
 
@@ -41,6 +43,8 @@ class LoginActivity : AppCompatActivity() {
         }
         FirebaseAuth.getInstance().currentUser?.let { user ->
             if (user.isEmailVerified) {
+                // Sync email verification status to Firestore
+                syncEmailVerificationStatus(user)
                 // Check if user is admin before redirecting
                 verifyAdminRole(user.uid) { isAdmin ->
                     if (isAdmin) {
@@ -86,6 +90,8 @@ class LoginActivity : AppCompatActivity() {
                 .addOnSuccessListener { result ->
                     val user = result.user
                     if (user != null) {
+                        // Sync email verification status to Firestore (Google accounts are auto-verified)
+                        syncEmailVerificationStatus(user)
                         // Check if user is admin
                         verifyAdminRole(user.uid) { isAdmin ->
                             if (isAdmin) {
@@ -155,6 +161,8 @@ class LoginActivity : AppCompatActivity() {
                     if (task.isSuccessful) {
                         val user = auth.currentUser
                         if (user != null && user.isEmailVerified) {
+                            // Sync email verification status to Firestore
+                            syncEmailVerificationStatus(user)
                             // Check if user is admin
                             verifyAdminRole(user.uid) { isAdmin ->
                                 if (isAdmin) {
@@ -259,6 +267,23 @@ class LoginActivity : AppCompatActivity() {
         }
 
 
+    }
+
+    private fun syncEmailVerificationStatus(user: com.google.firebase.auth.FirebaseUser) {
+        // Update email verification status in Firestore to keep it in sync with Firebase Auth
+        // Use set() with merge to work even if document doesn't exist yet
+        val updateData = hashMapOf(
+            "emailVerified" to user.isEmailVerified,
+            "lastLoginAt" to FieldValue.serverTimestamp()
+        )
+        FirebaseFirestore.getInstance()
+            .collection("users")
+            .document(user.uid)
+            .set(updateData, SetOptions.merge())
+            .addOnFailureListener { e ->
+                Log.w("LoginActivity", "Failed to sync email verification status", e)
+                // Non-critical error, continue anyway
+            }
     }
 
     private fun verifyAdminRole(uid: String, onComplete: (Boolean) -> Unit) {

@@ -49,6 +49,15 @@
             android:text="Provider: password" />
 
         <TextView
+            android:id="@+id/txtUserRole"
+            style="@style/TextAppearance.Material3.BodySmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Role: User"
+            android:textColor="@android:color/black" />
+
+        <TextView
             android:id="@+id/txtCreatedAt"
             style="@style/TextAppearance.Material3.BodySmall"
             android:layout_width="match_parent"
@@ -64,14 +73,33 @@
             android:layout_marginTop="2dp"
             android:text="Last login: Jan 05, 2024" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnResetPassword"
-            style="@style/Widget.MaterialComponents.Button"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Reset Password"
-            android:textAllCaps="false" />
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnResetPassword"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:text="Reset Password"
+                android:textAllCaps="false" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnToggleAdmin"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="Make Admin"
+                android:textAllCaps="false" />
+
+        </LinearLayout>
 
     </LinearLayout>
 

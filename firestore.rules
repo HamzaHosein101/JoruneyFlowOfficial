@@ -31,7 +31,7 @@ service cloud.firestore {
       allow get: if isPathOwner(userId) || (isAdmin() && userId != uid());
       allow list: if isAdmin();
       allow create: if isPathOwner(userId);
-      allow update: if isPathOwner(userId);
+      allow update: if isPathOwner(userId) || (isAdmin() && userId != uid());
       allow delete: if false;
 
       match /checklists/{listId} {

@@ -10,7 +10,8 @@ data class UserProfile(
     val createdAt: Timestamp? = null,
     val lastLoginAt: Timestamp? = null,
     val providers: List<String> = emptyList(),
-    val emailVerified: Boolean = false
+    val emailVerified: Boolean = false,
+    val role: String? = null
 )
 
 

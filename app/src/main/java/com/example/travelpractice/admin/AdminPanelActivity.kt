@@ -24,6 +24,7 @@ import com.google.android.material.search.SearchView
 import com.google.android.material.snackbar.Snackbar
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
@@ -222,7 +223,8 @@ class AdminPanelActivity : AppCompatActivity() {
     private fun setupUsersRecyclerView() {
         try {
             usersAdapter = AdminUserAdapter(
-                onResetPassword = { user -> handleResetPassword(user) }
+                onResetPassword = { user -> handleResetPassword(user) },
+                onToggleAdmin = { user -> handleToggleAdmin(user) }
             )
             recyclerUsers.layoutManager = LinearLayoutManager(this)
             recyclerUsers.adapter = usersAdapter
@@ -653,7 +655,26 @@ class AdminPanelActivity : AppCompatActivity() {
                                 try {
                                     val profile = doc.toObject(UserProfile::class.java)
                                     profile?.let {
-                                        if (it.uid.isBlank()) it.copy(uid = doc.id) else it
+                                        val uid = if (it.uid.isBlank()) doc.id else it.uid
+                                        val role = doc.getString("role")
+                                        // Explicitly extract emailVerified from document
+                                        // Use getBoolean() which properly handles the field type
+                                        val emailVerified = try {
+                                            doc.getBoolean("emailVerified") ?: it.emailVerified
+                                        } catch (e: Exception) {
+                                            // If getBoolean fails, try getting as Any and converting
+                                            try {
+                                                when (val value = doc.get("emailVerified")) {
+                                                    is Boolean -> value
+                                                    is String -> value.toBoolean()
+                                                    else -> it.emailVerified
+                                                }
+                                            } catch (e2: Exception) {
+                                                android.util.Log.w("AdminPanel", "Failed to parse emailVerified for ${doc.id}", e2)
+                                                it.emailVerified
+                                            }
+                                        }
+                                        it.copy(uid = uid, role = role, emailVerified = emailVerified)
                                     }
                                 } catch (e: Exception) {
                                     android.util.Log.e("AdminPanel", "Failed to parse user ${doc.id}", e)
@@ -731,6 +752,58 @@ class AdminPanelActivity : AppCompatActivity() {
                     }
             }
             .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun handleToggleAdmin(user: UserProfile) {
+        val auth = FirebaseAuth.getInstance()
+        if (auth.currentUser == null) {
+            Snackbar.make(findViewById(R.id.root), "Please log in to perform this action", Snackbar.LENGTH_LONG).show()
+            return
+        }
+
+        val isCurrentlyAdmin = user.role == "admin"
+        val action = if (isCurrentlyAdmin) "remove admin privileges from" else "make"
+        val newRole = if (isCurrentlyAdmin) null else "admin"
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle(if (isCurrentlyAdmin) "Remove Admin" else "Make Admin")
+            .setMessage("Are you sure you want to $action ${user.email}?")
+            .setPositiveButton(if (isCurrentlyAdmin) "Remove Admin" else "Make Admin") { _, _ ->
+                lifecycleScope.launch {
+                    try {
+                        val updateData = if (newRole == null) {
+                            mapOf("role" to FieldValue.delete())
+                        } else {
+                            mapOf("role" to newRole)
+                        }
+                        
+                        FirebaseFirestore.getInstance()
+                            .collection("users")
+                            .document(user.uid)
+                            .update(updateData)
+                            .await()
+                        
+                        val message = if (isCurrentlyAdmin) {
+                            "Admin privileges removed from ${user.email}"
+                        } else {
+                            "Admin privileges granted to ${user.email}"
+                        }
+                        Snackbar.make(findViewById(R.id.root), message, Snackbar.LENGTH_SHORT).show()
+                        // The listener will automatically update the UI
+                    } catch (e: Exception) {
+                        val errorMsg = when {
+                            e.message?.contains("PERMISSION_DENIED") == true -> {
+                                "Permission denied. You may need to update Firestore security rules."
+                            }
+                            else -> "Error: ${e.message}"
+                        }
+                        Snackbar.make(findViewById(R.id.root), errorMsg, Snackbar.LENGTH_LONG).show()
+                        android.util.Log.e("AdminPanel", "Error toggling admin role", e)
+                    }
+                }
+            }
+            .setNegativeButton("Cancel", null)
             .show()
     }
     
