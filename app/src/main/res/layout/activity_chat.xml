@@ -5,14 +5,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F7FA">
+    android:background="#E3F2FD">
 
-    <!-- Top toolbar with blue gradient -->
+    <!-- Top toolbar with solid blue matching My Trips -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@drawable/header_gradient"
+        android:background="#3F51B5"
         android:elevation="4dp"
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="@drawable/ic_back"
@@ -55,7 +55,7 @@
             android:textColor="#757575" />
     </LinearLayout>
 
-    <!-- ✅ Quick Actions Row -->
+    <!-- Quick Actions Row -->
     <HorizontalScrollView
         android:id="@+id/quickActionsScrollView"
         android:layout_width="match_parent"
@@ -84,10 +84,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="✈️ Find Flights"
-                android:textColor="#333333"
-                app:chipBackgroundColor="@color/chip_background"
-                app:chipStrokeColor="@color/chip_stroke"
-                app:chipStrokeWidth="1dp"
+                android:textColor="#3F51B5"
+                app:chipBackgroundColor="@android:color/white"
+                app:chipStrokeColor="#3F51B5"
+                app:chipStrokeWidth="2dp"
                 app:chipCornerRadius="20dp"
                 style="@style/Widget.MaterialComponents.Chip.Action" />
 
@@ -97,61 +97,22 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="🏨 Find Hotels"
-                android:textColor="#333333"
-                app:chipBackgroundColor="@color/chip_background"
-                app:chipStrokeColor="@color/chip_stroke"
-                app:chipStrokeWidth="1dp"
-                app:chipCornerRadius="20dp"
-                style="@style/Widget.MaterialComponents.Chip.Action" />
-
-            <!-- Expenses -->
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipExpenses"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="💰 My Expenses"
-                android:textColor="#333333"
-                app:chipBackgroundColor="@color/chip_background"
-                app:chipStrokeColor="@color/chip_stroke"
-                app:chipStrokeWidth="1dp"
-                app:chipCornerRadius="20dp"
-                style="@style/Widget.MaterialComponents.Chip.Action" />
-
-            <!-- Itinerary -->
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipItinerary"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📅 My Itinerary"
-                android:textColor="#333333"
-                app:chipBackgroundColor="@color/chip_background"
-                app:chipStrokeColor="@color/chip_stroke"
-                app:chipStrokeWidth="1dp"
-                app:chipCornerRadius="20dp"
-                style="@style/Widget.MaterialComponents.Chip.Action" />
-
-            <!-- Checklist -->
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipChecklist"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📋 Packing List"
-                android:textColor="#333333"
-                app:chipBackgroundColor="@color/chip_background"
-                app:chipStrokeColor="@color/chip_stroke"
-                app:chipStrokeWidth="1dp"
+                android:textColor="#3F51B5"
+                app:chipBackgroundColor="@android:color/white"
+                app:chipStrokeColor="#3F51B5"
+                app:chipStrokeWidth="2dp"
                 app:chipCornerRadius="20dp"
                 style="@style/Widget.MaterialComponents.Chip.Action" />
 
         </com.google.android.material.chip.ChipGroup>
     </HorizontalScrollView>
 
-    <!-- Bottom input area -->
+    <!-- Bottom input area with blue theme -->
     <LinearLayout
         android:id="@+id/inputContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/white"
+        android:background="#3F51B5"
         android:elevation="8dp"
         android:orientation="vertical"
         android:padding="12dp"
@@ -169,8 +130,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/bg_input"
+                android:background="@drawable/bg_input_white"
                 android:hint="Ask me anything about travel..."
+                android:textColorHint="#90A4AE"
+                android:textColor="#263238"
                 android:padding="12dp"
                 android:maxLines="4"
                 android:inputType="textMultiLine|textCapSentences"
@@ -186,7 +149,8 @@
                 android:src="@drawable/ic_send"
                 android:contentDescription="Send message"
                 app:fabCustomSize="48dp"
-                app:backgroundTint="#2196F3" />
+                app:backgroundTint="@android:color/white"
+                app:tint="#3F51B5" />
         </LinearLayout>
 
         <!-- Powered by text -->
@@ -196,7 +160,7 @@
             android:layout_marginTop="8dp"
             android:text="🤖 Powered by Google Gemini AI"
             android:textSize="10sp"
-            android:textColor="#9E9E9E"
+            android:textColor="@android:color/white"
             android:gravity="center" />
     </LinearLayout>
 

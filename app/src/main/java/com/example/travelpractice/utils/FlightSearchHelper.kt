@@ -62,7 +62,7 @@ class FlightSearchHelper(
     }
 
     /**
-     * ✅ Search for city code dynamically (for hotels)
+     * ✅ UPDATED: Search for city code dynamically (for hotels) - WITH NULL SAFETY
      */
     suspend fun searchCityCode(cityName: String): String? = withContext(Dispatchers.IO) {
         try {
@@ -99,6 +99,12 @@ class FlightSearchHelper(
 
                 val cityResponse = gson.fromJson(responseBody, CitySearchResponse::class.java)
 
+                // ✅ NULL CHECK - CRITICAL FIX
+                if (cityResponse.data.isNullOrEmpty()) {
+                    Log.d(TAG, "No cities found for: $cityName")
+                    return@withContext null
+                }
+
                 // Return the first city's IATA code
                 val firstCity = cityResponse.data.firstOrNull()
                 if (firstCity != null) {
@@ -119,7 +125,7 @@ class FlightSearchHelper(
     }
 
     /**
-     * ✅ IMPROVED: Search for airport code dynamically (for flights)
+     * ✅ UPDATED: Search for airport code dynamically (for flights) - WITH NULL SAFETY
      */
     suspend fun searchAirportCode(locationName: String): String? = withContext(Dispatchers.IO) {
         try {
@@ -142,7 +148,7 @@ class FlightSearchHelper(
                 .addPathSegment("locations")
                 .addQueryParameter("keyword", cleanLocation)
                 .addQueryParameter("subType", "AIRPORT,CITY")
-                .addQueryParameter("page[limit]", "10")  // ✅ Get more results
+                .addQueryParameter("page[limit]", "10")
                 .build()
 
             val request = Request.Builder()
@@ -155,11 +161,12 @@ class FlightSearchHelper(
             val responseBody = response.body?.string()
 
             if (response.isSuccessful && responseBody != null) {
-                Log.d(TAG, "Airport search response: $responseBody")
+                Log.d(TAG, "Airport search response: ${responseBody.take(300)}")
 
                 val airportResponse = gson.fromJson(responseBody, AirportSearchResponse::class.java)
 
-                if (airportResponse.data.isEmpty()) {
+                // ✅ NULL CHECK - CRITICAL FIX
+                if (airportResponse.data.isNullOrEmpty()) {
                     Log.d(TAG, "No locations found for: $locationName")
                     return@withContext null
                 }
@@ -195,10 +202,13 @@ class FlightSearchHelper(
                 }
 
                 // Priority 4: Just return first result
-                val firstResult = airportResponse.data.first()
-                Log.d(TAG, "Using first result: ${firstResult.name} -> ${firstResult.iataCode}")
-                return@withContext firstResult.iataCode
+                val firstResult = airportResponse.data.firstOrNull()
+                if (firstResult != null) {
+                    Log.d(TAG, "Using first result: ${firstResult.name} -> ${firstResult.iataCode}")
+                    return@withContext firstResult.iataCode
+                }
 
+                return@withContext null
             } else {
                 Log.e(TAG, "Airport search failed: ${response.code} - $responseBody")
                 return@withContext null
@@ -212,7 +222,7 @@ class FlightSearchHelper(
     // ==================== FLIGHTS ====================
 
     /**
-     * Search for flights
+     * ✅ UPDATED: Search for flights - WITH NULL SAFETY
      */
     suspend fun searchFlights(
         origin: String,
@@ -261,6 +271,11 @@ class FlightSearchHelper(
             if (response.isSuccessful && responseBody != null) {
                 val flightResponse = gson.fromJson(responseBody, FlightSearchResponse::class.java)
 
+                // ✅ NULL CHECK - CRITICAL FIX
+                if (flightResponse.data.isNullOrEmpty()) {
+                    return@withContext "❌ No flights found from $origin to $destination on $departureDate"
+                }
+
                 val filteredFlights = if (preferredAirline != null) {
                     flightResponse.data.filter { offer ->
                         offer.itineraries.any { itinerary ->
@@ -301,7 +316,7 @@ class FlightSearchHelper(
         departureDate: String,
         returnDate: String?
     ): String {
-        if (response.data.isEmpty()) {
+        if (response.data.isNullOrEmpty()) {
             return "No flights found from $origin to $destination"
         }
 
@@ -353,12 +368,13 @@ class FlightSearchHelper(
                 }
                 append("\n\n")
 
-                append("   🔗 Book this flight:\n")
+                // ✅ FIXED: Proper URL formatting
                 val googleFlightsUrl = buildGoogleFlightsUrl(origin, destination, departureDate, returnDate)
-                append("   • Google Flights:\n     $googleFlightsUrl\n")
                 val kayakUrl = buildKayakUrl(origin, destination, departureDate, returnDate)
-                append("   • Kayak:\n     $kayakUrl\n")
-                append("\n")
+
+                append("   🔗 Book this flight:\n")
+                append("   Google Flights: $googleFlightsUrl\n")
+                append("   Kayak: $kayakUrl\n\n")
             }
 
             append("━━━━━━━━━━━━━━━━━━━━\n\n")
@@ -381,7 +397,7 @@ class FlightSearchHelper(
     // ==================== HOTELS ====================
 
     /**
-     * ✅ Search for hotels
+     * ✅ UPDATED: Search for hotels - WITH FULL NULL SAFETY
      */
     suspend fun searchHotels(
         cityCode: String,
@@ -425,13 +441,35 @@ class FlightSearchHelper(
 
             if (!searchResponse.isSuccessful || searchBody == null) {
                 Log.e(TAG, "Hotel search failed: ${searchResponse.code} - $searchBody")
-                return@withContext "❌ Could not find hotels in $cityCode. Try searching for a different city."
+                return@withContext """
+                    ❌ Could not find hotels in $cityCode
+                    
+                    Try searching for:
+                    • Major cities (Paris, London, New York)
+                    • Tourist destinations (Bali, Dubai, Barcelona)
+                """.trimIndent()
             }
 
             val hotelListResponse = gson.fromJson(searchBody, HotelListResponse::class.java)
 
-            if (hotelListResponse.data.isEmpty()) {
-                return@withContext "❌ No hotels found in $cityCode"
+            // ✅ NULL CHECK - THIS IS THE CRITICAL FIX FOR YOUR CRASH!
+            if (hotelListResponse.data.isNullOrEmpty()) {
+                Log.d(TAG, "No hotels found in $cityCode")
+                return@withContext """
+                    ❌ No hotels found in $cityCode
+                    
+                    This could be because:
+                    • The city code might not be recognized
+                    • Try a major city nearby
+                    • Check the spelling
+                    
+                    Popular destinations:
+                    • Paris, France
+                    • London, England
+                    • New York, USA
+                    • Dubai, UAE
+                    • Barcelona, Spain
+                """.trimIndent()
             }
 
             Log.d(TAG, "Found ${hotelListResponse.data.size} hotels")
@@ -465,6 +503,12 @@ class FlightSearchHelper(
             if (offersResponse.isSuccessful && offersBody != null) {
                 Log.d(TAG, "Got hotel offers successfully")
                 val hotelOffersResponse = gson.fromJson(offersBody, HotelOffersResponse::class.java)
+
+                // ✅ NULL CHECK for offers
+                if (hotelOffersResponse.data.isNullOrEmpty()) {
+                    return@withContext "❌ No hotel offers available for $cityCode on these dates"
+                }
+
                 return@withContext formatHotelResults(hotelOffersResponse, cityCode, checkInDate, checkOutDate)
             } else {
                 Log.e(TAG, "Hotel offers failed: ${offersResponse.code} - $offersBody")
@@ -472,7 +516,7 @@ class FlightSearchHelper(
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error searching hotels", e)
-            return@withContext "❌ Error searching for hotels: ${e.message}"
+            return@withContext "❌ Error searching for hotels: ${e.message}\n\nPlease check your internet connection and try again."
         }
     }
 
@@ -485,7 +529,7 @@ class FlightSearchHelper(
         checkInDate: String,
         checkOutDate: String
     ): String {
-        if (response.data.isEmpty()) {
+        if (response.data.isNullOrEmpty()) {
             return "No hotels found in $cityCode for the selected dates"
         }
 
@@ -676,8 +720,8 @@ class FlightSearchHelper(
         @SerializedName("expires_in") val expiresIn: Int
     )
 
-    // ✅ City search data classes (for hotels)
-    data class CitySearchResponse(val data: List<CityData>)
+    // ✅ City search data classes (for hotels) - NULLABLE
+    data class CitySearchResponse(val data: List<CityData>?)  // ✅ Made nullable
     data class CityData(
         val name: String,
         val iataCode: String,
@@ -688,12 +732,12 @@ class FlightSearchHelper(
         val countryName: String?
     )
 
-    // ✅ Airport search data classes (for flights) - UPDATED
-    data class AirportSearchResponse(val data: List<AirportData>)
+    // ✅ Airport search data classes (for flights) - NULLABLE
+    data class AirportSearchResponse(val data: List<AirportData>?)  // ✅ Made nullable
     data class AirportData(
         val name: String,
         val iataCode: String,
-        val subType: String?,  // ✅ Added for better matching
+        val subType: String?,
         val address: AirportAddress?
     )
     data class AirportAddress(
@@ -701,8 +745,8 @@ class FlightSearchHelper(
         val countryName: String?
     )
 
-    // Flight data classes
-    data class FlightSearchResponse(val data: List<FlightOffer>)
+    // Flight data classes - NULLABLE
+    data class FlightSearchResponse(val data: List<FlightOffer>?)  // ✅ Made nullable
     data class FlightOffer(
         val price: Price,
         val itineraries: List<Itinerary>,
@@ -719,11 +763,11 @@ class FlightSearchHelper(
     )
     data class FlightPoint(val iataCode: String, val at: String)
 
-    // Hotel data classes
-    data class HotelListResponse(val data: List<HotelData>)
+    // Hotel data classes - NULLABLE
+    data class HotelListResponse(val data: List<HotelData>?)  // ✅ Made nullable
     data class HotelData(val hotelId: String, val name: String)
 
-    data class HotelOffersResponse(val data: List<HotelOffer>)
+    data class HotelOffersResponse(val data: List<HotelOffer>?)  // ✅ Made nullable
     data class HotelOffer(val hotel: Hotel, val offers: List<Offer>)
 
     data class Hotel(

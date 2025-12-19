@@ -31,7 +31,7 @@ class ChatActivity : AppCompatActivity() {
         binding = ActivityChatBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val geminiApiKey = "AIzaSyDglHD1fXogQvKkdaqcTsTU6HSQQSFqVVQ"
+        val geminiApiKey = "AIzaSyCA8riiN_fHO2TT9j8zlCf2hpPAjZyZwQI"
 
         // Initialize chat action handler
         chatActionHandler = ChatActionHandler(this)
@@ -127,20 +127,6 @@ class ChatActivity : AppCompatActivity() {
             showHotelSearchDialog()
         }
 
-        // Expenses - Direct query
-        binding.chipExpenses.setOnClickListener {
-            fillAndSendMessage("Show my expenses")
-        }
-
-        // Itinerary - Direct query
-        binding.chipItinerary.setOnClickListener {
-            fillAndSendMessage("Show my itinerary")
-        }
-
-        // Checklist - Direct query
-        binding.chipChecklist.setOnClickListener {
-            fillAndSendMessage("Show my packing checklist")
-        }
     }
 
     /**

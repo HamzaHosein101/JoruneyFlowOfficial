@@ -22,10 +22,7 @@
     <color name="red">#D32F2F</color>
     <color name="completed_green_tint">#CCF8CD</color>
 
-
-
-
-    <!--  colors -->
+    <!-- Category colors -->
     <color name="catFood">#00A86B</color>
     <color name="catTransport">#0077CC</color>
     <color name="catAccommodation">#8E44AD</color>
@@ -45,5 +42,21 @@
     <color name="jf_chip_text">#2F6BFD</color>
     <color name="jf_star">#FFC107</color>
 
+    <!-- Chat interface colors -->
+    <color name="chat_toolbar">#183371</color>
+    <color name="chat_background">#EAF6FB</color>
+    <color name="chat_input_container">#183371</color>
+    <color name="chat_input_background">@color/white</color>
+    <color name="chat_input_hint">#90A4AE</color>
+    <color name="chat_input_text">#263238</color>
 
+    <!-- Chip colors (NO DUPLICATES) -->
+    <color name="chip_background">#EEF3FF</color>
+    <color name="chip_stroke">#183371</color>
+    <color name="chip_text">#183371</color>
+
+    <!-- Material Design baseline colors -->
+    <color name="colorPrimary">#183371</color>
+    <color name="colorPrimaryDark">#0F2350</color>
+    <color name="colorAccent">#FF4081</color>
 </resources>
